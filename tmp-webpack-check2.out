@@ -1,0 +1,9 @@
+▲ Next.js 16.1.7 (webpack)
+- Local:         http://localhost:3108
+- Network:       http://192.168.1.9:3108
+- Environments: .env
+
+✓ Starting...
+✓ Ready in 10.7s
+○ Compiling / ...
+ GET / 200 in 7.2s (compile: 6.3s, render: 888ms)

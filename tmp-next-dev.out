@@ -1,0 +1,9 @@
+▲ Next.js 16.1.7 (Turbopack)
+- Local:         http://localhost:3105
+- Network:       http://192.168.1.9:3105
+- Environments: .env
+
+✓ Starting...
+Creating turbopack project { dir: 'D:\\Projects\\nextjs\\WEB SABU BARU\\api', testMode: true }
+✓ Ready in 3.8s
+○ Compiling / ...

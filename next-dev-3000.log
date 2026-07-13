@@ -1,0 +1,24 @@
+
+> api@0.1.0 dev
+> next dev --webpack --port 3000
+
+▲ Next.js 16.1.7 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.7:3000
+- Environments: .env
+
+✓ Starting...
+✓ Ready in 7.4s
+○ Compiling / ...
+ GET /login 200 in 22.6s (compile: 19.4s, render: 3.2s)
+ GET / 200 in 3.8s (compile: 2.5s, render: 1269ms)
+ GET /logo.png 200 in 5.3s (compile: 5.2s, render: 53ms)
+ GET / 200 in 878ms (compile: 36ms, render: 842ms)
+ GET /logo.png 200 in 105ms (compile: 78ms, render: 27ms)
+ GET /assets/images/logo-sau.png 404 in 4.1s (compile: 3.6s, render: 497ms)
+⨯ The requested resource isn't a valid image for /assets/images/logo-sau.png received null
+○ Compiling /admin ...
+ GET /admin 307 in 16.6s (compile: 12.4s, render: 4.3s)
+ GET /login 200 in 2.8s (compile: 169ms, render: 2.7s)
+ GET /logo.png 200 in 89ms (compile: 51ms, render: 37ms)
+[?25h
