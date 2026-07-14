@@ -17,14 +17,12 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
+          command_timeout: 30m
           script: |
             set -e
 
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-            node -v
-            npm -v
 
             cd "${{ secrets.APP_DIR }}"
 
@@ -43,7 +41,3 @@ jobs:
             mkdir -p "$TARGET_BASE"
             rm -rf "$TARGET_BASE/standalone"
             mv .next/standalone "$TARGET_BASE/standalone"
-
-            pkill -f "node server.js" || true
-            cd "$TARGET_BASE/standalone"
-            nohup node server.js > server.log 2>&1 &
