@@ -613,22 +613,21 @@ export default function PassengerPage() {
                 </table>
               </div>
 
-              <div className="mt-10 flex items-center justify-between border-t border-white/5 pt-8">
+              <div className="mt-10 grid grid-cols-2 gap-4 border-t border-white/5 pt-8 sm:flex sm:items-center sm:justify-between sm:gap-0">
                 <button
                   type="button"
                   onClick={() => setSelectedDate((value) => shiftDay(value, -1))}
-
-                  className="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-xs font-bold text-gray-400 transition hover:bg-white/10"
+                  className="order-1 flex cursor-pointer items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold text-gray-400 transition hover:bg-white/10 sm:order-none sm:px-6"
                 >
                   <i className="fa-solid fa-arrow-left"></i> Hari Sebelumnya
                 </button>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
+                <span className="order-3 col-span-2 text-center text-[10px] font-bold uppercase tracking-widest text-gray-600 sm:order-none sm:col-span-1 sm:text-left">
                   Passenger Traffic Control
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedDate((value) => shiftDay(value, 1))}
-                  className="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-xs font-bold text-gray-400 transition hover:bg-white/10"
+                  className="order-2 flex cursor-pointer items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold text-gray-400 transition hover:bg-white/10 sm:order-none sm:px-6"
                 >
                   Hari Sesudahnya <i className="fa-solid fa-arrow-right"></i>
                 </button>

@@ -15,7 +15,7 @@ const workUnits = [
     label: "Administrative Services",
     icon: "fa-folder-open",
     image:
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop",
+      "/assets/images/tu1.webp",
     description:
       "Unit Administrasi menjadi pusat tata kelola layanan internal bandara, memastikan persuratan, kepegawaian, arsip, pelaporan, dan dukungan logistik berjalan tertib, cepat, dan terdokumentasi.",
     duties: ["Tata usaha dan arsip", "Dukungan SDM", "Pelaporan layanan"],
@@ -25,7 +25,7 @@ const workUnits = [
     label: "Aviation Security",
     icon: "fa-shield-halved",
     image:
-      "https://images.unsplash.com/photo-1585776245865-b92df54c6b25?q=80&w=2070&auto=format&fit=crop",
+      "/assets/images/avsec.webp",
     description:
       "Unit AVSEC menjaga keamanan penerbangan melalui pemeriksaan penumpang dan barang, pengawasan area terminal, serta pengendalian akses menuju area terbatas bandara.",
     duties: ["Pemeriksaan keamanan", "Pengawasan akses", "Perlindungan objek vital"],
@@ -38,17 +38,17 @@ const workUnits = [
       "/assets/images/PKP.webp",
     description:
       "Unit PKP-PK bertanggung jawab pada kesiapsiagaan pertolongan kecelakaan penerbangan dan pemadam kebakaran, dengan personel serta peralatan yang disiapkan untuk respons cepat.",
-    link: "https://sites.google.com/view/a3r0/aero",
+    link: "https://sites.google.com/view/aerofiresafetyhub/aero-tardamu",
     duties: ["Kesiapan darurat", "Pemadaman kebakaran", "Rescue operation"],
   },
   {
-    title: "Unit Bangland",
+    title: "Unit Bangunan dan Landasan",
     label: "Airport Civil Engineering",
-    icon: "fa-compass-drafting",
+    icon: "/assets/images/bangland logo.png",
     image:
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2071&auto=format&fit=crop",
+      "/assets/images/bangland1.webp",
     description:
-      "Unit Bangland memelihara bangunan, lahan, dan fasilitas fisik bandara agar seluruh area pelayanan dan area operasional tetap layak, aman, dan siap digunakan.",
+      "Unit Bangunan dan Landasan memelihara bangunan, lahan, dan fasilitas fisik bandara agar seluruh area pelayanan dan area operasional tetap layak, aman, dan siap digunakan.",
     duties: ["Pemeliharaan bangunan", "Perawatan lahan", "Kelayakan fasilitas"],
   },
   {
@@ -56,7 +56,7 @@ const workUnits = [
     label: "Airport Electrical Engineering",
     icon: "fa-bolt",
     image:
-      "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop",
+      "/assets/images/listrik.webp",
     description:
       "Unit Listrik memastikan keandalan instalasi, panel, penerangan, dan sistem catu daya bandara untuk menjaga pelayanan terminal serta operasi penerbangan tetap stabil.",
     duties: ["Catu daya utama", "Penerangan area", "Genset dan panel"],
@@ -66,7 +66,7 @@ const workUnits = [
     label: "Airport Electronics",
     icon: "fa-radio",
     image:
-      "https://images.unsplash.com/photo-1598032390384-684d00b2949d?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8f",
+      "/assets/images/elban.webp",
     description:
       "Unit Elektronika Bandara menjadi pusat tata kelola layanan komunikasi dan navigasi bandara.",
     duties: ["Navigasi", "Komunikasi bandara", "Elektronika"],
@@ -76,7 +76,7 @@ const workUnits = [
     label: "Airport Mechanical Engineering",
     icon: "fa-gears",
     image:
-      "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop",
+      "/assets/images/a2b.webp",
     description:
       "Unit Alat-Alat Berat menangani perawatan perangkat pendukung gedung dan peralatan teknis, sehingga sistem layanan penumpang dan fasilitas bandara bekerja optimal.",
     duties: ["Perawatan peralatan", "Sistem gedung", "Dukungan teknis"],
@@ -400,6 +400,8 @@ export default function UnitKerjaPage() {
                     src={leaderProfile.image}
                     alt={leaderProfile.name}
                     fill
+                    quality={95}
+                    priority
                     sizes="(max-width: 1024px) 100vw, 430px"
                     className="unit-profile-image object-cover object-top grayscale-[15%]"
                   />
@@ -483,6 +485,7 @@ export default function UnitKerjaPage() {
                     src={unit.image}
                     alt={unit.title}
                     fill
+                    quality={90}
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="unit-profile-image object-cover brightness-110 contrast-105"
                   />

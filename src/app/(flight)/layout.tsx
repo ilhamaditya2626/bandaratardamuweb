@@ -82,6 +82,7 @@ const aboutSidebarItems = [
   { href: "/fasilitas", label: "Fasilitas", icon: "fa-couch" },
   { href: "/regulasi", label: "Regulasi", icon: "fa-scale-balanced" },
   { href: "/ppid", label: "PPID", icon: "fa-circle-info" },
+  { href: "/unit-kerja", label: "Unit Kerja", icon: "fa-user-tie" },
 ];
 
 const exploreSidebarItems = [
@@ -93,7 +94,7 @@ const exploreSidebarItems = [
 const informationSidebarItems = [
   { href: "/informasi-berkala", label: "Informasi Berkala", icon: "fa-calendar-check" },
   { href: "/berita", label: "Berita", icon: "fa-newspaper" },
-  { href: "/laporan", label: "laporan Setiap Saat", icon: "fa-file-lines" },
+  { href: "/laporan", label: "Laporan Setiap Saat", icon: "fa-file-lines" },
   {
     href: "/informasi-dikecualikan",
     label: "Informasi yang Dikecualikan",
@@ -245,11 +246,16 @@ export default function FlightLayout({
   const isExploreSidebar = exploreRoutes.has(pathname);
   const isInformationActive = informationRoutes.has(pathname) || isNewsDetail;
   const isInformationSidebar =
-    pathname === "/informasi-berkala" || pathname === "/berita" || isNewsDetail || pathname === "/laporan" || pathname === "/informasi-dikecualikan";
-  const isServiceSidebar = pathname === "/informasi" || serviceRoutes.has(pathname);
+    pathname === "/informasi" ||
+    pathname === "/informasi-berkala" ||
+    pathname === "/berita" ||
+    isNewsDetail ||
+    pathname === "/laporan" ||
+    pathname === "/informasi-dikecualikan";
+  const isServiceSidebar = serviceRoutes.has(pathname);
   const isSectionSidebar =
     isAboutSidebar || isExploreSidebar || isInformationSidebar || isServiceSidebar;
-  const hideMobileHeaderButton = pathname === "/penerbangan" || pathname === "/bantuan";
+  const hideMobileHeaderButton = pathname === "/penerbangan" || pathname === "/bantuan" || pathname === "/penumpang";
   const sidebarItems = isAboutSidebar
     ? aboutSidebarItems
     : isExploreSidebar
@@ -457,7 +463,7 @@ export default function FlightLayout({
               </button>
             </div>
 
-            <nav className={`flex flex-col ${isSectionSidebar ? "space-y-0" : "space-y-6"}`}>
+            <nav className={`flex-1 min-h-0 overflow-y-auto pr-2 flex flex-col ${isSectionSidebar ? "space-y-0" : "space-y-6"}`}>
               {sidebarItems.map((item) => (
                 <Link
                   key={item.href}

@@ -295,7 +295,7 @@ export default function JelajahSabuLayout({
                 </button>
               </div>
 
-              <nav className={`flex flex-col ${isExploreSidebar ? "space-y-0" : "space-y-6"}`}>
+              <nav className={`flex-1 min-h-0 overflow-y-auto pr-2 flex flex-col ${isExploreSidebar ? "space-y-0" : "space-y-6"}`}>
                 {sidebarItems.map((item) => (
                   <Link
                     key={item.href}

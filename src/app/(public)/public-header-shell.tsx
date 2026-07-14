@@ -149,11 +149,13 @@ export function PublicHeaderShell() {
           </Link>
         </nav>
 
-        <button className="header__burger" id="burgerBtn" aria-label="Buka menu navigasi">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        {pathname !== "/" && (
+          <button className="header__burger" id="burgerBtn" aria-label="Buka menu navigasi">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        )}
       </div>
     </header>
   );

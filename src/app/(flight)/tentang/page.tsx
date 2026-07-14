@@ -6,9 +6,9 @@ const specs = [
   { icon: "fa-plane-up", label: "IATA Code", value: "SAU" },
   { icon: "fa-plane-circle-check", label: "ICAO Code", value: "WATS" },
   { icon: "fa-map-location-dot", label: "Lokasi", value: "Seba, Sabu Raijua" },
-  { icon: "fa-clock", label: "Operasional", value: "06:00 - 18:00" },
+  { icon: "fa-clock", label: "Operasional", value: "07.00 - 15.00 WITA" },
   { icon: "fa-road", label: "Runway", value: "900m x 23m" },
-  { icon: "fa-shield-halved", label: "Pengelola", value: "UPT Hubud" },
+  { icon: "fa-shield-halved", label: "Pengelola", value: "UPT Ditjen Hubud" },
 ];
 
 const infoCards = [
