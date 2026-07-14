@@ -118,7 +118,7 @@ export default function UnitKerjaPage() {
         }
 
         .unit-profile-image {
-          animation: imageDrift 18s ease-in-out infinite alternate;
+          // animation: imageDrift 18s ease-in-out infinite alternate;
         }
 
         @supports (animation-timeline: view()) {
@@ -485,9 +485,8 @@ export default function UnitKerjaPage() {
                     src={unit.image}
                     alt={unit.title}
                     fill
-                    quality={90}
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="unit-profile-image object-cover brightness-110 contrast-105"
+                    className="object-cover"
                   />
                   <div className="absolute bottom-8 left-8 rounded-full border border-white/15 bg-[#111928]/65 px-5 py-3 text-xs font-bold uppercase tracking-[0.22em] text-white backdrop-blur-md">
                     {String(index + 1).padStart(2, "0")} / 08
