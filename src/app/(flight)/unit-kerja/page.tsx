@@ -25,7 +25,7 @@ const workUnits = [
     label: "Aviation Security",
     icon: "fa-shield-halved",
     image:
-      "/assets/images/avsec.webp",
+      "/assets/images/avsec1.webp",
     description:
       "Unit AVSEC menjaga keamanan penerbangan melalui pemeriksaan penumpang dan barang, pengawasan area terminal, serta pengendalian akses menuju area terbatas bandara.",
     duties: ["Pemeriksaan keamanan", "Pengawasan akses", "Perlindungan objek vital"],
@@ -35,7 +35,7 @@ const workUnits = [
     label: "Rescue & Fire Fighting",
     icon: "/assets/images/LOGO PKP.webp",
     image:
-      "/assets/images/PKP.webp",
+      "/assets/images/PKP1.webp",
     description:
       "Unit PKP-PK bertanggung jawab pada kesiapsiagaan pertolongan kecelakaan penerbangan dan pemadam kebakaran, dengan personel serta peralatan yang disiapkan untuk respons cepat.",
     link: "https://sites.google.com/view/aerofiresafetyhub/aero-tardamu",
@@ -56,7 +56,7 @@ const workUnits = [
     label: "Airport Electrical Engineering",
     icon: "fa-bolt",
     image:
-      "/assets/images/listrik.webp",
+      "/assets/images/listrik1.webp",
     description:
       "Unit Listrik memastikan keandalan instalasi, panel, penerangan, dan sistem catu daya bandara untuk menjaga pelayanan terminal serta operasi penerbangan tetap stabil.",
     duties: ["Catu daya utama", "Penerangan area", "Genset dan panel"],
@@ -66,7 +66,7 @@ const workUnits = [
     label: "Airport Electronics",
     icon: "fa-radio",
     image:
-      "/assets/images/elban.webp",
+      "/assets/images/elban1.webp",
     description:
       "Unit Elektronika Bandara menjadi pusat tata kelola layanan komunikasi dan navigasi bandara.",
     duties: ["Navigasi", "Komunikasi bandara", "Elektronika"],
@@ -76,7 +76,7 @@ const workUnits = [
     label: "Airport Mechanical Engineering",
     icon: "fa-gears",
     image:
-      "/assets/images/a2b.webp",
+      "/assets/images/a2b1.webp",
     description:
       "Unit Alat-Alat Berat menangani perawatan perangkat pendukung gedung dan peralatan teknis, sehingga sistem layanan penumpang dan fasilitas bandara bekerja optimal.",
     duties: ["Perawatan peralatan", "Sistem gedung", "Dukungan teknis"],

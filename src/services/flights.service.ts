@@ -22,17 +22,14 @@ export async function getFlightsByDate(date: string, type?: string) {
 export async function createFlight(data: {
   flight_no: string;
   airline: string;
-  airline_key?: string;
+
   origin?: string;
   destination?: string;
   type: string;
   flight_type?: string;
   scheduled_time: string;
   estimated_time?: string;
-  sta?: string | null;
-  eta?: string | null;
-  std?: string | null;
-  etd?: string | null;
+
   status?: string;
   status_label?: string;
   notes?: string | null;
@@ -53,17 +50,14 @@ export async function updateFlight(
   data: Partial<{
     flight_no: string;
     airline: string;
-    airline_key: string;
+
     origin: string;
     destination: string;
     type: string;
     flight_type: string;
     scheduled_time: string;
     estimated_time: string;
-    sta: string | null;
-    eta: string | null;
-    std: string | null;
-    etd: string | null;
+
     status: string;
     status_label: string;
     notes: string | null;

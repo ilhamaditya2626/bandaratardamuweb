@@ -29,7 +29,7 @@ export const flights = mysqlTable("flights", {
   id: int("id").autoincrement().primaryKey(),
   flight_no: varchar("flight_no", { length: 20 }).notNull(),
   airline: varchar("airline", { length: 100 }).notNull(),
-  airline_key: varchar("airline_key", { length: 50 }),
+
   origin: varchar("origin", { length: 100 }),
   destination: varchar("destination", { length: 100 }),
   type: varchar("type", { length: 20 }).notNull(), // "arrival" | "departure"
@@ -37,10 +37,7 @@ export const flights = mysqlTable("flights", {
   scheduled_time: varchar("scheduled_time", { length: 5 }).notNull(),
   estimated_time: varchar("estimated_time", { length: 5 }),
 
-  sta: varchar("sta", { length: 5 }),
-  eta: varchar("eta", { length: 5 }),
-  std: varchar("std", { length: 5 }),
-  etd: varchar("etd", { length: 5 }),
+
 
   status: varchar("status", { length: 20 }).default("ontime"),
 

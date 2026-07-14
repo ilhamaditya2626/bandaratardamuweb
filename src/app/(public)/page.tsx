@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 import { DynamicImage } from "@/components/dynamic-image";
+import { HeroSlider } from "@/components/hero-slider";
 import { buildPageMetadata, siteConfig } from "@/lib/seo";
 import { getFlightsByDate } from "@/services/flights.service";
 import { getAllNews } from "@/services/news.service";
@@ -233,18 +234,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="hero" id="hero">
-        <div className="hero__overlay"></div>
-        <div className="hero__content">
-          <p className="hero__greeting">Selamat Datang di</p>
-          <h1 className="hero__title">Bandar Udara Tardamu Sabu Raijua</h1>
-          <div className="hero__divider">
-            <span></span>
-            <p>Gerbang Wisata Negeri Seribu Lontar</p>
-            <span></span>
-          </div>
-        </div>
-      </section>
+      <HeroSlider />
 
       <section className="info-section" id="penerbangan">
         <div className="info-section__container">

@@ -6,7 +6,7 @@ export interface Flight {
   id: number;
   flight_no: string;
   airline: string;
-  airline_key: string | null;
+
   origin: string | null;
   destination: string | null;
   type: "arrival" | "departure";
@@ -24,7 +24,7 @@ export interface Flight {
 export interface CreateFlightPayload {
   flight_no: string;
   airline: string;
-  airline_key?: string;
+
   origin?: string;
   destination?: string;
   type: "arrival" | "departure";
