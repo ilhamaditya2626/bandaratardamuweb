@@ -6,7 +6,7 @@ const leaderProfile = {
   position: "Kepala Kantor UPBU Kelas III Tardamu Sabu",
   label: "Kepala Kantor UPBU Tardamu",
   image: "/assets/images/pegawai/pak david.webp",
-  quote: "Visi kami adalah menjadikan Bandar Udara Tardamu sebagai gerbang konektivitas utama yang mengedepankan aspek Safety, Security, Services, and Compliance (3S + 1C) dalam setiap jengkal pelayanan.",
+  quote: "Visi kami adalah menjadikan Bandar Udara Tardamu sebagai gerbang konektivitas utama yang mengedepankan aspek Safety, Security, Services, and Compliance (3S + 1C) dalam setiap jengkal pelayanan. ",
   bio: "Memimpin dengan dedikasi untuk memastikan seluruh unit kerja bersinergi dalam menghadirkan standar operasional penerbangan internasional bagi seluruh pengguna jasa.",
 };
 const workUnits = [
