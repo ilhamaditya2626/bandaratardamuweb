@@ -47,7 +47,7 @@ export default function TentangPage() {
         title={
           <>
             Tentang <br />
-            <span className="italic text-[#facc15]">Bandar Udara Tardamu</span>
+            <span className="italic text-[#facc15]">Bandar Udara Tardamu </span>
           </>
         }
         description="Menghubungkan Kepulauan Sabu Raijua dengan dunia melalui standar keselamatan tinggi dan pelayanan yang tulus."
