@@ -113,7 +113,7 @@ export default function UnitKerjaPage() {
             transform: scale(1.04);
           }
           to {
-            transform: scale(1.12);
+            transform: scale(1.09);
           }
         }
 
@@ -403,7 +403,7 @@ export default function UnitKerjaPage() {
                     quality={95}
                     priority
                     sizes="(max-width: 1024px) 100vw, 430px"
-                    className="unit-profile-image object-cover object-top grayscale-[15%]"
+                    className="unit-profile-image object-cover object-top"
                   />
                   {/* Subtle vignette */}
                   <div
