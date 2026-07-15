@@ -98,6 +98,21 @@ export const feedbackSubmissions = mysqlTable("feedback_submissions", {
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── PENGINAPAN (Akomodasi Penginapan) ───────────────────────
+export const penginapan = mysqlTable("penginapan", {
+  id: int("id").autoincrement().primaryKey(),
+  category: varchar("category", { length: 50 }).notNull(), // badge, teks bebas
+  name: varchar("name", { length: 150 }).notNull(),
+  description: text("description"),
+  photos: json("photos").$type<string[]>().notNull(), // array path/URL foto
+  facilities: json("facilities").$type<string[]>().notNull(), // array nama fasilitas
+  price: int("price").notNull(), // rupiah, integer
+  phone: varchar("phone", { length: 30 }), // nomor WA mentah
+  is_active: boolean("is_active").default(true).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── BETTER AUTH TABLES ──────────────────────────────────────
 
 export const user = mysqlTable("user", {

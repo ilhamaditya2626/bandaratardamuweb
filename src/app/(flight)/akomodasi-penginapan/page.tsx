@@ -1,58 +1,21 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
+import { DynamicImage } from "@/components/dynamic-image";
+import { usePublicPenginapan } from "@/hooks/usePenginapan";
+import { Penginapan } from "@/services/client/penginapan.client";
+import { facilityIcon } from "@/lib/penginapan-facilities";
+import { toWhatsappUrl } from "@/lib/whatsapp";
 
-const filters = ["Semua Pilihan", "Hotel & Resort", "Guest House", "Homestay"];
-
-const hotels = [
-  {
-    title: "Hotel Raijua Permai",
-    images: [
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=2070&auto=format&fit=crop",
-    ],
-    badge: "Terpopuler",
-    description:
-      "Terletak strategis di pusat kota Seba, menawarkan fasilitas lengkap dengan akses mudah ke bandara dan pelabuhan.",
-    amenities: ["WiFi", "AC", "Resto"],
-    amenityIcons: ["fa-wifi", "fa-snowflake", "fa-utensils"],
-    price: "Rp 450.000",
-  },
-  {
-    title: "Napae Beach Inn",
-    images: [
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
-    ],
-    badge: "Beachfront",
-    description:
-      "Penginapan nyaman tepat di bibir pantai, cocok untuk menikmati pemandangan matahari terbenam setiap hari.",
-    amenities: ["Pantai", "AC", "Parkir"],
-    amenityIcons: ["fa-water", "fa-snowflake", "fa-parking"],
-    price: "Rp 350.000",
-  },
-  {
-    title: "Leba Homestay",
-    images: [
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop",
-    ],
-    badge: "Budget Friendly",
-    description:
-      "Suasana kekeluargaan yang kental dengan keramahan penduduk lokal, kamar bersih, dan lingkungan sangat tenang.",
-    amenities: ["Sarapan", "Fan"],
-    amenityIcons: ["fa-mug-hot", "fa-fan"],
-    price: "Rp 200.000",
-  },
-];
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
 
 /* ───── Image Carousel Component ───── */
 function ImageCarousel({
@@ -91,11 +54,8 @@ function ImageCarousel({
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
         {images.map((src, i) => (
-          <div
-            key={i}
-            className="relative h-full w-full flex-shrink-0"
-          >
-            <Image
+          <div key={i} className="relative h-full w-full flex-shrink-0">
+            <DynamicImage
               src={src}
               alt={`${alt} - foto ${i + 1}`}
               fill
@@ -107,44 +67,50 @@ function ImageCarousel({
       </div>
 
       {/* Left Arrow */}
-      <button
-        type="button"
-        onClick={prev}
-        aria-label="Foto sebelumnya"
-        className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-[#facc15] hover:text-[#111928] hover:scale-110 group-hover/carousel:opacity-100"
-      >
-        <i className="fa-solid fa-chevron-left text-sm"></i>
-      </button>
+      {total > 1 && (
+        <button
+          type="button"
+          onClick={prev}
+          aria-label="Foto sebelumnya"
+          className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-[#facc15] hover:text-[#111928] hover:scale-110 group-hover/carousel:opacity-100"
+        >
+          <i className="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+      )}
 
       {/* Right Arrow */}
-      <button
-        type="button"
-        onClick={next}
-        aria-label="Foto selanjutnya"
-        className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-[#facc15] hover:text-[#111928] hover:scale-110 group-hover/carousel:opacity-100"
-      >
-        <i className="fa-solid fa-chevron-right text-sm"></i>
-      </button>
+      {total > 1 && (
+        <button
+          type="button"
+          onClick={next}
+          aria-label="Foto selanjutnya"
+          className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-[#facc15] hover:text-[#111928] hover:scale-110 group-hover/carousel:opacity-100"
+        >
+          <i className="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+      )}
 
       {/* Dot Indicators */}
-      <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5">
-        {images.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrent(i);
-            }}
-            aria-label={`Lihat foto ${i + 1}`}
-            className={`rounded-full transition-all duration-300 ${
-              i === current
-                ? "h-2 w-5 bg-[#facc15]"
-                : "h-2 w-2 bg-white/50 hover:bg-white/80"
-            }`}
-          />
-        ))}
-      </div>
+      {total > 1 && (
+        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrent(i);
+              }}
+              aria-label={`Lihat foto ${i + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                i === current
+                  ? "h-2 w-5 bg-[#facc15]"
+                  : "h-2 w-2 bg-white/50 hover:bg-white/80"
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Badge */}
       <div className="absolute left-4 top-4 z-10 rounded-lg bg-[#facc15]/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#111928] backdrop-blur-md">
@@ -160,8 +126,76 @@ function ImageCarousel({
   );
 }
 
+/* ───── Accommodation Card ───── */
+function HotelCard({ hotel }: { hotel: Penginapan }) {
+  const whatsappUrl = toWhatsappUrl(hotel.phone);
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#1f2937] transition duration-300 hover:-translate-y-2 hover:border-[#facc15] hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3)]">
+      <ImageCarousel
+        images={hotel.photos.length > 0 ? hotel.photos : ["/assets/images/kelabba-maja.webp"]}
+        alt={hotel.name}
+        badge={hotel.category}
+      />
+
+      <div className="flex flex-grow flex-col p-8">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <h3 className="text-2xl leading-tight text-white" style={serifStyle}>
+            {hotel.name}
+          </h3>
+        </div>
+
+        <p className="mb-6 flex-grow text-sm leading-relaxed text-gray-400">
+          {hotel.description}
+        </p>
+
+        {hotel.facilities.length > 0 && (
+          <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-white/5 pb-6 text-xs text-gray-500">
+            {hotel.facilities.map((facility) => (
+              <span key={facility} className="flex items-center gap-1">
+                <i className={`fa-solid ${facilityIcon(facility)} text-[#facc15]`}></i>
+                {facility}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-gray-500">
+              Mulai Dari
+            </p>
+            <p className="text-lg font-bold text-white">
+              {formatCurrency(hotel.price)}
+              <span className="text-xs font-normal text-gray-400">/malam</span>
+            </p>
+          </div>
+          {hotel.phone ? (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Hubungi ${hotel.name} via WhatsApp`}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 transition hover:bg-[#facc15] hover:text-[#111928]"
+            >
+              <i className="fa-solid fa-phone"></i>
+            </a>
+          ) : (
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-gray-600">
+              <i className="fa-solid fa-phone"></i>
+            </span>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
 /* ───── Main Page ───── */
 export default function AkomodasiPenginapanPage() {
+  const { data: response, isLoading, isError } = usePublicPenginapan();
+  const hotels = response?.data ?? [];
+
   return (
     <div className="bg-[#111928] text-gray-200">
       <PageHero
@@ -182,75 +216,26 @@ export default function AkomodasiPenginapanPage() {
       />
 
       <main className="mx-auto max-w-7xl flex-grow px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mb-16 flex flex-wrap gap-4 overflow-x-auto pb-4">
-          {filters.map((item, index) => (
-            <button
-              key={item}
-              type="button"
-              className={`rounded-full px-6 py-2 text-sm ${
-                index === 0
-                  ? "bg-[#facc15] font-bold text-[#111928] shadow-lg"
-                  : "border border-gray-700 bg-[#1f2937] font-medium text-gray-400 transition hover:border-[#facc15] hover:text-white"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {hotels.map((hotel) => (
-            <article
-              key={hotel.title}
-              className="flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#1f2937] transition duration-300 hover:-translate-y-2 hover:border-[#facc15] hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3)]"
-            >
-              <ImageCarousel
-                images={hotel.images}
-                alt={hotel.title}
-                badge={hotel.badge}
-              />
-
-              <div className="flex flex-grow flex-col p-8">
-                <div className="mb-4 flex items-start justify-between gap-4">
-                  <h3 className="text-2xl leading-tight text-white" style={serifStyle}>
-                    {hotel.title}
-                  </h3>
-                </div>
-
-                <p className="mb-6 flex-grow text-sm leading-relaxed text-gray-400">
-                  {hotel.description}
-                </p>
-
-                <div className="mb-8 flex items-center gap-4 border-b border-white/5 pb-6 text-xs text-gray-500">
-                  {hotel.amenities.map((amenity, index) => (
-                    <span key={amenity} className="flex items-center gap-1">
-                      <i className={`fa-solid ${hotel.amenityIcons[index]} text-[#facc15]`}></i>
-                      {amenity}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-gray-500">
-                      Mulai Dari
-                    </p>
-                    <p className="text-lg font-bold text-white">
-                      {hotel.price}
-                      <span className="text-xs font-normal text-gray-400">/malam</span>
-                    </p>
-                  </div>
-                  <a
-                    href="tel:08123456789"
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 transition hover:bg-[#facc15] hover:text-[#111928]"
-                  >
-                    <i className="fa-solid fa-phone"></i>
-                  </a>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="py-20 text-center text-gray-400">
+            <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+            Memuat data penginapan...
+          </div>
+        ) : isError ? (
+          <div className="py-20 text-center text-red-400">
+            Gagal memuat data penginapan. Silakan muat ulang halaman.
+          </div>
+        ) : hotels.length === 0 ? (
+          <div className="py-20 text-center text-gray-400">
+            Belum ada data penginapan yang tersedia saat ini.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
+            {hotels.map((hotel) => (
+              <HotelCard key={hotel.id} hotel={hotel} />
+            ))}
+          </div>
+        )}
 
         <div className="group relative mt-24 overflow-hidden rounded-[40px] border border-white/5 bg-[#1f2937] p-10 md:p-16">
           <div className="absolute right-0 top-0 p-10 opacity-5 transition-transform duration-1000 group-hover:scale-110">
@@ -277,7 +262,9 @@ export default function AkomodasiPenginapanPage() {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="rounded-2xl border border-white/5 bg-white/5 p-6">
-                <h4 className="mb-1 text-2xl font-bold text-[#facc15]">15+</h4>
+                <h4 className="mb-1 text-2xl font-bold text-[#facc15]">
+                  {hotels.length > 0 ? `${hotels.length}+` : "15+"}
+                </h4>
                 <p className="text-xs uppercase tracking-widest text-gray-500">
                   Pilihan Akomodasi
                 </p>

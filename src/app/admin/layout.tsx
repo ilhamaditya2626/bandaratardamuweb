@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Inter } from "next/font/google";
-import { Plane, Users, Newspaper, LayoutDashboard, LogOut, TrendingUp, MessageSquareText, Tags } from "lucide-react";
+import { Plane, Users, Newspaper, LayoutDashboard, LogOut, TrendingUp, MessageSquareText, Tags, BedDouble } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +35,7 @@ export default async function AdminLayout({
         { name: "Harga Tiket", href: "/admin/ticket-prices", icon: Tags },
         { name: "Penumpang", href: "/admin/passengers", icon: Users },
         { name: "Berita", href: "/admin/news", icon: Newspaper },
+        { name: "Penginapan", href: "/admin/penginapan", icon: BedDouble },
         { name: "Kritik & Saran", href: "/admin/feedback", icon: MessageSquareText },
         { name: "Stats", href: "/admin/stats", icon: TrendingUp },
     ];

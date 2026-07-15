@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import { PublicHeaderShell } from "./public-header-shell";
+import { PublicBottomNav } from "./public-bottom-nav";
 import { siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -171,36 +172,7 @@ export default function PublicLayout({
       </footer>
 
 
-      <nav className="bottom-nav" id="bottomNav">
-        <Link href="/penerbangan" className="bottom-nav__item">
-          <i className="fa-solid fa-plane"></i>
-          <span>Penerbangan</span>
-        </Link>
-        <Link href="/penumpang" className="bottom-nav__item">
-          <i className="fa-solid fa-users"></i>
-          <span>Penumpang</span>
-        </Link>
-        <Link href="/tentang" className="bottom-nav__item">
-          <i className="fa-solid fa-building"></i>
-          <span>Tentang</span>
-        </Link>
-        <Link href="/bantuan" className="bottom-nav__item">
-          <i className="fa-solid fa-circle-question"></i>
-          <span>Bantuan</span>
-        </Link>
-        <Link href="/jelajah-sabu" className="bottom-nav__item">
-          <i className="fa-solid fa-umbrella-beach"></i>
-          <span>Jelajah</span>
-        </Link>
-        <Link href="/informasi" className="bottom-nav__item">
-          <i className="fa-solid fa-newspaper"></i>
-          <span>Informasi</span>
-        </Link>
-        <Link href="/layanan-informasi" className="bottom-nav__item">
-          <i className="fa-solid fa-info-circle"></i>
-          <span>Layanan</span>
-        </Link>
-      </nav>
+      <PublicBottomNav />
 
       <Script src="/js/main.js" strategy="afterInteractive" />
     </>
