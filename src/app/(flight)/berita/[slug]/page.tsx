@@ -191,10 +191,14 @@ export default async function BeritaDetailPage({ params }: PageProps) {
               color: #333;
               line-height: 1.8;
               font-size: 16px;
+              text-align: justify;
+              text-justify: inter-word;
+              hyphens: auto;
             }
 
             .news-article__content p {
               margin-bottom: 16px;
+              text-indent: 2.5em;
             }
 
             .news-article__content p:last-child {

@@ -1,75 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-import sharp from "sharp";
 
 import { auth } from "@/lib/auth";
+import { ImageUploadError, saveImageAsWebp } from "@/lib/image-upload";
 import { createNews, deleteNews, updateNews } from "@/services/news.service";
 
 export const runtime = "nodejs";
-
-const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
-const IMAGE_MAX_DIMENSION = 1600;
-const WEBP_QUALITY = 80;
-
-class ImageUploadError extends Error {}
 
 async function verifyAdmin(request: NextRequest) {
   return auth.api.getSession({
     headers: request.headers,
   });
-}
-
-function createSafeImageName(originalName: string) {
-  const parsedName = path.parse(originalName || "news-image").name;
-  const safeBaseName = parsedName
-    .replace(/[^a-zA-Z0-9-_]/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 80);
-
-  return `${Date.now()}-${safeBaseName || "news-image"}.webp`;
-}
-
-async function saveNewsImageAsWebp(image: File) {
-  if (!image.type.startsWith("image/")) {
-    throw new ImageUploadError("File yang diupload harus berupa gambar");
-  }
-
-  if (image.size > MAX_IMAGE_SIZE) {
-    throw new ImageUploadError("Ukuran gambar maksimal 15 MB");
-  }
-
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(uploadDir, { recursive: true });
-
-  const inputBuffer = Buffer.from(await image.arrayBuffer());
-  const fileName = createSafeImageName(image.name);
-  const filePath = path.join(uploadDir, fileName);
-
-  try {
-    const webpBuffer = await sharp(inputBuffer)
-      .rotate()
-      .resize({
-        width: IMAGE_MAX_DIMENSION,
-        height: IMAGE_MAX_DIMENSION,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .webp({
-        quality: WEBP_QUALITY,
-        effort: 5,
-      })
-      .toBuffer();
-
-    await fs.writeFile(filePath, webpBuffer);
-  } catch {
-    throw new ImageUploadError(
-      "Gagal memproses gambar. Gunakan file JPG, PNG, WebP, atau format gambar umum lainnya."
-    );
-  }
-
-  return `/uploads/${fileName}`;
 }
 
 function imageUploadErrorResponse(error: ImageUploadError) {
@@ -104,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (image && image.size > 0) {
-      image_url = await saveNewsImageAsWebp(image);
+      image_url = await saveImageAsWebp(image, "news");
     }
 
     const article = await createNews({ title, content, image_url });
@@ -159,7 +99,7 @@ export async function PUT(request: NextRequest) {
     if (content) updateData.content = content;
 
     if (image && image.size > 0) {
-      updateData.image_url = await saveNewsImageAsWebp(image);
+      updateData.image_url = await saveImageAsWebp(image, "news");
     } else if (image_url !== undefined) {
       updateData.image_url = image_url;
     }
