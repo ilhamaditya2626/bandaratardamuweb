@@ -23,7 +23,7 @@ const destinations = [
       "Festival budaya tahunan masyarakat Sabu Raijua sebagai wujud syukur atas hasil panen dengan ritual adat yang sakral.",
     actionLabel: "Lihat Jadwal",
     actionIcon: "fa-calendar-days",
-    href: "/berita",
+    href: "https://disparbud.saburaijuakab.go.id/beranda",
   },
   {
     title: "Benteng Menanga",
