@@ -237,27 +237,47 @@ export default function TransportasiAksesPage() {
             </div>
 
             <div className="space-y-4">
-              {localServices.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-xl border border-white/5 bg-white/[0.03] p-5 transition hover:border-[#facc15] hover:bg-[#facc15]/[0.05]"
-                >
+              {localServices.map((item) => {
+                const waLink = item.contact
+                  ? `https://wa.me/${item.contact.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Halo, saya ingin menanyakan layanan ${item.title}`)}`
+                  : null;
+
+                const cardContent = (
                   <div className="flex gap-4">
                     <i className={`fa-solid ${item.icon} mt-1 text-[#facc15]`}></i>
                     <div>
                       <h4 className="font-semibold text-white">{item.title}</h4>
                       <p className="mt-1 text-xs text-gray-400">{item.subtitle}</p>
                       {item.contact ? (
-                        <p className="mt-2 text-xs font-medium text-[#facc15]">
-                          <i className="fa-solid fa-phone mr-1"></i> {item.contact}
+                        <p className="mt-2 inline-flex items-center gap-2 text-xs font-medium text-[#facc15]">
+                          <i className="fa-brands fa-whatsapp"></i> {item.contact}
                         </p>
                       ) : (
                         <p className="mt-2 text-[10px] italic text-gray-500">{item.note}</p>
                       )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+
+                return waLink ? (
+                  <a
+                    key={item.title}
+                    href={waLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-xl border border-white/5 bg-white/[0.03] p-5 transition hover:border-[#facc15] hover:bg-[#facc15]/[0.05]"
+                  >
+                    {cardContent}
+                  </a>
+                ) : (
+                  <div
+                    key={item.title}
+                    className="rounded-xl border border-white/5 bg-white/[0.03] p-5 transition hover:border-[#facc15] hover:bg-[#facc15]/[0.05]"
+                  >
+                    {cardContent}
+                  </div>
+                );
+              })}
             </div>
           </section>
 

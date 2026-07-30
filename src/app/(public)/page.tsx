@@ -270,10 +270,10 @@ export default async function HomePage() {
                     featuredFlights.map((flight) => {
                       const from = flight.type === "arrival" ? flight.origin || "-" : "Sabu (SAU)";
                       const to = flight.type === "arrival" ? "Sabu (SAU)" : flight.destination || "-";
-                      const displayTime =
-                        flight.type === "arrival"
-                          ? flight.estimated_time || flight.scheduled_time || "-"
-                          : flight.scheduled_time || flight.estimated_time || "-";
+                      const isArrivalToSabu = flight.type === "arrival" || to.toLowerCase().includes("sabu");
+                      const displayTime = isArrivalToSabu
+                        ? flight.estimated_time || flight.scheduled_time || "-"
+                        : flight.scheduled_time || flight.estimated_time || "-";
                       const statusLabel = flight.status_label || flight.status || "Scheduled";
                       const notes = flight.notes?.trim();
 

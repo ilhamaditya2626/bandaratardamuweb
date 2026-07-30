@@ -37,7 +37,7 @@ export default function FlightsPage() {
   const [dest, setDest] = useState("");
   const [type, setType] = useState<"arrival" | "departure">("arrival");
   const [flightType, setFlightType] = useState<FlightType>("reguler");
-  const [timeType, setTimeType] = useState<"STA" | "ETA" | "STD" | "ETD">("STA");
+  const [timeType, setTimeType] = useState<"ETA" | "ETD">("ETD");
   const [sta, setSta] = useState("");
   const [eta, setEta] = useState("");
   const [std, setStd] = useState("");
@@ -51,20 +51,14 @@ export default function FlightsPage() {
 
   const flights = response?.data || [];
 
-  const timeTypeOptions =
-    type === "arrival"
-      ? [
-        { value: "STA", label: "STA" },
-        { value: "ETA", label: "ETA" },
-      ]
-      : [
-        { value: "STD", label: "STD" },
-        { value: "ETD", label: "ETD" },
-      ];
+  const timeTypeOptions = [
+    { value: "ETD", label: "ETD" },
+    { value: "ETA", label: "ETA" },
+  ];
 
   const handleTypeChange = (value: "arrival" | "departure") => {
     setType(value);
-    setTimeType(value === "arrival" ? "STA" : "STD");
+    setTimeType("ETD");
   };
 
 
@@ -97,7 +91,7 @@ export default function FlightsPage() {
     setOrigin("");
     setDest("");
     setType("arrival");
-    setTimeType("STA");
+    setTimeType("ETD");
     setSta("");
     setEta("");
     setStd("");
@@ -120,11 +114,9 @@ export default function FlightsPage() {
     setOrigin(flight.origin || "");
     setDest(flight.destination || "");
     setType(flight.type);
-    setTimeType(flight.type === "arrival" ? "STA" : "STD");
-    setSta(flight.type === "arrival" ? flight.scheduled_time : "");
-    setEtd(flight.type === "arrival" ? (flight.estimated_time || "") : "");
-    setStd(flight.type === "departure" ? flight.scheduled_time : "");
-    setEta(flight.type === "departure" ? (flight.estimated_time || "") : "");
+    setTimeType("ETD");
+    setEtd(flight.scheduled_time || "");
+    setEta(flight.estimated_time || "");
 
     setStatus(flight.status || "ontime");
     setNotes(flight.notes || "");
@@ -141,8 +133,8 @@ export default function FlightsPage() {
       destination: dest,
       type,
       flight_type: flightType,
-      scheduled_time: type === "arrival" ? sta : std,
-      estimated_time: type === "arrival" ? (etd || undefined) : (eta || undefined),
+      scheduled_time: etd,
+      estimated_time: eta || undefined,
       status,
       status_label: status.toUpperCase(),
       notes: notes.trim() || null,
@@ -228,26 +220,19 @@ export default function FlightsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${f.flight_type === "perintis" ? "bg-purple-100 text-purple-800" :
-                              f.flight_type === "charter_flight" ? "bg-indigo-100 text-indigo-800" :
-                                f.flight_type === "extra_flight" ? "bg-orange-100 text-orange-800" :
-                                  "bg-blue-100 text-blue-800"
+                            f.flight_type === "charter_flight" ? "bg-indigo-100 text-indigo-800" :
+                              f.flight_type === "extra_flight" ? "bg-orange-100 text-orange-800" :
+                                "bg-blue-100 text-blue-800"
                             } capitalize`}>
                             {f.flight_type}
                           </span>
                         </td>
 
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                          {f.type === "arrival" ? (
-                            <div>
-                              <div>STA: {f.scheduled_time || "-"}</div>
-                              <div className="text-gray-500">ETD: {f.estimated_time || "-"}</div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div>STD: {f.scheduled_time || "-"}</div>
-                              <div className="text-gray-500">ETA: {f.estimated_time || "-"}</div>
-                            </div>
-                          )}
+                          <div>
+                            <div>ETD: {f.scheduled_time || "-"}</div>
+                            <div className="text-gray-500">ETA: {f.estimated_time || "-"}</div>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {f.airline} <span className="text-gray-500">({f.flight_no})</span>
@@ -395,56 +380,26 @@ export default function FlightsPage() {
                     </div>
                   )}
 
-                  {type === "arrival" ? (
-                    <>
-                      <div className="sm:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700">STA</label>
-                        <input
-                          required
-                          type="time"
-                          value={sta}
-                          onChange={(e) => setSta(e.target.value)}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-                      </div>
+                  <div className="sm:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700">ETD</label>
+                    <input
+                      required
+                      type="time"
+                      value={etd}
+                      onChange={(e) => setEtd(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
 
-                      <div className="sm:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700">ETD</label>
-                        <input
-                          type="time"
-                          value={etd}
-                          onChange={(e) => setEtd(e.target.value)}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-
-
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="sm:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700">STD</label>
-                        <input
-                          required
-                          type="time"
-                          value={std}
-                          onChange={(e) => setStd(e.target.value)}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-                      </div>
-
-                      <div className="sm:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700">ETA</label>
-                        <input
-                          type="time"
-                          value={eta}
-                          onChange={(e) => setEta(e.target.value)}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-
-                      </div>
-                    </>
-                  )}
+                  <div className="sm:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700">ETA</label>
+                    <input
+                      type="time"
+                      value={eta}
+                      onChange={(e) => setEta(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
 
                   <div className="sm:col-span-3">
                     <label className="block text-sm font-medium text-gray-700">Status</label>

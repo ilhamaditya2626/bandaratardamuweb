@@ -514,10 +514,10 @@ export default function FlightsPage() {
                         {activeTab === "arrival" ? "Asal" : "Tujuan"}
                       </th>
                       <th className="px-6 py-5 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
-                        {activeTab === "arrival" ? "STA" : "STD"}
+                        ETD
                       </th>
                       <th className="px-6 py-5 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
-                        {activeTab === "arrival" ? "ETD" : "ETA"}
+                        ETA
                       </th>
                     </tr>
                   </thead>
