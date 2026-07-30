@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { feedbackSubmissions } from "@/db/schema";
-import { desc, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 export async function createFeedback(data: { name: string; message: string }) {
   const [inserted] = await db
@@ -51,4 +51,10 @@ export async function getAllFeedback(page: number = 1, limit: number = 50) {
       totalPages: Math.ceil(total / limit),
     },
   };
+}
+
+export async function deleteFeedback(id: number) {
+  await db.delete(feedbackSubmissions).where(eq(feedbackSubmissions.id, id));
+
+  return { id };
 }

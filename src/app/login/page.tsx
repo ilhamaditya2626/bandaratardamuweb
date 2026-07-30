@@ -30,7 +30,7 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (err) {
-      setError("Terjadi kesalahan sistem.");
+      setError("Email atau password tidak valid.");
     } finally {
       setLoading(false);
     }

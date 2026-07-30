@@ -1,8 +1,8 @@
 "use client";
 
-import { Inbox, MessageSquareText, RefreshCw, Sparkles, UserRound } from "lucide-react";
+import { Inbox, MessageSquareText, RefreshCw, Sparkles, Trash2, UserRound } from "lucide-react";
 import { useMemo } from "react";
-import { useGetFeedback } from "@/hooks/useFeedback";
+import { useDeleteFeedback, useGetFeedback } from "@/hooks/useFeedback";
 
 const monthNames = [
   "Januari",
@@ -74,10 +74,20 @@ export default function FeedbackAdminPage() {
   const page = 1;
   const limit = 100;
   const { data: response, isLoading, isFetching, refetch } = useGetFeedback(page, limit);
+  const deleteMutation = useDeleteFeedback();
   const feedback = response?.data || [];
 
   const latestFeedback = feedback[0];
   const total = response?.pagination.total || feedback.length;
+
+  const handleDelete = (id: number) => {
+    const confirmed = window.confirm("Apakah Anda yakin ingin menghapus kritik dan saran ini?");
+    if (!confirmed) {
+      return;
+    }
+
+    deleteMutation.mutate(id);
+  };
 
   const summary = useMemo(
     () => [
@@ -189,9 +199,20 @@ export default function FeedbackAdminPage() {
                       </p>
                     </div>
                   </div>
-                  <time className="shrink-0 text-sm font-medium text-slate-400">
-                    {formatFeedbackDate(item.created_at)}
-                  </time>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <time className="text-sm font-medium text-slate-400">
+                      {formatFeedbackDate(item.created_at)}
+                    </time>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                      disabled={deleteMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Hapus
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}

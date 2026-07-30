@@ -22,4 +22,7 @@ export const FeedbackClientService = {
       data: FeedbackSubmission[];
       pagination: FeedbackPagination;
     }>(`/admin/feedback?page=${page}&limit=${limit}`),
+
+  deleteFeedback: (id: number) =>
+    ApiClient.delete<{ success: boolean; data: { id: number } }>('/admin/feedback', { id }),
 };
