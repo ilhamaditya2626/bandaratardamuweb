@@ -5,8 +5,12 @@ import { getSiteUrl, siteConfig } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   applicationName: siteConfig.shortName,
-  title: siteConfig.shortName,
+  title: {
+    default: `${siteConfig.name} (Tardamu Airport) - Situs Resmi`,
+    template: `%s | ${siteConfig.shortName}`,
+  },
   description: siteConfig.description,
+  keywords: siteConfig.keywords,
   icons: {
     icon: "/assets/favicon.ico",
     shortcut: "/assets/favicon.ico",

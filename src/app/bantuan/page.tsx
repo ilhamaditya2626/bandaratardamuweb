@@ -43,8 +43,8 @@ const helpCards = [
     valueIconClass: "fa-brands fa-whatsapp",
     title: "WhatsApp Chat",
     description: "Respon cepat melalui aplikasi pesan instan WhatsApp.",
-    value: "0812 3456 7890",
-    href: "https://wa.me/6281234567890",
+    value: "085707190065",
+    href: "https://wa.me/6285707190065",
   },
 ];
 

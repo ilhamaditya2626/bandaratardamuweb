@@ -1,14 +1,42 @@
 import type { Metadata } from "next";
 
-const FALLBACK_SITE_URL = "http://127.0.0.1:3000";
+// Dipakai HANYA bila tidak ada env sama sekali. Sengaja domain produksi
+// supaya metadata (canonical, OG, sitemap) tidak pernah bocor ke localhost.
+const FALLBACK_SITE_URL = "https://tardamuairport.id";
 
 export const siteConfig = {
   name: "Bandar Udara Tardamu Sabu Raijua",
   shortName: "Bandara Tardamu",
+  // Nama alternatif untuk pencarian bahasa Inggris ("tardamu airport").
+  alternateName: ["Tardamu Airport", "Bandara Tardamu", "Bandar Udara Tardamu"],
+  iataCode: "SAU",
   description:
-    "Website resmi Bandar Udara Tardamu Sabu Raijua untuk informasi jadwal penerbangan, layanan penumpang, berita, dan layanan informasi publik.",
+    "Website resmi Bandar Udara Tardamu Sabu Raijua (Tardamu Airport) untuk informasi jadwal penerbangan, layanan penumpang, berita, dan layanan informasi publik.",
+  keywords: [
+    "Bandara Tardamu",
+    "Bandar Udara Tardamu",
+    "Tardamu Airport",
+    "Bandara Sabu Raijua",
+    "Bandara Sabu",
+    "Bandara SAU",
+    "jadwal penerbangan Sabu Raijua",
+    "Sabu Raijua NTT",
+  ],
   locale: "id_ID",
   defaultImage: "/assets/images/hero-bg.webp",
+  logo: "/assets/images/logo-sau.png",
+  geo: { latitude: -10.4941185, longitude: 121.8454013 },
+  address: {
+    locality: "Sabu Raijua",
+    region: "Nusa Tenggara Timur",
+    country: "ID",
+  },
+  sameAs: [
+    "https://www.facebook.com/tardamusabuairport",
+    "https://www.instagram.com/tardamuairport",
+    "https://www.youtube.com/channel/UCGdlwT6j283tcnpAM7lfEgw",
+    "https://www.tiktok.com/@tardamuairport",
+  ],
 };
 
 export function getSiteUrl() {
@@ -97,5 +125,49 @@ export function buildPageMetadata({
           },
         }
       : {}),
+  };
+}
+
+// Structured data (schema.org) untuk memperkuat pencarian nama bandara dan
+// membantu Google menampilkan knowledge panel / sitelinks.
+export function buildAirportJsonLd() {
+  const siteUrl = getSiteUrl();
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Airport",
+        "@id": `${siteUrl}/#airport`,
+        name: siteConfig.name,
+        alternateName: siteConfig.alternateName,
+        iataCode: siteConfig.iataCode,
+        url: siteUrl,
+        logo: buildAbsoluteUrl(siteConfig.logo),
+        image: buildAbsoluteUrl(siteConfig.defaultImage),
+        description: siteConfig.description,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: siteConfig.address.locality,
+          addressRegion: siteConfig.address.region,
+          addressCountry: siteConfig.address.country,
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: siteConfig.geo.latitude,
+          longitude: siteConfig.geo.longitude,
+        },
+        sameAs: siteConfig.sameAs,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: siteConfig.name,
+        alternateName: siteConfig.alternateName,
+        inLanguage: "id-ID",
+        publisher: { "@id": `${siteUrl}/#airport` },
+      },
+    ],
   };
 }

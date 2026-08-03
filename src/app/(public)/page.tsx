@@ -3,16 +3,23 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { DynamicImage } from "@/components/dynamic-image";
 import { HeroSlider } from "@/components/hero-slider";
-import { buildPageMetadata, siteConfig } from "@/lib/seo";
+import { buildAirportJsonLd, buildPageMetadata, siteConfig } from "@/lib/seo";
 import { getFlightsByDate } from "@/services/flights.service";
 import { getAllNews } from "@/services/news.service";
 
-export const metadata = buildPageMetadata({
-  title: siteConfig.name,
-  description:
-    "Portal resmi Bandar Udara Tardamu Sabu Raijua untuk jadwal penerbangan, cuaca terkini, berita terbaru, dan informasi layanan publik.",
-  path: "/",
-});
+export const metadata = {
+  ...buildPageMetadata({
+    title: `${siteConfig.name} (Tardamu Airport)`,
+    description:
+      "Situs resmi Bandar Udara Tardamu Sabu Raijua (Tardamu Airport) — jadwal penerbangan, cuaca terkini, berita terbaru, dan layanan informasi publik.",
+    path: "/",
+    keywords: siteConfig.keywords,
+  }),
+  // Judul beranda dibuat absolut agar tidak tertimpa template "%s | ...".
+  title: {
+    absolute: `${siteConfig.name} (Tardamu Airport) - Situs Resmi`,
+  },
+};
 
 export const revalidate = 1800;
 
@@ -234,6 +241,11 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        // Structured data bandara untuk pencarian "bandara tardamu" / "tardamu airport".
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildAirportJsonLd()) }}
+      />
       <HeroSlider />
 
       <section className="info-section" id="penerbangan">
