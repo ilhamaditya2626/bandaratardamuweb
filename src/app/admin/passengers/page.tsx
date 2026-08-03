@@ -14,6 +14,32 @@ type PassengerLog = {
   city: string | null;
   passenger_count: number | null;
   load_factor: string | number | null;
+  pax_adult?: number | null;
+  pax_child?: number | null;
+  pax_infant?: number | null;
+  pax_transit_adult?: number | null;
+  pax_transit_child?: number | null;
+  pax_transit_infant?: number | null;
+  baggage_kg?: number | null;
+  cargo_kg?: number | null;
+  mail_kg?: number | null;
+};
+
+// Payload rincian yang dikirim ke API (passenger_count dihitung di server).
+type RincianPayload = {
+  date: string;
+  airline: string;
+  flight_type: FlightType;
+  city: string;
+  pax_adult: number;
+  pax_child: number;
+  pax_infant: number;
+  pax_transit_adult: number;
+  pax_transit_child: number;
+  pax_transit_infant: number;
+  baggage_kg: number;
+  cargo_kg: number;
+  mail_kg: number;
 };
 
 const airlineOptions = [
@@ -27,8 +53,36 @@ const cityOptions = [
   "Waingapu",
 ];
 
+function NumField({
+  label,
+  value,
+  onChange,
+  required,
+}: {
+  label: string;
+  value: number;
+  onChange: (n: number) => void;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <input
+        type="number"
+        min="0"
+        required={required}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+      />
+    </div>
+  );
+}
+
 function getPassengerCount(row: PassengerLog) {
-  return Number(row.passenger_count ?? 0);
+  // Dewasa + anak (bayi tidak dihitung); fallback ke passenger_count lama.
+  const rincian = Number(row.pax_adult ?? 0) + Number(row.pax_child ?? 0);
+  return rincian > 0 ? rincian : Number(row.passenger_count ?? 0);
 }
 
 function getLoadFactor(row: PassengerLog) {
@@ -49,8 +103,19 @@ export default function PassengersPage() {
   const [airline, setAirline] = useState("");
   const [flightType, setFlightType] = useState<FlightType>("arrival");
   const [city, setCity] = useState("");
-  const [passengerCount, setPassengerCount] = useState(0);
+  const [paxAdult, setPaxAdult] = useState(0);
+  const [paxChild, setPaxChild] = useState(0);
+  const [paxInfant, setPaxInfant] = useState(0);
+  const [paxTransitAdult, setPaxTransitAdult] = useState(0);
+  const [paxTransitChild, setPaxTransitChild] = useState(0);
+  const [paxTransitInfant, setPaxTransitInfant] = useState(0);
+  const [baggageKg, setBaggageKg] = useState(0);
+  const [cargoKg, setCargoKg] = useState(0);
+  const [mailKg, setMailKg] = useState(0);
   const [editingId, setEditingId] = useState<string | number | null>(null);
+
+  // Total penumpang = dewasa + anak (bayi tidak dihitung).
+  const totalPenumpang = Number(paxAdult) + Number(paxChild);
 
   const [statusMsg, setStatusMsg] = useState<{
     type: "success" | "error";
@@ -77,24 +142,13 @@ export default function PassengersPage() {
   }, [data]);
 
   const passengerMutation = useMutation({
-    mutationFn: (payload: {
-      date: string;
-      airline: string;
-      flight_type: FlightType;
-      city: string;
-      passenger_count: number;
-    }) => ApiClient.post("/admin/passengers", payload),
+    mutationFn: (payload: RincianPayload) =>
+      ApiClient.post("/admin/passengers", payload),
   });
 
   const updatePassengerMutation = useMutation({
-    mutationFn: (payload: {
-      id: string | number;
-      date: string;
-      airline: string;
-      flight_type: FlightType;
-      city: string;
-      passenger_count: number;
-    }) => ApiClient.put("/admin/passengers", payload),
+    mutationFn: (payload: RincianPayload & { id: string | number }) =>
+      ApiClient.put("/admin/passengers", payload),
   });
 
   const deletePassengerMutation = useMutation({
@@ -108,7 +162,15 @@ export default function PassengersPage() {
     setAirline("");
     setFlightType("arrival");
     setCity("");
-    setPassengerCount(0);
+    setPaxAdult(0);
+    setPaxChild(0);
+    setPaxInfant(0);
+    setPaxTransitAdult(0);
+    setPaxTransitChild(0);
+    setPaxTransitInfant(0);
+    setBaggageKg(0);
+    setCargoKg(0);
+    setMailKg(0);
   };
 
   const refreshPassengerQueries = () => {
@@ -124,7 +186,15 @@ export default function PassengersPage() {
     setAirline(row.airline || "");
     setFlightType(row.flight_type || "arrival");
     setCity(row.city || "");
-    setPassengerCount(getPassengerCount(row));
+    setPaxAdult(Number(row.pax_adult ?? 0));
+    setPaxChild(Number(row.pax_child ?? 0));
+    setPaxInfant(Number(row.pax_infant ?? 0));
+    setPaxTransitAdult(Number(row.pax_transit_adult ?? 0));
+    setPaxTransitChild(Number(row.pax_transit_child ?? 0));
+    setPaxTransitInfant(Number(row.pax_transit_infant ?? 0));
+    setBaggageKg(Number(row.baggage_kg ?? 0));
+    setCargoKg(Number(row.cargo_kg ?? 0));
+    setMailKg(Number(row.mail_kg ?? 0));
     setShowForm(true);
   };
 
@@ -151,24 +221,27 @@ export default function PassengersPage() {
     e.preventDefault();
     setStatusMsg(null);
 
+    const payload: RincianPayload = {
+      date,
+      airline,
+      flight_type: flightType,
+      city,
+      pax_adult: Number(paxAdult),
+      pax_child: Number(paxChild),
+      pax_infant: Number(paxInfant),
+      pax_transit_adult: Number(paxTransitAdult),
+      pax_transit_child: Number(paxTransitChild),
+      pax_transit_infant: Number(paxTransitInfant),
+      baggage_kg: Number(baggageKg),
+      cargo_kg: Number(cargoKg),
+      mail_kg: Number(mailKg),
+    };
+
     try {
       if (editingId) {
-        await updatePassengerMutation.mutateAsync({
-          id: editingId,
-          date,
-          airline,
-          flight_type: flightType,
-          city,
-          passenger_count: Number(passengerCount),
-        });
+        await updatePassengerMutation.mutateAsync({ id: editingId, ...payload });
       } else {
-        await passengerMutation.mutateAsync({
-          date,
-          airline,
-          flight_type: flightType,
-          city,
-          passenger_count: Number(passengerCount),
-        });
+        await passengerMutation.mutateAsync(payload);
       }
 
       refreshPassengerQueries();
@@ -290,18 +363,41 @@ export default function PassengersPage() {
               </select>
             </div>
 
+            {/* Penumpang — dewasa + anak dihitung, bayi tidak */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Jumlah Penumpang
-              </label>
-              <input
-                type="number"
-                min="0"
-                required
-                value={passengerCount}
-                onChange={(e) => setPassengerCount(Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-              />
+              <p className="mb-2 text-sm font-semibold text-gray-800">Penumpang</p>
+              <div className="grid grid-cols-3 gap-4">
+                <NumField label="Dewasa" value={paxAdult} onChange={setPaxAdult} required />
+                <NumField label="Anak" value={paxChild} onChange={setPaxChild} required />
+                <NumField label="Bayi" value={paxInfant} onChange={setPaxInfant} />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Total penumpang dihitung:{" "}
+                <span className="font-semibold text-gray-800">
+                  {totalPenumpang.toLocaleString("id-ID")}
+                </span>{" "}
+                (Dewasa + Anak — bayi tidak dihitung)
+              </p>
+            </div>
+
+            {/* Transit */}
+            <div>
+              <p className="mb-2 text-sm font-semibold text-gray-800">Transit</p>
+              <div className="grid grid-cols-3 gap-4">
+                <NumField label="Dewasa" value={paxTransitAdult} onChange={setPaxTransitAdult} />
+                <NumField label="Anak" value={paxTransitChild} onChange={setPaxTransitChild} />
+                <NumField label="Bayi" value={paxTransitInfant} onChange={setPaxTransitInfant} />
+              </div>
+            </div>
+
+            {/* Muatan */}
+            <div>
+              <p className="mb-2 text-sm font-semibold text-gray-800">Muatan (kg)</p>
+              <div className="grid grid-cols-3 gap-4">
+                <NumField label="Bagasi" value={baggageKg} onChange={setBaggageKg} />
+                <NumField label="Kargo" value={cargoKg} onChange={setCargoKg} />
+                <NumField label="Pos" value={mailKg} onChange={setMailKg} />
+              </div>
             </div>
 
             <div className="flex justify-end">

@@ -15,6 +15,8 @@ async function verifyAdmin(request: NextRequest) {
   return session;
 }
 
+const jumlahOpsional = z.coerce.number().int().nonnegative().optional().default(0);
+
 // Zod schema for validation
 const passengerSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format date harus YYYY-MM-DD"),
@@ -23,7 +25,17 @@ const passengerSchema = z.object({
     message: "Tipe penerbangan harus arrival atau departure",
   }),
   city: z.string().min(1, "Kota wajib dipilih"),
-  passenger_count: z.number().int().nonnegative("Jumlah penumpang tidak boleh negatif"),
+  // Rincian DAU. passenger_count TIDAK diterima dari klien — dihitung
+  // server = dewasa + anak (bayi tidak dihitung).
+  pax_adult: z.coerce.number().int().nonnegative("Jumlah dewasa tidak boleh negatif"),
+  pax_child: z.coerce.number().int().nonnegative("Jumlah anak tidak boleh negatif"),
+  pax_infant: jumlahOpsional,
+  pax_transit_adult: jumlahOpsional,
+  pax_transit_child: jumlahOpsional,
+  pax_transit_infant: jumlahOpsional,
+  baggage_kg: jumlahOpsional,
+  cargo_kg: jumlahOpsional,
+  mail_kg: jumlahOpsional,
 });
 
 const passengerUpdateSchema = passengerSchema.extend({
@@ -68,7 +80,17 @@ export async function POST(request: NextRequest) {
       val.airline,
       val.flight_type,
       val.city,
-      val.passenger_count
+      {
+        pax_adult: val.pax_adult,
+        pax_child: val.pax_child,
+        pax_infant: val.pax_infant,
+        pax_transit_adult: val.pax_transit_adult,
+        pax_transit_child: val.pax_transit_child,
+        pax_transit_infant: val.pax_transit_infant,
+        baggage_kg: val.baggage_kg,
+        cargo_kg: val.cargo_kg,
+        mail_kg: val.mail_kg,
+      }
     );
 
     return NextResponse.json({ success: true, data: result });
@@ -112,7 +134,17 @@ export async function PUT(request: NextRequest) {
       val.airline,
       val.flight_type,
       val.city,
-      val.passenger_count
+      {
+        pax_adult: val.pax_adult,
+        pax_child: val.pax_child,
+        pax_infant: val.pax_infant,
+        pax_transit_adult: val.pax_transit_adult,
+        pax_transit_child: val.pax_transit_child,
+        pax_transit_infant: val.pax_transit_infant,
+        baggage_kg: val.baggage_kg,
+        cargo_kg: val.cargo_kg,
+        mail_kg: val.mail_kg,
+      }
     );
 
     return NextResponse.json({ success: true, data: result });

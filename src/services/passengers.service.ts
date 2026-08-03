@@ -11,24 +11,63 @@ function calculateLoadFactor(passengerCount: number) {
   return Number(((passengerCount / DEFAULT_SEAT_CAPACITY) * 100).toFixed(1));
 }
 
+// Rincian DAU untuk satu baris. Bayi TIDAK dihitung sebagai penumpang,
+// tetapi tetap disimpan karena keluar pada PDF laporan DAU.
+export interface RincianPenumpang {
+  pax_adult: number;
+  pax_child: number;
+  pax_infant: number;
+  pax_transit_adult?: number;
+  pax_transit_child?: number;
+  pax_transit_infant?: number;
+  baggage_kg?: number;
+  cargo_kg?: number;
+  mail_kg?: number;
+}
+
+// passenger_count SELALU = dewasa + anak (bayi tidak dihitung). Nilai ini
+// dipakai kartu/tabel di web sehingga "total penumpang" otomatis benar.
+function bangunNilai(
+  date: string,
+  airline: string,
+  flight_type: FlightType,
+  city: string,
+  r: RincianPenumpang
+) {
+  const nol = (n: number | undefined) => Math.max(0, Math.trunc(Number(n) || 0));
+  const pax_adult = nol(r.pax_adult);
+  const pax_child = nol(r.pax_child);
+  const passenger_count = pax_adult + pax_child; // bayi tidak dihitung
+  return {
+    date,
+    airline,
+    flight_type,
+    city,
+    passenger_count,
+    load_factor: calculateLoadFactor(passenger_count).toFixed(2),
+    pax_adult,
+    pax_child,
+    pax_infant: nol(r.pax_infant),
+    pax_transit_adult: nol(r.pax_transit_adult),
+    pax_transit_child: nol(r.pax_transit_child),
+    pax_transit_infant: nol(r.pax_transit_infant),
+    baggage_kg: nol(r.baggage_kg),
+    cargo_kg: nol(r.cargo_kg),
+    mail_kg: nol(r.mail_kg),
+  };
+}
+
 // ─── Insert passenger data from Admin ─────────────────────────
 export async function syncDailyPassengers(
   date: string,
   airline: string,
   flight_type: FlightType,
   city: string,
-  passenger_count: number
+  rincian: RincianPenumpang
 ) {
   const [inserted] = await db
     .insert(passengerStats)
-    .values({
-      date,
-      airline,
-      flight_type,
-      city,
-      passenger_count,
-      load_factor: calculateLoadFactor(passenger_count).toFixed(2),
-    })
+    .values(bangunNilai(date, airline, flight_type, city, rincian))
     .$returningId();
 
   const [result] = await db
@@ -46,18 +85,11 @@ export async function updatePassengerLog(
   airline: string,
   flight_type: FlightType,
   city: string,
-  passenger_count: number
+  rincian: RincianPenumpang
 ) {
   await db
     .update(passengerStats)
-    .set({
-      date,
-      airline,
-      flight_type,
-      city,
-      passenger_count,
-      load_factor: calculateLoadFactor(passenger_count).toFixed(2),
-    })
+    .set(bangunNilai(date, airline, flight_type, city, rincian))
     .where(eq(passengerStats.id, id));
 
   const [result] = await db
@@ -130,7 +162,10 @@ function getDateRange(range: string, anchorDate?: string): { start: string; end:
 }
 
 function getPassengerCount(row: typeof passengerStats.$inferSelect) {
-  return Number(row.passenger_count ?? 0);
+  // Penumpang dihitung = dewasa + anak (bayi tidak dihitung). Bila rincian
+  // belum diisi (data lama), jatuh ke passenger_count agar tetap tampil.
+  const rincian = Number(row.pax_adult ?? 0) + Number(row.pax_child ?? 0);
+  return rincian > 0 ? rincian : Number(row.passenger_count ?? 0);
 }
 
 function getLoadFactor(row: typeof passengerStats.$inferSelect) {
@@ -360,6 +395,16 @@ export async function getStats(range: string, anchorDate?: string) {
     city: row.city,
     passenger_count: getPassengerCount(row),
     load_factor: getLoadFactor(row),
+    // Rincian DAU untuk form admin & laporan (bayi tidak masuk hitungan total).
+    pax_adult: Number(row.pax_adult ?? 0),
+    pax_child: Number(row.pax_child ?? 0),
+    pax_infant: Number(row.pax_infant ?? 0),
+    pax_transit_adult: Number(row.pax_transit_adult ?? 0),
+    pax_transit_child: Number(row.pax_transit_child ?? 0),
+    pax_transit_infant: Number(row.pax_transit_infant ?? 0),
+    baggage_kg: Number(row.baggage_kg ?? 0),
+    cargo_kg: Number(row.cargo_kg ?? 0),
+    mail_kg: Number(row.mail_kg ?? 0),
   }));
 
   return {

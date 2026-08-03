@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { PageHero } from "../_components/info-page-shell";
 
 const localServices = [
@@ -197,6 +197,15 @@ const destinations = [
 
 export default function TransportasiAksesPage() {
   const [selectedDestination, setSelectedDestination] = useState(destinations[0]);
+  const mapSectionRef = useRef<HTMLElement>(null);
+
+  const handleSelectDestination = (item: (typeof destinations)[number]) => {
+    setSelectedDestination(item);
+    // Pada mode mobile, gulir otomatis ke card Peta Navigasi.
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      mapSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const mapSrc = useMemo(() => {
     const destination = selectedDestination.query.replace(/ /g, "+");
@@ -308,7 +317,7 @@ export default function TransportasiAksesPage() {
                   {destinations.map((item) => (
                     <tr
                       key={item.name}
-                      onClick={() => setSelectedDestination(item)}
+                      onClick={() => handleSelectDestination(item)}
                       className={`cursor-pointer border-b border-white/5 transition last:border-b-0 ${selectedDestination.name === item.name ? "bg-[#facc15]/10" : "hover:bg-[#facc15]/10"
                         }`}
                     >
@@ -330,7 +339,10 @@ export default function TransportasiAksesPage() {
             </p>
           </section>
 
-          <section className="flex flex-col rounded-2xl border border-white/5 bg-[#1f2937] p-4 shadow-xl">
+          <section
+            ref={mapSectionRef}
+            className="flex flex-col rounded-2xl border border-white/5 bg-[#1f2937] p-4 shadow-xl scroll-mt-24"
+          >
             <div className="mb-4 flex items-center gap-4 px-4 pt-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#facc15]/10 text-[#facc15]">
                 <i className="fa-solid fa-map-location-dot text-xl"></i>

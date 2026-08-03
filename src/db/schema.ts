@@ -87,6 +87,18 @@ export const passengerStats = mysqlTable("passenger_stats", {
   passenger_count: int("passenger_count").default(0),
   load_factor: decimal("load_factor", { precision: 8, scale: 2 }),
 
+  // Rincian DAU (dewasa+anak = penumpang dihitung; bayi TIDAK dihitung
+  // tapi tetap disimpan karena keluar di PDF DAU).
+  pax_adult: int("pax_adult").default(0).notNull(),
+  pax_child: int("pax_child").default(0).notNull(),
+  pax_infant: int("pax_infant").default(0).notNull(),
+  pax_transit_adult: int("pax_transit_adult").default(0).notNull(),
+  pax_transit_child: int("pax_transit_child").default(0).notNull(),
+  pax_transit_infant: int("pax_transit_infant").default(0).notNull(),
+  baggage_kg: int("baggage_kg").default(0).notNull(),
+  cargo_kg: int("cargo_kg").default(0).notNull(),
+  mail_kg: int("mail_kg").default(0).notNull(),
+
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
