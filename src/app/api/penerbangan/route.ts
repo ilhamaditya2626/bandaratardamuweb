@@ -114,3 +114,110 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// =============================================================
+// POST /api/penerbangan  — tambah 1 penerbangan + rekap penumpang
+//
+// Dipakai tombol "Tambah Data" di halaman LLAU SIMTAR. Body:
+//   { penerbangan: {...flights}, penumpang: {...passenger_stats} }
+//
+// Kolom di-whitelist eksplisit (INSERT hanya kolom sah) → aman dari
+// kolom sampah lama (Column12.. / Column16..) dan dari nama kolom liar.
+// Dua INSERT dibungkus satu transaksi.
+// =============================================================
+
+const KOLOM_INSERT_FLIGHTS = [
+  "flight_no", "airline", "origin", "destination", "type", "flight_type",
+  "scheduled_time", "estimated_time", "status", "status_label", "notes",
+  "flight_date", "seat_capacity", "aircraft_type", "is_scheduled",
+];
+const KOLOM_INSERT_STATS = [
+  "date", "arrival_count", "departure_count", "category", "airline",
+  "flight_type", "city", "passenger_count", "load_factor",
+  "pax_adult", "pax_child", "pax_infant",
+  "pax_transit_adult", "pax_transit_child", "pax_transit_infant",
+  "baggage_kg", "cargo_kg", "mail_kg",
+];
+
+function susunInsert(
+  tabel: string,
+  obj: Record<string, unknown>,
+  kolom: string[]
+) {
+  const nama: string[] = [];
+  const nilai: unknown[] = [];
+  for (const k of kolom) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && v !== "") {
+      nama.push(k);
+      nilai.push(v);
+    }
+  }
+  const sql = `INSERT INTO \`${tabel}\` (${nama
+    .map((n) => `\`${n}\``)
+    .join(", ")}) VALUES (${nama.map(() => "?").join(", ")})`;
+  return { sql, nilai, jumlah: nama.length };
+}
+
+export async function POST(request: NextRequest) {
+  const token = (request.headers.get("authorization") ?? "").replace(
+    /^Bearer\s+/i,
+    ""
+  );
+  if (!process.env.SIMTAR_API_TOKEN || token !== process.env.SIMTAR_API_TOKEN) {
+    return NextResponse.json(
+      { success: false, error: "Token tidak sah." },
+      { status: 401 }
+    );
+  }
+
+  let body: { penerbangan?: Record<string, unknown>; penumpang?: Record<string, unknown> };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Body bukan JSON." },
+      { status: 400 }
+    );
+  }
+
+  const penerbangan = body?.penerbangan ?? {};
+  const penumpang = body?.penumpang ?? {};
+  if (!body?.penerbangan || !body?.penumpang) {
+    return NextResponse.json(
+      { success: false, error: "penerbangan & penumpang wajib diisi." },
+      { status: 400 }
+    );
+  }
+
+  const conn = await pool().getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const f = susunInsert("flights", penerbangan, KOLOM_INSERT_FLIGHTS);
+    let flightId: number | null = null;
+    if (f.jumlah > 0) {
+      const [r] = await conn.query(f.sql, f.nilai);
+      flightId = (r as { insertId?: number }).insertId ?? null;
+    }
+
+    const s = susunInsert("passenger_stats", penumpang, KOLOM_INSERT_STATS);
+    let paxId: number | null = null;
+    if (s.jumlah > 0) {
+      const [r] = await conn.query(s.sql, s.nilai);
+      paxId = (r as { insertId?: number }).insertId ?? null;
+    }
+
+    await conn.commit();
+    return NextResponse.json({ success: true, ok: true, flightId, paxId });
+  } catch (error) {
+    await conn.rollback();
+    console.error("POST /api/penerbangan error:", error);
+    return NextResponse.json(
+      { success: false, error: "Gagal menyimpan data." },
+      { status: 500 }
+    );
+  } finally {
+    conn.release();
+  }
+}
