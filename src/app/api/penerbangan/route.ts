@@ -1,222 +1,285 @@
-import { NextRequest, NextResponse } from "next/server";
+// src/app/api/penerbangan/route.ts  — DI PROJECT WEB VPS (tardamuairport.id)
+//
+// GET  /api/penerbangan?dari=YYYY-MM-DD&sampai=YYYY-MM-DD   → tarik data
+// POST /api/penerbangan                                     → tambah/timpa data
+// Header wajib (keduanya): Authorization: Bearer <PENERBANGAN_API_TOKEN>
+//
+// POST menerima body { penerbangan: {...}, penumpang: {...} } dari n8n/SIMTAR.
+// Alih-alih selalu INSERT, POST melakukan UPSERT: mencari baris JADWAL yang
+// cocok lalu MENIMPANYA (bukan membuat duplikat).
+//
+//   Kunci cocok flights   : flight_date + arah + endpoint (bandara non-SAU),
+//                           tie-break jam jadwal terdekat.
+//                           (flight_no TIDAK dipakai sebagai kunci karena diisi
+//                            registrasi pesawat yang berulang antar leg.)
+//   Kunci cocok penumpang : date + flight_type + city.
+
 import mysql from "mysql2/promise";
 
-// =============================================================
-// GET /api/penerbangan?dari=YYYY-MM-DD&sampai=YYYY-MM-DD
-//
-// Endpoint KHUSUS untuk aplikasi SIMTAR: mengembalikan data penerbangan
-// (flights) dan rekap penumpang (passenger_stats) satu rentang tanggal
-// penuh, dengan SEMUA kolom (SELECT *) — termasuk kolom DAU baru
-// (pax_adult/child/infant, transit, baggage/cargo/mail_kg, seat_capacity,
-// aircraft_type, is_scheduled).
-//
-// Memakai pool mysql2 sendiri + .query() (BUKAN prepared .execute() milik
-// drizzle) supaya:
-//   1. Kolom yang baru ditambahkan ke DB ikut terkirim tanpa mengubah
-//      schema.ts / service / tampilan web yang sudah publish.
-//   2. Terhindar dari bug cache metadata prepared-statement mysql2 yang
-//      memunculkan kolom hantu "Column12" saat skema tabel berubah.
-//
-// Dilindungi token statis:  Authorization: Bearer <SIMTAR_API_TOKEN>
-// =============================================================
-
-// DATABASE_URL memuat '@' pada password, jadi diurai manual (bukan lewat URL()).
-function konfigDb(): mysql.PoolOptions {
-  const raw = (process.env.DATABASE_URL ?? "").replace(/^mysql:\/\//, "");
-  const potong = raw.lastIndexOf("@");
-  const kredensial = raw.slice(0, potong); // user:pass (pass boleh ber-@)
-  const lokasi = raw.slice(potong + 1); // host:port/db
-  const bagiKred = kredensial.indexOf(":");
-  const user = kredensial.slice(0, bagiKred);
-  const password = kredensial.slice(bagiKred + 1);
-  const [hostPort, database] = lokasi.split("/");
-  const [host, port] = hostPort.split(":");
-  return {
-    host,
-    port: Number(port || 3306),
-    user,
-    password,
-    database,
-    charset: "utf8mb4",
-    dateStrings: true,
-    waitForConnections: true,
-    connectionLimit: 5,
-  };
+// ---------------------------------------------------------------------------
+// Koneksi ke DATABASE web VPS ini sendiri (localhost).
+// ---------------------------------------------------------------------------
+const globalDb = globalThis as unknown as { poolPenerbangan?: mysql.Pool };
+function pool() {
+  if (!globalDb.poolPenerbangan) {
+    // Urai DATABASE_URL (mis. mysql://user:pass@host:3306/nama_db).
+    const url = new URL(process.env.DATABASE_URL!);
+    globalDb.poolPenerbangan = mysql.createPool({
+      host: url.hostname,
+      port: Number(url.port || 3306),
+      user: decodeURIComponent(url.username),
+      password: decodeURIComponent(url.password),
+      database: url.pathname.replace(/^\//, ""),
+      charset: "utf8mb4",
+      dateStrings: true,
+      waitForConnections: true,
+      connectionLimit: 5,
+    });
+  }
+  return globalDb.poolPenerbangan;
 }
 
-const globalPool = globalThis as unknown as { poolPenerbangan?: mysql.Pool };
-function pool(): mysql.Pool {
-  if (!globalPool.poolPenerbangan) {
-    globalPool.poolPenerbangan = mysql.createPool(konfigDb());
-  }
-  return globalPool.poolPenerbangan;
+const TABEL_FLIGHTS = "flights";
+const TABEL_PENUMPANG = "passenger_stats";
+const KOLOM_TANGGAL_FLIGHTS = "flight_date";
+const KODE_HOME = "SAU"; // bandara Tardamu (Sabu)
+
+// ---------------------------------------------------------------------------
+// Util umum
+// ---------------------------------------------------------------------------
+function cekToken(request: Request): boolean {
+  const auth = request.headers.get("authorization") ?? "";
+  const token = auth.replace(/^Bearer\s+/i, "");
+  return !!process.env.PENERBANGAN_API_TOKEN && token === process.env.PENERBANGAN_API_TOKEN;
 }
 
-export async function GET(request: NextRequest) {
-  const token = (request.headers.get("authorization") ?? "").replace(
-    /^Bearer\s+/i,
-    ""
-  );
-  if (!process.env.SIMTAR_API_TOKEN || token !== process.env.SIMTAR_API_TOKEN) {
-    return NextResponse.json(
-      { success: false, error: "Token tidak sah." },
-      { status: 401 }
-    );
-  }
-
-  try {
-    const { searchParams } = new URL(request.url);
-    const dari = searchParams.get("dari");
-    const sampai = searchParams.get("sampai");
-
-    function filter(kolom: string) {
-      const syarat: string[] = [];
-      const args: string[] = [];
-      if (dari) { syarat.push(`\`${kolom}\` >= ?`); args.push(dari); }
-      if (sampai) { syarat.push(`\`${kolom}\` <= ?`); args.push(sampai); }
-      return { where: syarat.length ? ` WHERE ${syarat.join(" AND ")}` : "", args };
+// Ambil hanya kolom yang diizinkan (hindari kolom liar / injection nama kolom).
+function ambilKolom<T extends Record<string, unknown>>(
+  obj: T,
+  kolom: string[]
+): { nama: string[]; nilai: unknown[] } {
+  const nama: string[] = [];
+  const nilai: unknown[] = [];
+  for (const k of kolom) {
+    if (obj[k] !== undefined) {
+      nama.push(k);
+      nilai.push(obj[k]);
     }
-
-    // Kolom dipilih EKSPLISIT (bukan SELECT *) agar kolom sampah lama di DB
-    // (Column12.. / Column16.. dari impor lama) tidak ikut terkirim.
-    const KOLOM_FLIGHTS = [
-      "id", "flight_no", "airline", "origin", "destination", "type",
-      "flight_type", "scheduled_time", "estimated_time", "status",
-      "status_label", "notes", "flight_date", "seat_capacity",
-      "aircraft_type", "is_scheduled",
-    ].map((k) => `\`${k}\``).join(", ");
-    const KOLOM_STATS = [
-      "id", "date", "arrival_count", "departure_count", "category", "airline",
-      "flight_type", "city", "passenger_count", "load_factor",
-      "pax_adult", "pax_child", "pax_infant",
-      "pax_transit_adult", "pax_transit_child", "pax_transit_infant",
-      "baggage_kg", "cargo_kg", "mail_kg",
-    ].map((k) => `\`${k}\``).join(", ");
-
-    const f = filter("flight_date");
-    const [penerbangan] = await pool().query(
-      `SELECT ${KOLOM_FLIGHTS} FROM flights${f.where} ORDER BY flight_date, scheduled_time`,
-      f.args
-    );
-
-    const s = filter("date");
-    const [penumpang] = await pool().query(
-      `SELECT ${KOLOM_STATS} FROM passenger_stats${s.where} ORDER BY date`,
-      s.args
-    );
-
-    return NextResponse.json({ penerbangan, penumpang });
-  } catch (error) {
-    console.error("GET /api/penerbangan error:", error);
-    return NextResponse.json(
-      { success: false, error: "Gagal mengambil data penerbangan." },
-      { status: 500 }
-    );
   }
+  return { nama, nilai };
 }
 
-// =============================================================
-// POST /api/penerbangan  — tambah 1 penerbangan + rekap penumpang
-//
-// Dipakai tombol "Tambah Data" di halaman LLAU SIMTAR. Body:
-//   { penerbangan: {...flights}, penumpang: {...passenger_stats} }
-//
-// Kolom di-whitelist eksplisit (INSERT hanya kolom sah) → aman dari
-// kolom sampah lama (Column12.. / Column16..) dan dari nama kolom liar.
-// Dua INSERT dibungkus satu transaksi.
-// =============================================================
+// Normalisasi nama/kode bandara → kode 3 huruf (samakan dgn kodeBandara SIMTAR).
+function kodeBandara(nilai: unknown): string {
+  const t = String(nilai ?? "").trim();
+  if (!t) return "";
+  const dlm = t.match(/\(([A-Za-z]{3})\)/);
+  if (dlm) return dlm[1].toUpperCase();
+  const l = t.toLowerCase();
+  const peta: [RegExp, string][] = [
+    [/kupang|koe|el\s*tari/, "KOE"],
+    [/sabu|sau|tardamu/, "SAU"],
+    [/waingapu|sumba|wgp|umbu/, "WGP"],
+    [/\bende\b|ene/, "ENE"],
+    [/rote|roti|ba['’]?a|rti|lekunik/, "RTI"],
+    [/maumere|mof/, "MOF"],
+    [/labuan\s*bajo|lbj|komodo/, "LBJ"],
+    [/tambolaka|tmc/, "TMC"],
+    [/atambua|abu/, "ABU"],
+  ];
+  for (const [re, k] of peta) if (re.test(l)) return k;
+  return t.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase();
+}
 
-const KOLOM_INSERT_FLIGHTS = [
+function arahKode(v: unknown): "arrival" | "departure" {
+  return /arriv|datang|keda|tiba|masuk/i.test(String(v ?? "")) ? "arrival" : "departure";
+}
+
+// Endpoint = bandara non-SAU yang terisi (asal utk kedatangan / tujuan utk keberangkatan).
+function endpointDari(data: any): string {
+  const o = kodeBandara(data.origin);
+  const d = kodeBandara(data.destination);
+  return o && o !== KODE_HOME ? o : d;
+}
+
+// Selisih menit antara dua jam "HH:MM"/"HH.MM" (utk tie-break jadwal terdekat).
+function selisihMenit(a: unknown, b: unknown): number {
+  const m = (x: unknown) => {
+    const t = String(x ?? "").match(/(\d{1,2})[.:](\d{2})/);
+    return t ? Number(t[1]) * 60 + Number(t[2]) : 99999;
+  };
+  return Math.abs(m(a) - m(b));
+}
+
+// ---------------------------------------------------------------------------
+// Kolom yang boleh ditulis
+// ---------------------------------------------------------------------------
+const KOLOM_FLIGHTS = [
   "flight_no", "airline", "origin", "destination", "type", "flight_type",
   "scheduled_time", "estimated_time", "status", "status_label", "notes",
   "flight_date", "seat_capacity", "aircraft_type", "is_scheduled",
 ];
-const KOLOM_INSERT_STATS = [
+const KOLOM_PENUMPANG = [
   "date", "arrival_count", "departure_count", "category", "airline",
   "flight_type", "city", "passenger_count", "load_factor",
   "pax_adult", "pax_child", "pax_infant",
-  "pax_transit_adult", "pax_transit_child", "pax_transit_infant",
   "baggage_kg", "cargo_kg", "mail_kg",
 ];
 
-function susunInsert(
-  tabel: string,
-  obj: Record<string, unknown>,
-  kolom: string[]
-) {
-  const nama: string[] = [];
-  const nilai: unknown[] = [];
-  for (const k of kolom) {
-    const v = obj[k];
-    if (v !== undefined && v !== null && v !== "") {
-      nama.push(k);
-      nilai.push(v);
-    }
-  }
-  const sql = `INSERT INTO \`${tabel}\` (${nama
-    .map((n) => `\`${n}\``)
-    .join(", ")}) VALUES (${nama.map(() => "?").join(", ")})`;
-  return { sql, nilai, jumlah: nama.length };
+// ---------------------------------------------------------------------------
+// GET — tarik data
+// ---------------------------------------------------------------------------
+function filterTanggal(kolom: string, dari: string | null, sampai: string | null) {
+  const syarat: string[] = [];
+  const args: unknown[] = [];
+  if (kolom && dari) { syarat.push(`\`${kolom}\` >= ?`); args.push(dari); }
+  if (kolom && sampai) { syarat.push(`\`${kolom}\` <= ?`); args.push(sampai); }
+  const where = syarat.length ? ` WHERE ${syarat.join(" AND ")}` : "";
+  return { where, args };
 }
 
-export async function POST(request: NextRequest) {
-  const token = (request.headers.get("authorization") ?? "").replace(
-    /^Bearer\s+/i,
-    ""
-  );
-  if (!process.env.SIMTAR_API_TOKEN || token !== process.env.SIMTAR_API_TOKEN) {
-    return NextResponse.json(
-      { success: false, error: "Token tidak sah." },
-      { status: 401 }
+export async function GET(request: Request) {
+  if (!cekToken(request)) {
+    return Response.json({ pesan: "Token tidak sah." }, { status: 401 });
+  }
+  const p = new URL(request.url).searchParams;
+  const dari = p.get("dari");
+  const sampai = p.get("sampai");
+
+  try {
+    const f = filterTanggal(KOLOM_TANGGAL_FLIGHTS, dari, sampai);
+    const [penerbangan] = await pool().query(
+      `SELECT * FROM \`${TABEL_FLIGHTS}\`${f.where} ORDER BY \`${KOLOM_TANGGAL_FLIGHTS}\``,
+      f.args
     );
+    const s = filterTanggal("date", dari, sampai);
+    const [penumpang] = await pool().query(
+      `SELECT * FROM \`${TABEL_PENUMPANG}\`${s.where} ORDER BY \`date\``,
+      s.args
+    );
+    return Response.json({ penerbangan, penumpang });
+  } catch (err) {
+    console.error("[api/penerbangan GET]", err);
+    return Response.json({ pesan: "Galat mengambil data." }, { status: 500 });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// UPSERT flights — cari jadwal cocok lalu timpa, atau insert baru.
+// ---------------------------------------------------------------------------
+async function upsertFlight(conn: any, data: any): Promise<number | null> {
+  const f = ambilKolom(data, KOLOM_FLIGHTS);
+  if (!f.nama.length) return null;
+
+  const tgl = data.flight_date;
+  const tipe = arahKode(data.type ?? data.flight_type);
+  const ep = endpointDari(data);
+
+  if (tgl && ep) {
+    const [rows]: any = await conn.query(
+      `SELECT id, type, flight_type, origin, destination, scheduled_time
+         FROM \`${TABEL_FLIGHTS}\` WHERE \`${KOLOM_TANGGAL_FLIGHTS}\` = ?`,
+      [tgl]
+    );
+    const cocok = rows.filter(
+      (r: any) =>
+        arahKode(r.type ?? r.flight_type) === tipe &&
+        (kodeBandara(r.origin) === ep || kodeBandara(r.destination) === ep)
+    );
+    if (cocok.length) {
+      // >1 kandidat (rute + arah sama, hari sama) → pilih jam jadwal terdekat.
+      const target =
+        cocok.length === 1
+          ? cocok[0]
+          : cocok.sort(
+              (a: any, b: any) =>
+                selisihMenit(a.scheduled_time, data.scheduled_time) -
+                selisihMenit(b.scheduled_time, data.scheduled_time)
+            )[0];
+      await conn.query(
+        `UPDATE \`${TABEL_FLIGHTS}\`
+            SET ${f.nama.map((n) => `\`${n}\` = ?`).join(", ")}
+          WHERE id = ?`,
+        [...f.nilai, target.id]
+      );
+      return target.id;
+    }
   }
 
-  let body: { penerbangan?: Record<string, unknown>; penumpang?: Record<string, unknown> };
+  const [r]: any = await conn.query(
+    `INSERT INTO \`${TABEL_FLIGHTS}\` (${f.nama.map((n) => `\`${n}\``).join(",")})
+     VALUES (${f.nama.map(() => "?").join(",")})`,
+    f.nilai
+  );
+  return r.insertId ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// UPSERT passenger_stats — cocok date + flight_type + city, atau insert baru.
+// ---------------------------------------------------------------------------
+async function upsertPenumpang(conn: any, data: any): Promise<number | null> {
+  const s = ambilKolom(data, KOLOM_PENUMPANG);
+  if (!s.nama.length) return null;
+
+  const tgl = data.date;
+  const tipe = arahKode(data.flight_type);
+  const kota = kodeBandara(data.city);
+
+  if (tgl && kota) {
+    const [rows]: any = await conn.query(
+      `SELECT id, flight_type, city FROM \`${TABEL_PENUMPANG}\` WHERE \`date\` = ?`,
+      [tgl]
+    );
+    const cocok = rows.filter(
+      (r: any) => arahKode(r.flight_type) === tipe && kodeBandara(r.city) === kota
+    );
+    if (cocok.length) {
+      await conn.query(
+        `UPDATE \`${TABEL_PENUMPANG}\`
+            SET ${s.nama.map((n) => `\`${n}\` = ?`).join(", ")}
+          WHERE id = ?`,
+        [...s.nilai, cocok[0].id]
+      );
+      return cocok[0].id;
+    }
+  }
+
+  const [r]: any = await conn.query(
+    `INSERT INTO \`${TABEL_PENUMPANG}\` (${s.nama.map((n) => `\`${n}\``).join(",")})
+     VALUES (${s.nama.map(() => "?").join(",")})`,
+    s.nilai
+  );
+  return r.insertId ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// POST — tambah / timpa data (transaksi)
+// ---------------------------------------------------------------------------
+export async function POST(request: Request) {
+  if (!cekToken(request)) {
+    return Response.json({ pesan: "Token tidak sah." }, { status: 401 });
+  }
+
+  let body: any;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Body bukan JSON." },
-      { status: 400 }
-    );
+    return Response.json({ pesan: "Body bukan JSON." }, { status: 400 });
   }
-
   const penerbangan = body?.penerbangan ?? {};
   const penumpang = body?.penumpang ?? {};
-  if (!body?.penerbangan || !body?.penumpang) {
-    return NextResponse.json(
-      { success: false, error: "penerbangan & penumpang wajib diisi." },
-      { status: 400 }
-    );
-  }
 
   const conn = await pool().getConnection();
   try {
     await conn.beginTransaction();
-
-    const f = susunInsert("flights", penerbangan, KOLOM_INSERT_FLIGHTS);
-    let flightId: number | null = null;
-    if (f.jumlah > 0) {
-      const [r] = await conn.query(f.sql, f.nilai);
-      flightId = (r as { insertId?: number }).insertId ?? null;
-    }
-
-    const s = susunInsert("passenger_stats", penumpang, KOLOM_INSERT_STATS);
-    let paxId: number | null = null;
-    if (s.jumlah > 0) {
-      const [r] = await conn.query(s.sql, s.nilai);
-      paxId = (r as { insertId?: number }).insertId ?? null;
-    }
-
+    const flightId = await upsertFlight(conn, penerbangan);
+    const paxId = await upsertPenumpang(conn, penumpang);
     await conn.commit();
-    return NextResponse.json({ success: true, ok: true, flightId, paxId });
-  } catch (error) {
+    return Response.json({ ok: true, flightId, paxId });
+  } catch (err) {
     await conn.rollback();
-    console.error("POST /api/penerbangan error:", error);
-    return NextResponse.json(
-      { success: false, error: "Gagal menyimpan data." },
-      { status: 500 }
-    );
+    console.error("[api/penerbangan POST]", err);
+    return Response.json({ pesan: "Gagal menyimpan data." }, { status: 500 });
   } finally {
     conn.release();
   }
