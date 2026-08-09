@@ -2,7 +2,7 @@
 //
 // GET  /api/penerbangan?dari=YYYY-MM-DD&sampai=YYYY-MM-DD   → tarik data
 // POST /api/penerbangan                                     → tambah/timpa data
-// Header wajib (keduanya): Authorization: Bearer <PENERBANGAN_API_TOKEN>
+// Header wajib (keduanya): Authorization: Bearer <SIMTAR_API_TOKEN>
 //
 // POST menerima body { penerbangan: {...}, penumpang: {...} } dari n8n/SIMTAR.
 // Alih-alih selalu INSERT, POST melakukan UPSERT: mencari baris JADWAL yang
@@ -50,7 +50,7 @@ const KODE_HOME = "SAU"; // bandara Tardamu (Sabu)
 function cekToken(request: Request): boolean {
   const auth = request.headers.get("authorization") ?? "";
   const token = auth.replace(/^Bearer\s+/i, "");
-  return !!process.env.PENERBANGAN_API_TOKEN && token === process.env.PENERBANGAN_API_TOKEN;
+  return !!process.env.SIMTAR_API_TOKEN && token === process.env.SIMTAR_API_TOKEN;
 }
 
 // Ambil hanya kolom yang diizinkan (hindari kolom liar / injection nama kolom).
