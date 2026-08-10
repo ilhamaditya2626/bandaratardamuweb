@@ -197,7 +197,10 @@ async function updateWeather() {
     const windElement = document
       .querySelector(".fa-wind")
       ?.parentElement?.querySelector("strong");
-    if (windElement) windElement.innerText = `${data.wind.speed} km/jam`;
+    // OpenWeatherMap units=metric mengembalikan kecepatan angin dalam m/detik,
+    // jadi dikali 3,6 untuk mengubahnya ke km/jam.
+    if (windElement)
+      windElement.innerText = `${Math.round(data.wind.speed * 3.6)} km/jam`;
 
     const humidElement = document
       .querySelector(".fa-droplet")
