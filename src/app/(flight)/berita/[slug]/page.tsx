@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import DOMPurify from "isomorphic-dompurify";
 import { DynamicImage } from "@/components/dynamic-image";
 import { buildPageMetadata, stripHtml } from "@/lib/seo";
 import { getAllNews, getNewsBySlug } from "@/services/news.service";
@@ -39,7 +40,11 @@ function renderArticleContent(content: string) {
   const hasHtml = /<\/?[a-z][\s\S]*>/i.test(content);
 
   if (hasHtml) {
-    return <div dangerouslySetInnerHTML={{ __html: content }} />;
+    // Sanitasi HTML untuk mencegah stored XSS (mis. <script>, onerror=...).
+    const safeHtml = DOMPurify.sanitize(content, {
+      USE_PROFILES: { html: true },
+    });
+    return <div dangerouslySetInnerHTML={{ __html: safeHtml }} />;
   }
 
   const paragraphs = content

@@ -30,6 +30,9 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    // Registrasi publik dimatikan: akun admin hanya dibuat lewat
+    // script seed / server-side, bukan endpoint publik sign-up.
+    disableSignUp: true,
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
