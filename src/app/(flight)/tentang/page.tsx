@@ -96,7 +96,7 @@ export default function TentangPage() {
             <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#facc15]/20 blur-2xl"></div>
             <div className="relative z-10 h-[400px] w-full overflow-hidden rounded-[40px] border border-white/5 shadow-2xl">
               <Image
-                src="/assets/images/fasilitas/terminal lama.webp"
+                src="/assets/images/fasilitas/terminal lama1.webp"
                 alt="Sejarah Bandara Tardamu"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"

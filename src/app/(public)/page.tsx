@@ -438,10 +438,10 @@ export default async function HomePage() {
             />
             <div className="tourism-card__overlay">
               <span className="tourism-card__tag">Destinasi Favorit</span>
-              <h3 className="tourism-card__title">Kelabba Maja</h3>
+              <h3 className="tourism-card__title">Kelabba Madja</h3>
             </div>
           </Link>
-          <Link href="/destinasi-wisata" className="tourism-card" id="card-festival">
+          <Link href="https://disparbud.saburaijuakab.go.id/beranda" className="tourism-card" id="card-festival">
             <Image
               src="/assets/images/festival-hole.webp"
               alt="Festival Hole - Festival Budaya Sabu Raijua"
@@ -449,7 +449,7 @@ export default async function HomePage() {
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="tourism-card__overlay">
-              <span className="tourism-card__tag">Festival Hole 2025</span>
+              <span className="tourism-card__tag">Festival Hole</span>
               <h3 className="tourism-card__title">Saksikan Budaya Sabu</h3>
             </div>
           </Link>

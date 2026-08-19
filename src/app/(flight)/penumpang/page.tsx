@@ -42,6 +42,55 @@ function getRoute(row: PassengerLog) {
 
 const sansStyle = { fontFamily: "'Poppins', sans-serif" } as const;
 const serifStyle = { fontFamily: "'Playfair Display', serif" } as const;
+
+function AnimatedNumber({
+  value,
+  duration = 1200,
+  decimals = 0,
+}: {
+  value: number;
+  duration?: number;
+  decimals?: number;
+}) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    const startValue = 0;
+    const endValue = Number(value) || 0;
+
+    if (endValue === 0) {
+      setDisplayValue(0);
+      return;
+    }
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeOutProgress = progress * (2 - progress);
+      const current = startValue + easeOutProgress * (endValue - startValue);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setDisplayValue(endValue);
+      }
+    };
+
+    const animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [value, duration]);
+
+  return (
+    <span>
+      {displayValue.toLocaleString("id-ID", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+    </span>
+  );
+}
 const rangeOptions: { value: PassengerRange; label: string }[] = [
   { value: "weekly", label: "Mingguan" },
   { value: "monthly", label: "Bulanan" },
@@ -321,12 +370,12 @@ export default function PassengerPage() {
         </div>
 
         <section className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-500 hover:border-[#facc15]/30 hover:shadow-[0_10px_30px_rgba(250,204,21,0.1)]">
             <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
               Total Penumpang
             </h3>
             <p className="text-4xl font-bold tracking-tight text-white tabular-nums">
-              {isLoading ? "..." : stats?.kpiCards.totalPassengers.toLocaleString("id-ID") || "0"}
+              {isLoading ? "..." : <AnimatedNumber value={stats?.kpiCards.totalPassengers || 0} />}
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-500">
               <i className="fa-solid fa-users"></i>
@@ -334,12 +383,12 @@ export default function PassengerPage() {
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-500 hover:border-[#3b82f6]/30 hover:shadow-[0_10px_30px_rgba(59,130,246,0.1)]">
             <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
               Kedatangan
             </h3>
             <p className="text-4xl font-bold tracking-tight text-[#3b82f6] tabular-nums">
-              {isLoading ? "..." : stats?.kpiCards.arrivalCount.toLocaleString("id-ID") || "0"}
+              {isLoading ? "..." : <AnimatedNumber value={stats?.kpiCards.arrivalCount || 0} />}
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-500">
               <i className="fa-solid fa-plane-arrival"></i>
@@ -347,12 +396,12 @@ export default function PassengerPage() {
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-500 hover:border-[#facc15]/30 hover:shadow-[0_10px_30px_rgba(250,204,21,0.1)]">
             <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
               Keberangkatan
             </h3>
             <p className="text-4xl font-bold tracking-tight text-[#facc15] tabular-nums">
-              {isLoading ? "..." : stats?.kpiCards.departureCount.toLocaleString("id-ID") || "0"}
+              {isLoading ? "..." : <AnimatedNumber value={stats?.kpiCards.departureCount || 0} />}
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs font-bold text-red-400">
               <i className="fa-solid fa-plane-departure"></i>
@@ -360,13 +409,13 @@ export default function PassengerPage() {
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="rounded-[2.5rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-7 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-500 hover:border-cyan-400/30 hover:shadow-[0_10px_30px_rgba(34,211,238,0.1)]">
             <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
               Avg. Load Factor
             </h3>
             <div className="flex items-end gap-1">
               <p className="text-4xl font-bold tracking-tight text-white tabular-nums">
-                {isLoading ? "..." : stats?.kpiCards.avgLoadFactor.toFixed(1) || "0"}
+                {isLoading ? "..." : <AnimatedNumber value={stats?.kpiCards.avgLoadFactor || 0} decimals={1} />}
               </p>
               <span className="mb-1 text-xl font-bold text-gray-600">%</span>
             </div>
@@ -380,7 +429,7 @@ export default function PassengerPage() {
         </section>
 
         <div className="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-12">
-          <div className="rounded-[3rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-8 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:col-span-8">
+          <div className="rounded-[3rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-8 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-700 hover:border-white/20 lg:col-span-8">
             <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
               <h3 className="text-2xl font-bold text-white" style={serifStyle}>
                 Tren Pergerakan
@@ -423,8 +472,26 @@ export default function PassengerPage() {
                       }}
                     />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="arrivals" name="Datang" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar yAxisId="left" dataKey="departures" name="Berangkat" fill="#facc15" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      yAxisId="left"
+                      dataKey="arrivals"
+                      name="Datang"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                      isAnimationActive={true}
+                      animationDuration={1400}
+                      animationEasing="ease-out"
+                    />
+                    <Bar
+                      yAxisId="left"
+                      dataKey="departures"
+                      name="Berangkat"
+                      fill="#facc15"
+                      radius={[4, 4, 0, 0]}
+                      isAnimationActive={true}
+                      animationDuration={1400}
+                      animationEasing="ease-out"
+                    />
                     <Line
                       yAxisId="right"
                       type="monotone"
@@ -433,6 +500,9 @@ export default function PassengerPage() {
                       stroke="#ffffff"
                       strokeWidth={2}
                       dot={{ r: 3 }}
+                      isAnimationActive={true}
+                      animationDuration={1600}
+                      animationEasing="ease-in-out"
                     />
                   </ComposedChart>
                 </ResponsiveContainer>
@@ -442,14 +512,16 @@ export default function PassengerPage() {
             </div>
           </div>
 
-          <div className="rounded-[3rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-8 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl lg:col-span-4">
+          <div className="rounded-[3rem] border border-white/8 bg-[rgba(31,41,55,0.4)] p-8 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-700 hover:border-white/20 lg:col-span-4">
             <h3 className="mb-8 text-2xl font-bold text-white" style={serifStyle}>
               Ratio Arus
             </h3>
             <div className="relative mb-8 flex items-center justify-center">
               <div className="absolute flex flex-col items-center">
                 <span className="text-[10px] font-bold uppercase text-gray-500">Ratio</span>
-                <span className="text-4xl font-bold text-white">{isLoading ? "..." : totalRatio}</span>
+                <span className="text-4xl font-bold text-white">
+                  {isLoading ? "..." : <AnimatedNumber value={parseFloat(totalRatio) || 0} decimals={2} />}
+                </span>
               </div>
               <div className="h-56 w-56">
                 {isClient ? (
@@ -463,6 +535,9 @@ export default function PassengerPage() {
                         dataKey="value"
                         stroke="#1f2937"
                         strokeWidth={8}
+                        isAnimationActive={true}
+                        animationDuration={1400}
+                        animationEasing="ease-out"
                       >
                         {donutData.map((entry, index) => (
                           <Cell key={entry.name} fill={donutColors[index]} />
@@ -512,7 +587,6 @@ export default function PassengerPage() {
             </div>
             <div className="rounded-xl bg-emerald-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
               {isDailyError ? "Data Error" : "Operational Success"}
-
             </div>
           </div>
 
@@ -525,18 +599,20 @@ export default function PassengerPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Total Label</span>
-                    <span className="text-sm font-bold text-white">{dailyLogs.length}</span>
+                    <span className="text-sm font-bold text-white">
+                      <AnimatedNumber value={dailyLogs.length} />
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-400">Pax Datang</span>
                     <span className="text-sm font-bold text-[#3b82f6]">
-                      {dailyStats?.kpiCards.arrivalCount.toLocaleString("id-ID") || "0"}
+                      {isDailyLoading ? "..." : <AnimatedNumber value={dailyStats?.kpiCards.arrivalCount || 0} />}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-400">Pax Berangkat</span>
                     <span className="text-sm font-bold text-[#facc15]">
-                      {dailyStats?.kpiCards.departureCount.toLocaleString("id-ID") || "0"}
+                      {isDailyLoading ? "..." : <AnimatedNumber value={dailyStats?.kpiCards.departureCount || 0} />}
                     </span>
                   </div>
                 </div>

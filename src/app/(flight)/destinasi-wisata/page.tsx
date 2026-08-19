@@ -37,17 +37,6 @@ const destinations = [
     href: "https://maps.google.com/?q=Benteng+Menanga+Sabu+Raijua",
   },
   {
-    title: "Bukit Senyum",
-    image: "/assets/images/bukit-senyum.webp",
-    alt: "Bukit Senyum",
-    badge: "Panorama",
-    description:
-      "Perbukitan dengan panorama terbuka yang cocok untuk menikmati sunrise, sunset, dan bentang alam Sabu.",
-    actionLabel: "Buka di Maps",
-    actionIcon: "fa-location-arrow",
-    href: "https://maps.google.com/?q=Bukit+Senyum+Sabu+Raijua",
-  },
-  {
     title: "Bukit Titinalede",
     image: "/assets/images/bukit-titinalede.webp",
     alt: "Bukit Titinalede",

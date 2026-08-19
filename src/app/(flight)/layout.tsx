@@ -386,20 +386,27 @@ export default function FlightLayout({
                 </Link>
               )}
 
-              {desktopNavItems.map((item) =>
-                item.items ? (
-                  <div key={item.href} className="group relative">
+              {desktopNavItems.map((item) => {
+                const active = isDesktopItemActive(item);
+                return item.items ? (
+                  <div key={item.href} className="group relative py-2">
                     <span
-                      className={`inline-flex items-center gap-1 ${isDesktopItemActive(item)
+                      className={`relative inline-flex items-center gap-1.5 py-1 text-sm font-medium transition-colors duration-300 cursor-pointer ${active
                         ? "font-semibold text-[#facc15]"
-                        : ""
+                        : "text-gray-200 hover:text-[#facc15]"
                         }`}
                     >
                       <Link href={item.href}>{item.label}</Link>
-                      <i className="fa-solid fa-chevron-down text-[10px]"></i>
+                      <i className="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
+                      <span
+                        className={`absolute -bottom-1 left-0 h-[2.5px] rounded-full bg-[#facc15] transition-all duration-300 ease-out ${active
+                          ? "w-full opacity-100 shadow-[0_0_8px_rgba(250,204,21,0.6)]"
+                          : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100"
+                          }`}
+                      />
                     </span>
                     <div
-                      className={`invisible absolute left-0 top-full mt-1 rounded-xl border border-gray-700 bg-[#1f2937] py-2 opacity-0 shadow-2xl transition-all group-hover:visible group-hover:opacity-100 ${item.label === "Layanan Informasi" ? "w-72" : "w-56"
+                      className={`invisible absolute left-0 top-full mt-1 rounded-xl border border-gray-700 bg-[#1f2937] py-2 opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:opacity-100 ${item.label === "Layanan Informasi" ? "w-72" : "w-56"
                         }`}
                     >
                       {item.items.map((subItem) => (
@@ -418,12 +425,19 @@ export default function FlightLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={isItemActive(item.href) ? "font-semibold text-[#facc15]" : ""}
+                    className={`group relative py-2 text-sm font-medium transition-colors duration-300 ${active ? "font-semibold text-[#facc15]" : "text-gray-200 hover:text-[#facc15]"
+                      }`}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    <span
+                      className={`absolute -bottom-1 left-0 h-[2.5px] rounded-full bg-[#facc15] transition-all duration-300 ease-out ${active
+                        ? "w-full opacity-100 shadow-[0_0_8px_rgba(250,204,21,0.6)]"
+                        : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100"
+                        }`}
+                    />
                   </Link>
-                )
-              )}
+                );
+              })}
             </div>
 
             {!hideMobileHeaderButton && (

@@ -86,7 +86,7 @@ const workUnits = [
     label: "Sanitation & Hygiene",
     icon: "fa-spray-can-sparkles",
     image:
-      "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?q=80&w=2070&auto=format&fit=crop",
+      "/assets/images/sanitasi.webp",
     description:
       "Unit Sanitasi menjaga kebersihan terminal, toilet, area publik, dan lingkungan bandara melalui pengelolaan sanitasi rutin yang higienis dan konsisten.",
     duties: ["Kebersihan terminal", "Sanitasi toilet", "Lingkungan sehat"],

@@ -30,13 +30,6 @@ const facilityGroups = [
           "/assets/images/fasilitas/apron.webp",
         description: "Area parkir pesawat untuk proses boarding, handling, dan persiapan operasi.",
       },
-      {
-        name: "APAPI",
-        icon: "fa-lightbulb",
-        image:
-          "/assets/images/fasilitas/APAPI.webp",
-        description: "Alat bantu visual untuk membantu pilot menjaga sudut pendekatan pendaratan.",
-      },
     ],
   },
   {
@@ -71,7 +64,7 @@ const facilityGroups = [
         name: "Gedung Power House",
         icon: "fa-bolt",
         image:
-          "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop",
+          "/assets/images/fasilitas/gedung ph.webp",
         description: "Pusat dukungan kelistrikan untuk menjaga pasokan daya fasilitas bandara.",
       },
       {
@@ -136,28 +129,28 @@ const facilityGroups = [
         name: "Smoking Area",
         icon: "fa-smoking",
         image:
-          "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=2070&auto=format&fit=crop",
+          "\/assets/images/fasilitas/smooking room.webp",
         description: "Area khusus merokok untuk menjaga kenyamanan ruang publik terminal.",
       },
       {
         name: "Nursery Room",
         icon: "fa-person-breastfeeding",
         image:
-          "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop",
+          "/assets/images/fasilitas/NURSERY ROOM.webp",
         description: "Ruang laktasi dan perawatan bayi yang privat, bersih, dan nyaman.",
       },
       {
         name: "Mushola",
         icon: "fa-mosque",
         image:
-          "https://images.unsplash.com/photo-1542750012-f029646b1f81?q=80&w=2070&auto=format&fit=crop",
+          "/assets/images/fasilitas/mushola.webp",
         description: "Area ibadah yang tenang untuk memenuhi kebutuhan spiritual pengguna jasa.",
       },
       {
         name: "Area Komersial",
         icon: "fa-store",
         image:
-          "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?q=80&w=2070&auto=format&fit=crop",
+          "/assets/images/fasilitas/area komersil.webp",
         description: "Ruang layanan komersial pendukung kebutuhan penumpang di area terminal.",
       },
     ],

@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: https://images.unsplash.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://api.openweathermap.org",
+      "frame-src 'self' https://www.google.com https://maps.google.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

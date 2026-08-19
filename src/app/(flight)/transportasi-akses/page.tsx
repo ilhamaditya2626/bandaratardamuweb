@@ -54,20 +54,6 @@ const destinations = [
     query: "Kota Seba, Sabu Raijua, NTT",
   },
   {
-    name: "Pantai Cemara",
-    type: "Pantai",
-    distance: "8 km",
-    duration: "15 mnt",
-    query: "Pantai Cemara, Sabu Raijua",
-  },
-  {
-    name: "Bukit Senyum",
-    type: "Panorama",
-    distance: "10 km",
-    duration: "20 mnt",
-    query: "Bukit Senyum, Sabu Raijua",
-  },
-  {
     name: "Gua Nahoro",
     type: "Gua",
     distance: "10,4 km",
@@ -80,13 +66,6 @@ const destinations = [
     distance: "12,1 km",
     duration: "23 mnt",
     query: "Bukit Titinalede, Sabu Raijua",
-  },
-  {
-    name: "Gua Mabala",
-    type: "Gua",
-    distance: "15 km",
-    duration: "26 mnt",
-    query: "Gua Mabala, Sabu Raijua",
   },
   {
     name: "Benteng Menanga",
@@ -131,11 +110,11 @@ const destinations = [
     query: "Kampung Adat Kujiratu, Sabu Raijua",
   },
   {
-    name: "Kelabba Maja",
+    name: "Kelabba Madja",
     type: "Ikon Wisata",
     distance: "21,7 km",
     duration: "43 mnt",
-    query: "Kelabba Maja, Sabu Raijua, NTT",
+    query: "Kelabba Madja, Sabu Raijua, NTT",
   },
   {
     name: "Pantai Langa Ae",
@@ -150,6 +129,13 @@ const destinations = [
     distance: "23 km",
     duration: "45 mnt",
     query: "Pantai Leokoa, Sabu Raijua",
+  },
+  {
+    name: "Pantai Batu Gong Liae",
+    type: "Pantai",
+    distance: "24 km",
+    duration: "45 mnt",
+    query: "Pantai Batu Gong, Sabu Raijua",
   },
   {
     name: "Pantai Ledeae",
@@ -173,25 +159,25 @@ const destinations = [
     query: "Pantai Eingatta, Sabu Raijua",
   },
   {
-    name: "Pantai Rai Mea",
+    name: "Pantai Cemara",
+    type: "Pantai",
+    distance: "24,1 km",
+    duration: "37 mnt",
+    query: "Pantai Cemara, Sabu Raijua",
+  },
+  {
+    name: "Pantai Rae Mea",
     type: "Wisata Bahari",
     distance: "25,5 km",
     duration: "37 mnt",
-    query: "Pantai Rai Mea, Sabu Raijua",
+    query: "Pantai Rae Mea, Sabu Raijua",
   },
   {
-    name: "Pantai Ledeana",
-    type: "Pantai",
-    distance: "27 km",
-    duration: "50 mnt",
-    query: "Pantai Ledeana, Sabu Raijua",
-  },
-  {
-    name: "Gua Lie Madira",
+    name: "Gua Mabala",
     type: "Gua",
     distance: "28 km",
     duration: "50 mnt",
-    query: "Gua Lie Madira, Sabu Raijua",
+    query: "Gua Mabala, Sabu Raijua",
   }
 ]
 

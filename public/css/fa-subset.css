@@ -1,5 +1,5 @@
 /* Font Awesome 6 Free — SUBSET (dibuat otomatis oleh scripts/build-fa-subset.mjs)
-   Hanya berisi 132 ikon yang dipakai. Jangan diedit manual. */
+   Hanya berisi 130 ikon yang dipakai. Jangan diedit manual. */
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:swap;src:url(/fonts/fa/fa-solid-900.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-regular-400.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Brands";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-brands-400.woff2) format("woff2")}
@@ -73,7 +73,6 @@
 .fa-instagram::before{content:"\f16d"}
 .fa-jug-detergent::before{content:"\e519"}
 .fa-kitchen-set::before{content:"\e51a"}
-.fa-lightbulb::before{content:"\f0eb"}
 .fa-list::before{content:"\f03a"}
 .fa-location-arrow::before{content:"\f124"}
 .fa-location-dot::before{content:"\f3c5"}

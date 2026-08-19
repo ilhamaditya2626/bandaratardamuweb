@@ -59,16 +59,16 @@ export function PublicHeaderShell() {
             </Link>
           )}
 
-          <Link href="/penerbangan" className="header__nav-link">
+          <Link href="/penerbangan" className={`header__nav-link ${pathname === "/penerbangan" ? "active" : ""}`}>
             Penerbangan
           </Link>
 
-          <Link href="/penumpang" className="header__nav-link">
+          <Link href="/penumpang" className={`header__nav-link ${pathname === "/penumpang" ? "active" : ""}`}>
             Penumpang
           </Link>
 
           <div className="nav-dropdown">
-            <Link href="/tentang" className="header__nav-link">
+            <Link href="/tentang" className={`header__nav-link ${["/tentang", "/fasilitas", "/regulasi", "/ppid", "/unit-kerja"].includes(pathname) ? "active" : ""}`}>
               Tentang <i className="fa-solid fa-chevron-down"></i>
             </Link>
 
@@ -82,7 +82,7 @@ export function PublicHeaderShell() {
           </div>
 
           <div className="nav-dropdown">
-            <Link href="/jelajah-sabu" className="header__nav-link">
+            <Link href="/jelajah-sabu" className={`header__nav-link ${["/jelajah-sabu", "/destinasi-wisata", "/transportasi-akses", "/akomodasi-penginapan"].includes(pathname) ? "active" : ""}`}>
               Jelajah Sabu <i className="fa-solid fa-chevron-down"></i>
             </Link>
 
@@ -95,7 +95,7 @@ export function PublicHeaderShell() {
           </div>
 
           <div className="nav-dropdown">
-            <Link href="/informasi" className="header__nav-link">
+            <Link href="/informasi" className={`header__nav-link ${["/informasi", "/informasi-berkala", "/berita", "/laporan", "/informasi-dikecualikan"].some((p) => pathname.startsWith(p)) ? "active" : ""}`}>
               Informasi <i className="fa-solid fa-chevron-down"></i>
             </Link>
 
@@ -111,7 +111,7 @@ export function PublicHeaderShell() {
           </div>
 
           <div className="nav-dropdown">
-            <Link href="/layanan-informasi" className="header__nav-link">
+            <Link href="/layanan-informasi" className={`header__nav-link ${pathname.startsWith("/layanan-informasi") ? "active" : ""}`}>
               Layanan Informasi <i className="fa-solid fa-chevron-down"></i>
             </Link>
 
@@ -144,7 +144,7 @@ export function PublicHeaderShell() {
             </div>
           </div>
 
-          <Link href="/bantuan" className="header__nav-link">
+          <Link href="/bantuan" className={`header__nav-link ${pathname === "/bantuan" ? "active" : ""}`}>
             Bantuan
           </Link>
         </nav>
