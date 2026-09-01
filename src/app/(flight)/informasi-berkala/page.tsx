@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
+import { DynamicImage } from "@/components/dynamic-image";
+import { getAllNews } from "@/services/news.service";
 
 const quickStats = [
   { label: "Alamat", value: "Jl. Trans Seba Bolou, Kel. Mebba, Kec. Sabu Barat/ Kab. Sabu Raijua / Propinsi Nusa Tenggara Timur", icon: "fa-location-dot" },
@@ -180,8 +182,8 @@ const reportGroups = [
     icon: "fa-chart-line",
     summary: "Pertanggungjawaban pelaksanaan kebijakan, capaian layanan, dan evaluasi kinerja kantor.",
     files: [
-      { label: "LAPORAN TAHUNAN 2024", href: "/assets/pdf/laporan/LAKIP 2024.pdf" },
-      { label: "LAPORAN TAHUNAN 2025", href: "/assets/pdf/laporan/LAKIP 2025.pdf" },
+      { label: "LAPORAN TAHUNAN 2024", slug: "laporan-tahunan-2024" },
+      { label: "LAPORAN TAHUNAN 2025", slug: "laporan-tahunan-2025" },
     ],
   },
   {
@@ -191,11 +193,11 @@ const reportGroups = [
     files: [
       {
         label: "Rencana Kerja Anggaran 2024",
-        href: "/assets/pdf/regulasi/rencana-kerja-anggaran-2024.pdf",
+        slug: "rencana-kerja-anggaran-2024",
       },
       {
         label: "Rencana Kerja Anggaran 2025",
-        href: "/assets/pdf/regulasi/rencana-kerja-anggaran-2025.pdf",
+        slug: "rencana-kerja-anggaran-2025",
       },
     ],
   },
@@ -206,11 +208,11 @@ const reportGroups = [
     files: [
       {
         label: "Laporan Keuangan 2024",
-        href: "/assets/pdf/regulasi/laporan-keuangan-2024.pdf",
+        slug: "laporan-keuangan-2024",
       },
       {
         label: "Laporan Keuangan 2025",
-        href: "/assets/pdf/regulasi/laporan-keuangan-2025.pdf",
+        slug: "laporan-keuangan-2025",
       },
     ],
   },
@@ -280,7 +282,13 @@ function PersonPhoto({
   );
 }
 
-export default function InformasiBerkalaPage() {
+export default async function InformasiBerkalaPage() {
+  let latestNews: Awaited<ReturnType<typeof getAllNews>>["data"] = [];
+  try {
+    latestNews = (await getAllNews(1, 4)).data;
+  } catch (error) {
+    console.error("Failed to load latest news for periodic information:", error);
+  }
   return (
     <div className="bg-[#111928] text-gray-200">
       <style>{`
@@ -439,6 +447,7 @@ export default function InformasiBerkalaPage() {
               ["Pejabat", "#pejabat"],
               ["Laporan", "#laporan"],
               ["Pengaduan", "#pengaduan"],
+              ["Berita", "#berita"],
             ].map(([label, href]) => (
               <a
                 key={href}
@@ -846,11 +855,9 @@ export default function InformasiBerkalaPage() {
                   <p className="mb-7 text-sm leading-7 text-gray-400">{group.summary}</p>
                   <div className="space-y-3">
                     {group.files.map((file) => (
-                      <a
-                        key={file.href}
-                        href={`${file.href}#toolbar=1&navpanes=0`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        key={file.slug}
+                        href={`/informasi-berkala/dokumen/${file.slug}`}
                         className="group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-4 text-sm text-gray-300 transition hover:border-[#facc15]/70 hover:bg-[#facc15]/10 hover:text-white"
                       >
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
@@ -858,7 +865,7 @@ export default function InformasiBerkalaPage() {
                         </span>
                         <span className="min-w-0 flex-1 leading-6">{file.label}</span>
                         <i className="fa-solid fa-eye text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </article>
@@ -879,6 +886,27 @@ export default function InformasiBerkalaPage() {
                 Ajukan Permohonan Dokumen
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section id="berita-terbaru" className="border-b border-white/5 bg-[#111928] py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <SectionHeading
+                eyebrow="Berita Terbaru"
+                title={<>Kabar dari <span className="italic text-[#facc15]">Bandara Tardamu</span></>}
+                description="Informasi dan pengumuman terbaru yang dipublikasikan melalui kanal berita resmi bandara."
+              />
+              <Link href="/berita" className="mb-12 inline-flex items-center gap-3 self-start rounded-full border border-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-[#facc15] hover:text-[#facc15] md:self-auto">Lihat Berita Lainnya <i className="fa-solid fa-arrow-right text-xs" /></Link>
+            </div>
+            {latestNews.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+              {latestNews.map((article) => <article key={article.id} className="group overflow-hidden rounded-[26px] border border-white/5 bg-[#1f2937]/70 transition hover:-translate-y-1 hover:border-[#facc15]/60">
+                <Link href={`/berita/${article.slug}`} className="block">
+                  <div className="relative h-48 overflow-hidden"><DynamicImage src={article.image_url || "/assets/images/hero-bg.webp"} alt={article.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw" className="object-cover transition duration-500 group-hover:scale-105" /></div>
+                  <div className="p-6"><p className="text-[11px] font-bold uppercase tracking-[.16em] text-[#facc15]">{new Date(article.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</p><h3 className="mt-3 line-clamp-2 text-xl leading-tight text-white" style={serifStyle}>{article.title}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-gray-400">{article.content}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#facc15]">Baca berita <i className="fa-solid fa-arrow-right text-xs transition group-hover:translate-x-1" /></span></div>
+                </Link>
+              </article>)}
+            </div> : <div className="rounded-3xl border border-white/5 bg-[#1f2937]/50 p-8 text-center text-sm text-gray-400">Belum ada berita terbaru yang dipublikasikan.</div>}
           </div>
         </section>
 

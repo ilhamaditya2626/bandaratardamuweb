@@ -22,20 +22,22 @@ const nextConfig: NextConfig = {
     // 'unsafe-eval' hanya untuk mode dev (webpack HMR memakai eval).
     // Di produksi eval diblokir sepenuhnya.
     const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://elfsightcdn.com https://*.elfsightcdn.com https://static.elfsight.com https://core.service.elfsight.com"
+      : "script-src 'self' 'unsafe-inline' https://elfsightcdn.com https://*.elfsightcdn.com https://static.elfsight.com https://core.service.elfsight.com";
 
     const contentSecurityPolicy = [
       "default-src 'self'",
       // Next.js menyuntik script bootstrap/hydration inline, sehingga
       // 'unsafe-inline' masih diperlukan tanpa skema nonce.
       scriptSrc,
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: https://images.unsplash.com",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://api.openweathermap.org",
-      "frame-src 'self' https://www.google.com https://maps.google.com",
-      "frame-ancestors 'none'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.elfsightcdn.com https://*.elfsight.com",
+      "img-src 'self' data: blob: https://images.unsplash.com https://*.elfsightcdn.com https://*.elfsight.com https://*.googleusercontent.com",
+      "font-src 'self' data: https://fonts.gstatic.com https://*.elfsightcdn.com",
+      "connect-src 'self' https://api.openweathermap.org https://core.service.elfsight.com https://*.elfsight.com https://*.elfsightcdn.com",
+      "frame-src 'self' https://www.google.com https://maps.google.com https://*.elfsight.com",
+      // Mengizinkan dokumen internal (mis. pratinjau PDF terbatas) dipasang
+      // hanya oleh halaman dari situs ini; situs pihak ketiga tetap diblokir.
+      "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'",
@@ -46,7 +48,7 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: contentSecurityPolicy },
-          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {

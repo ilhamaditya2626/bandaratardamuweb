@@ -294,14 +294,14 @@ export default function FlightLayout({
       if (!currentHash) return hashId === "daftar-informasi";
       return currentHash === `#${hashId}`;
     }
-    return pathname === href || (href === "/informasi-serta-merta" && (pathname === "/informasi-serta-merta" || pathname === "/berita" || isNewsDetail));
+    return pathname === href;
   };
 
   const isNavGroupActive = (href: string) => {
     if (href === "/tentang") return aboutRoutes.has(pathname);
     if (href === "/jelajah-sabu") return exploreRoutes.has(pathname);
     if (href === "/informasi") return isInformationActive;
-    if (href === "/informasi-serta-merta") return pathname === "/informasi-serta-merta" || pathname === "/berita" || isNewsDetail;
+    if (href === "/informasi-serta-merta") return pathname === "/informasi-serta-merta";
     if (href === "/layanan-informasi") return serviceRoutes.has(pathname);
     return pathname === href;
   };

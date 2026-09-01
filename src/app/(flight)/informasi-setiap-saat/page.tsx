@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 
-const lakipDocs = ["LAKIP 2024.pdf", "LAKIP 2025.pdf"];
-const dipDocs = ["DIP 2024.pdf", "DIP 2025.pdf"];
-const dikDocs = ["DIK 2024.pdf", "DIK 2025.pdf"];
+const lakipDocs = [{ label: "LAKIP 2024.pdf", slug: "laporan-tahunan-2024" }, { label: "LAKIP 2025.pdf", slug: "laporan-tahunan-2025" }];
+const dipDocs = [{ label: "DIP 2024.pdf", slug: "dip-2024" }, { label: "DIP 2025.pdf", slug: "dip-2025" }];
+const dikDocs = [{ label: "DIK 2024.pdf", slug: "dik-2024" }, { label: "DIK 2025.pdf", slug: "dik-2025" }];
 
 export default function InformasiSetiapSaatPage() {
   return (
@@ -62,15 +63,13 @@ export default function InformasiSetiapSaatPage() {
               <h4 className="mb-6 font-semibold text-white">Dokumen LAKIP</h4>
               <div className="w-full space-y-3">
                 {lakipDocs.map((doc) => (
-                  <a
-                    key={doc}
-                    href={`/assets/pdf/laporan/${doc}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    key={doc.slug}
+                    href={`/informasi-berkala/dokumen/${doc.slug}`}
                     className="file-item group flex w-full items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-4 text-left text-sm transition hover:border-[#facc15] hover:bg-[#facc15]/10"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc}</span><i className="fa-solid fa-download ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
-                  </a>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc.label}</span><i className="fa-solid fa-eye ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -117,15 +116,13 @@ export default function InformasiSetiapSaatPage() {
               <h4 className="mb-6 font-semibold text-white">Dokumen DIP</h4>
               <div className="w-full space-y-3">
                 {dipDocs.map((doc) => (
-                  <a
-                    key={doc}
-                    href={`/assets/pdf/laporan/${doc}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    key={doc.slug}
+                    href={`/informasi-berkala/dokumen/${doc.slug}`}
                     className="file-item group flex w-full items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-4 text-left text-sm transition hover:border-[#facc15] hover:bg-[#facc15]/10"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc}</span><i className="fa-solid fa-download ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
-                  </a>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc.label}</span><i className="fa-solid fa-eye ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -168,15 +165,13 @@ export default function InformasiSetiapSaatPage() {
               <h4 className="mb-6 font-semibold text-white">Dokumen DIK</h4>
               <div className="w-full space-y-3">
                 {dikDocs.map((doc) => (
-                  <a
-                    key={doc}
-                    href={`/assets/pdf/laporan/${doc}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    key={doc.slug}
+                    href={`/informasi-berkala/dokumen/${doc.slug}`}
                     className="file-item group flex w-full items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-4 text-left text-sm transition hover:border-[#facc15] hover:bg-[#facc15]/10"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc}</span><i className="fa-solid fa-download ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
-                  </a>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc.label}</span><i className="fa-solid fa-eye ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
+                  </Link>
                 ))}
               </div>
             </div>

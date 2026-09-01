@@ -4,7 +4,7 @@ export default function Head() {
       <title>Pusat Informasi - Bandara Tardamu Sabu Raijua</title>
       <meta
         name="description"
-        content="Pusat informasi publik, berita, dan laporan resmi Bandara Tardamu Sabu Raijua."
+        content="Pusat informasi publik dan laporan resmi Bandara Tardamu Sabu Raijua."
       />
     </>
   );

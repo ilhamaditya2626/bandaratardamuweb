@@ -24,6 +24,17 @@ export const news = mysqlTable("news", {
   updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── 1b. URGENT PUBLIC INFORMATION (Informasi Serta Merta) ──
+export const urgentInformation = mysqlTable("urgent_information", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  attachment_url: text("attachment_url"),
+  published_at: timestamp("published_at").defaultNow().notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── 2. FLIGHTS (Jadwal Penerbangan) ─────────────────────────
 export const flights = mysqlTable("flights", {
   id: int("id").autoincrement().primaryKey(),
