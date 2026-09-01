@@ -35,8 +35,8 @@ const desktopNavItems = [
     items: [
       { href: "/informasi", label: "Informasi" },
       { href: "/informasi-berkala", label: "Informasi Berkala" },
-      { href: "/berita", label: "Informasi Serta Merta" },
-      { href: "/laporan", label: "Laporan Setiap Saat" },
+      { href: "/informasi-serta-merta", label: "Informasi Serta Merta" },
+      { href: "/informasi-setiap-saat", label: "Informasi Setiap Saat" },
       { href: "/informasi-dikecualikan", label: "Informasi yang Dikecualikan" },
     ],
   },
@@ -123,7 +123,7 @@ const exploreRoutes = new Set([
 const informationRoutes = new Set([
   "/informasi",
   "/berita",
-  "/laporan",
+  "/informasi-setiap-saat",
   "/informasi-dikecualikan",
 ]);
 const serviceRoutes = new Set(["/layanan-informasi"]);

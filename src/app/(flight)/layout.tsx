@@ -35,8 +35,8 @@ const desktopNavItems = [
     items: [
       { href: "/informasi", label: "Informasi" },
       { href: "/informasi-berkala", label: "Informasi Berkala" },
-      { href: "/berita", label: "Informasi Serta Merta" },
-      { href: "/laporan", label: "Laporan Setiap Saat" },
+      { href: "/informasi-serta-merta", label: "Informasi Serta Merta" },
+      { href: "/informasi-setiap-saat", label: "Informasi Setiap Saat" },
       { href: "/informasi-dikecualikan", label: "Informasi yang Dikecualikan" },
     ],
   },
@@ -70,6 +70,14 @@ const desktopNavItems = [
         label: "Hak-Hak Pemohon Informasi",
       },
       { href: "/layanan-informasi#formulir", label: "Formulir Layanan" },
+      {
+        href: "/layanan-informasi#estimasi-waktu-pelayanan",
+        label: "Estimasi Waktu Pelayanann",
+      },
+      {
+        href: "/layanan-informasi#jadwal-pelayanan-informasi-publik",
+        label: "Jadwal Pelayanan Informasi Publik",
+      },
       { href: "/layanan-informasi#pengaduan", label: "Informasi & Pengaduan" },
     ],
   },
@@ -93,8 +101,8 @@ const exploreSidebarItems = [
 
 const informationSidebarItems = [
   { href: "/informasi-berkala", label: "Informasi Berkala", icon: "fa-calendar-check" },
-  { href: "/berita", label: "Berita", icon: "fa-newspaper" },
-  { href: "/laporan", label: "Laporan Setiap Saat", icon: "fa-file-lines" },
+  { href: "/informasi-serta-merta", label: "Informasi Serta Merta", icon: "fa-newspaper" },
+  { href: "/informasi-setiap-saat", label: "Informasi Setiap Saat", icon: "fa-file-lines" },
   {
     href: "/informasi-dikecualikan",
     label: "Informasi yang Dikecualikan",
@@ -144,6 +152,16 @@ const serviceSidebarItems = [
     icon: "fa-pen-to-square",
   },
   {
+    href: "/layanan-informasi#estimasi-waktu-pelayanan",
+    label: "Estimasi Waktu Pelayanan",
+    icon: "fa-clock",
+  },
+  {
+    href: "/layanan-informasi#jadwal-pelayanan-informasi-publik",
+    label: "Jadwal Pelayanan Informasi Publik",
+    icon: "fa-calendar-check",
+  },
+  {
     href: "/layanan-informasi#pengaduan",
     label: "Informasi & Pengaduan",
     icon: "fa-headset",
@@ -158,6 +176,8 @@ const serviceSectionIds = [
   "keberatan",
   "sengketa",
   "hak-hak-pemohon",
+  "estimasi-waktu-pelayanan",
+  "jadwal-pelayanan-informasi-publik",
   "formulir",
   "pengaduan",
 ];
@@ -172,8 +192,8 @@ const exploreRoutes = new Set([
 const informationRoutes = new Set([
   "/informasi",
   "/informasi-berkala",
-  "/berita",
-  "/laporan",
+  "/informasi-serta-merta",
+  "/informasi-setiap-saat",
   "/informasi-dikecualikan",
 ]);
 const serviceRoutes = new Set(["/layanan-informasi"]);
@@ -242,15 +262,16 @@ export default function FlightLayout({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentHash, setCurrentHash] = useState("");
   const isNewsDetail = pathname.startsWith("/berita/");
+  const isInformationList = pathname === "/informasi-serta-merta" || pathname === "/berita";
   const isAboutSidebar = aboutRoutes.has(pathname);
   const isExploreSidebar = exploreRoutes.has(pathname);
-  const isInformationActive = informationRoutes.has(pathname) || isNewsDetail;
+  const isInformationActive = informationRoutes.has(pathname) || isNewsDetail || isInformationList;
   const isInformationSidebar =
     pathname === "/informasi" ||
     pathname === "/informasi-berkala" ||
-    pathname === "/berita" ||
+    isInformationList ||
     isNewsDetail ||
-    pathname === "/laporan" ||
+    pathname === "/informasi-setiap-saat" ||
     pathname === "/informasi-dikecualikan";
   const isServiceSidebar = serviceRoutes.has(pathname);
   const isSectionSidebar =
@@ -273,14 +294,14 @@ export default function FlightLayout({
       if (!currentHash) return hashId === "daftar-informasi";
       return currentHash === `#${hashId}`;
     }
-    return pathname === href || (href === "/berita" && isNewsDetail);
+    return pathname === href || (href === "/informasi-serta-merta" && (pathname === "/informasi-serta-merta" || pathname === "/berita" || isNewsDetail));
   };
 
   const isNavGroupActive = (href: string) => {
     if (href === "/tentang") return aboutRoutes.has(pathname);
     if (href === "/jelajah-sabu") return exploreRoutes.has(pathname);
     if (href === "/informasi") return isInformationActive;
-    if (href === "/berita") return pathname === "/berita" || isNewsDetail;
+    if (href === "/informasi-serta-merta") return pathname === "/informasi-serta-merta" || pathname === "/berita" || isNewsDetail;
     if (href === "/layanan-informasi") return serviceRoutes.has(pathname);
     return pathname === href;
   };

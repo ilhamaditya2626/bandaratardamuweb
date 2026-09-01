@@ -4,9 +4,8 @@ import type { ReactNode } from "react";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 
 const quickStats = [
-  { label: "Kode IATA", value: "SAU", icon: "fa-plane-departure" },
-  { label: "Kode ICAO", value: "WATS", icon: "fa-tower-observation" },
-  { label: "Operasional", value: "06.00 - 18.00", icon: "fa-clock" },
+  { label: "Alamat", value: "Jl. Trans Seba Bolou, Kel. Mebba, Kec. Sabu Barat/ Kab. Sabu Raijua / Propinsi Nusa Tenggara Timur", icon: "fa-location-dot" },
+  { label: "Operasional", value: "07.00 - 15.00", icon: "fa-clock" },
   { label: "Runway", value: "900m x 23m", icon: "fa-road" },
 ];
 
@@ -108,7 +107,6 @@ const leaderHistory = [
 
 const organizationBranches = {
   left: [
-    "Analis Sumber Daya Manusia Aparatur Ahli Pertama",
     "Pengevaluasi Keselamatan dan Keamanan Bandar Udara Bidang Avsec",
     "Teknisi Penerbangan Pelaksana",
     "Penelaah Teknis Kebijakan",
@@ -139,31 +137,40 @@ const officials = [
     name: "David Benjamin Messakh, S.H.",
     title: "Kepala Kantor UPBU Tardamu",
     photo: "/assets/images/pegawai/pak david1.webp",
+    initials: "DBM",
     focus: "Koordinasi strategis, keselamatan, keamanan, pelayanan, dan kepatuhan operasional bandara.",
     description:
       "Memimpin arah pelayanan Kantor UPBU Tardamu Sabu melalui penguatan keselamatan operasi, koordinasi lintas unit, serta peningkatan kualitas layanan publik yang responsif bagi masyarakat Sabu Raijua.",
     badge: "Pimpinan Kantor",
     icon: "fa-compass-drafting",
+    lhkpnUrl: "/assets/pdf/lhkpn/lhkpn-david-benjamin-messakh.pdf",
+    lhkpnDoc: "LHKPN 2025",
   },
   {
     name: "Gusti Ngurah Budiarta, S.H.",
     title: "Kepala Tata Usaha",
-    initials: "GB",
+    photo: "/assets/images/pegawai/pak gusti.webp",
+    initials: "GNB",
     focus: "Tata usaha, kepegawaian, arsip, perencanaan, keuangan, dan dukungan administrasi kantor.",
     description:
       "Mengawal tata kelola administrasi kantor agar proses perencanaan, pengarsipan, kepegawaian, dan dukungan anggaran berjalan tertib, transparan, dan selaras dengan kebutuhan operasional bandara.",
     badge: "Administrasi & Tata Kelola",
     icon: "fa-folder-open",
+    lhkpnUrl: "/assets/pdf/lhkpn/lhkpn-gusti-ngurah-budiarta.pdf",
+    lhkpnDoc: "LHKPN 2025",
   },
   {
-    name: "Firminianus Reginaldus, A.Ma",
+    name: "Jefri Adji, S.I.P",
     title: "Kepala TOKPD",
-    photo: "/assets/images/pegawai/pak fridus.webp",
+    photo: "/assets/images/pegawai/pak jey1.webp",
+    initials: "JA",
     focus: "Teknik, operasi, keamanan, pelayanan darurat, serta koordinasi kesiapan fasilitas operasional.",
     description:
       "Menjaga kesiapan teknis dan operasional fasilitas bandara, mulai dari koordinasi sisi udara, keamanan, pelayanan darurat, hingga pemeliharaan sarana pendukung operasi harian.",
     badge: "Operasi & Kesiapan Fasilitas",
     icon: "fa-tower-observation",
+    lhkpnUrl: "/assets/pdf/lhkpn/lhkpn-jefri-adji.pdf",
+    lhkpnDoc: "LHKPN 2025",
   },
 ];
 
@@ -456,16 +463,58 @@ export default function InformasiBerkalaPage() {
                   className="object-cover"
                 />
               </div>
-              <div className="grid grid-cols-2 border-t border-white/5 md:grid-cols-4">
-                {quickStats.map((item) => (
-                  <div key={item.label} className="border-white/5 p-5 md:border-r">
-                    <i className={`fa-solid ${item.icon} mb-4 text-xl text-[#facc15]`}></i>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-white">{item.value}</p>
+              <div className="border-t border-white/10 bg-[#111928]/80 p-5 md:p-6 space-y-4">
+                {/* Alamat */}
+                {quickStats[0] && (
+                  <div className="flex items-start gap-4 rounded-2xl border border-white/5 bg-[#1f2937]/50 p-4 md:p-5 transition hover:border-[#facc15]/30">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#facc15]/10 text-xl text-[#facc15]">
+                      <i className={`fa-solid ${quickStats[0].icon}`}></i>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#facc15]">
+                        {quickStats[0].label}
+                      </p>
+                      <p className="mt-1 text-sm font-medium leading-relaxed text-gray-200">
+                        {quickStats[0].value}
+                      </p>
+                    </div>
                   </div>
-                ))}
+                )}
+
+                {/* Grid Operasional & Runway */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {quickStats[1] && (
+                    <div className="flex items-center gap-4 rounded-2xl border border-white/5 bg-[#1f2937]/50 p-4 md:p-5 transition hover:border-[#facc15]/30">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#facc15]/10 text-xl text-[#facc15]">
+                        <i className={`fa-solid ${quickStats[1].icon}`}></i>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                          {quickStats[1].label}
+                        </p>
+                        <p className="mt-1 text-base font-bold text-white">
+                          {quickStats[1].value} <span className="text-xs font-normal text-[#facc15]">WITA</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {quickStats[2] && (
+                    <div className="flex items-center gap-4 rounded-2xl border border-white/5 bg-[#1f2937]/50 p-4 md:p-5 transition hover:border-[#facc15]/30">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#facc15]/10 text-xl text-[#facc15]">
+                        <i className={`fa-solid ${quickStats[2].icon}`}></i>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                          {quickStats[2].label}
+                        </p>
+                        <p className="mt-1 text-base font-bold text-white">
+                          {quickStats[2].value}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -730,6 +779,39 @@ export default function InformasiBerkalaPage() {
                           </p>
                           <p className="text-sm leading-7 text-gray-300">{official.focus}</p>
                         </div>
+
+                        {/* LHKPN Transparency & PDF Link */}
+                        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#facc15]/20 bg-[#facc15]/10 text-base text-[#facc15]">
+                              <i className="fa-solid fa-file-shield"></i>
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#facc15]">
+                                  Kepatuhan LHKPN
+                                </p>
+                                <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold text-emerald-400">
+                                  Terverifikasi KPK
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-400">
+                                Laporan Harta Kekayaan Penyelenggara Negara ({official.lhkpnDoc})
+                              </p>
+                            </div>
+                          </div>
+
+                          <a
+                            href={official.lhkpnUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group/lhkpn inline-flex items-center gap-2.5 rounded-xl border border-[#facc15]/40 bg-[#facc15]/10 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-[#facc15] shadow-[0_4px_20px_rgba(250,204,21,0.12)] transition-all duration-300 hover:scale-[1.03] hover:border-[#facc15] hover:bg-[#facc15] hover:text-[#111928] hover:shadow-[0_8px_25px_rgba(250,204,21,0.3)]"
+                          >
+                            <i className="fa-solid fa-file-pdf text-sm transition-transform group-hover/lhkpn:scale-110"></i>
+                            <span>Lihat LHKPN</span>
+                            <i className="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-75 transition-transform group-hover/lhkpn:translate-x-0.5 group-hover/lhkpn:-translate-y-0.5 group-hover/lhkpn:opacity-100"></i>
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </article>
@@ -785,10 +867,10 @@ export default function InformasiBerkalaPage() {
 
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
-                href="/laporan"
+                href="/informasi-setiap-saat"
                 className="inline-flex items-center gap-3 rounded-full bg-[#facc15] px-6 py-3 text-sm font-bold text-[#111928] transition hover:-translate-y-1"
               >
-                Buka Laporan Publik <i className="fa-solid fa-arrow-right text-xs"></i>
+                Buka Informasi Setiap Saat <i className="fa-solid fa-arrow-right text-xs"></i>
               </Link>
               <Link
                 href="/layanan-informasi#formulir"

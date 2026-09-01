@@ -700,6 +700,13 @@ const formCards = [
     description:
       "Formulir resmi untuk menyampaikan keberatan atas tanggapan permintaan informasi.",
   },
+  {
+    href: "https://drive.google.com/drive/u/0/my-drive",
+    icon: "fa-file-lines",
+    title: "SOP",
+    description:
+      "Panduan prosedur pelayanan informasi publik dan standar operasional yang berlaku di unit kerja.",
+  },
 ];
 
 const complaintChannels = [
@@ -731,10 +738,50 @@ const complaintChannels = [
 
 export default function LayananInformasiPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("berkala");
+  const [isServiceOpen, setIsServiceOpen] = useState<boolean | null>(null);
+
   const rows = useMemo(
     () => (activeTab === "dikecualikan" ? [] : infoRows[activeTab]),
     [activeTab],
   );
+
+  useEffect(() => {
+    const updateServiceStatus = () => {
+      try {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Makassar",
+          weekday: "short",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: false,
+        });
+        const parts = formatter.formatToParts(now);
+        const weekday = parts.find((p) => p.type === "weekday")?.value;
+        const hour = parseInt(parts.find((p) => p.type === "hour")?.value || "0", 10);
+        const minute = parseInt(parts.find((p) => p.type === "minute")?.value || "0", 10);
+
+        const isWeekday = weekday !== "Sat" && weekday !== "Sun";
+        const currentMinute = hour * 60 + minute;
+        // Buka: Senin - Jumat pukul 08.00 - 16.00 WITA
+        const open = isWeekday && currentMinute >= 8 * 60 && currentMinute < 16 * 60;
+        setIsServiceOpen(open);
+      } catch {
+        // Fallback UTC+8
+        const now = new Date();
+        const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+        const witaDate = new Date(utc + 8 * 3600000);
+        const day = witaDate.getDay();
+        const hours = witaDate.getHours();
+        const isWeekday = day >= 1 && day <= 5;
+        setIsServiceOpen(isWeekday && hours >= 8 && hours < 16);
+      }
+    };
+
+    updateServiceStatus();
+    const interval = setInterval(updateServiceStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const scrollToHash = () => {
@@ -963,13 +1010,13 @@ export default function LayananInformasiPage() {
             </p>
           </div>
 
-          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
             {formCards.map((card) => (
               <a
                 key={card.title}
                 href={card.href}
-                target="_blank"
-                rel="noreferrer"
+                target={card.href.startsWith("http") ? "_blank" : undefined}
+                rel={card.href.startsWith("http") ? "noreferrer" : undefined}
                 className="group rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]"
               >
                 <div className="mb-8 flex items-center justify-between">
@@ -982,6 +1029,158 @@ export default function LayananInformasiPage() {
                 <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
               </a>
             ))}
+          </div>
+        </section>
+
+        <section id="estimasi-waktu-pelayanan" className="scroll-mt-28 md:scroll-mt-32">
+          <div className="mb-10 text-center">
+            <h2 className="text-3xl text-white" style={serifStyle}>
+              Estimasi Waktu Pelayanan
+            </h2>
+          </div>
+          <div className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#1f2937] shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
+            <Image
+              src="/assets/images/maklumat pelayanan.webp"
+              alt="Estimasi Waktu Pelayanan"
+              width={3200}
+              height={4800}
+              sizes="(max-width: 1280px) 100vw, 1024px"
+              className="h-auto w-full"
+            />
+          </div>
+        </section>
+
+        <section id="jadwal-pelayanan-informasi-publik" className="scroll-mt-28 md:scroll-mt-32">
+          <div className="mb-16 max-w-3xl">
+            <h2 className="mb-6 text-3xl text-white md:text-5xl" style={serifStyle}>
+              Jadwal <span className="italic text-[#facc15]">Pelayanan</span> Informasi Publik
+            </h2>
+            <p className="text-lg leading-relaxed text-gray-400">
+              Jadwal operasional layanan informasi publik di Kantor UPBU Tardamu untuk masyarakat umum.
+            </p>
+          </div>
+
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
+            {/* Hari Kerja */}
+            <div className="group relative overflow-hidden rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]/30 md:p-12">
+              {/* Gradient top accent */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#facc15] to-transparent opacity-60" />
+
+              <div className="mb-8 flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15] transition-transform duration-300 group-hover:scale-110">
+                  <i className="fa-solid fa-calendar-days" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#facc15]">Hari Kerja</p>
+                  <p className="text-sm text-gray-500">Senin s.d. Jumat</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-xl text-gray-400">
+                    <i className="fa-regular fa-clock" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Jam Buka</p>
+                    <p className="text-2xl font-bold text-white">08.00 <span className="text-base font-normal text-gray-500">WITA</span></p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-xl text-gray-400">
+                    <i className="fa-regular fa-clock" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Jam Tutup</p>
+                    <p className="text-2xl font-bold text-white">16.00 <span className="text-base font-normal text-gray-500">WITA</span></p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status indicator */}
+              <div
+                className={`mt-8 flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-5 py-3 transition-colors ${
+                  isServiceOpen
+                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                    : "border-rose-500/20 bg-rose-500/10 text-rose-400"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-3 w-3">
+                    {isServiceOpen ? (
+                      <>
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+                      </>
+                    ) : (
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-rose-500" />
+                    )}
+                  </span>
+                  <span className="text-sm font-semibold">
+                    {isServiceOpen === null
+                      ? "Memeriksa Status..."
+                      : isServiceOpen
+                      ? "Layanan Buka"
+                      : "Layanan Tutup"}
+                  </span>
+                </div>
+                <span className="text-xs font-medium text-gray-400">
+                  {isServiceOpen
+                    ? "Sedang Beroperasi (WITA)"
+                    : "Buka Senin s.d. Jumat, 08.00 WITA"}
+                </span>
+              </div>
+            </div>
+
+            {/* Catatan */}
+            <div className="group relative overflow-hidden rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]/30 md:p-12">
+              {/* Gradient top accent */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#facc15] to-transparent opacity-60" />
+
+              <div className="mb-8 flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15] transition-transform duration-300 group-hover:scale-110">
+                  <i className="fa-solid fa-circle-info" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#facc15]">Catatan</p>
+                  <p className="text-sm text-gray-500">Informasi tambahan</p>
+                </div>
+              </div>
+
+              <ul className="space-y-5">
+                <li className="flex items-start gap-4">
+                  <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#facc15]/10 text-xs text-[#facc15]">
+                    <i className="fa-solid fa-check" />
+                  </div>
+                  <p className="text-base leading-relaxed text-gray-300">
+                    Layanan tersedia untuk seluruh masyarakat tanpa dipungut biaya
+                  </p>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#facc15]/10 text-xs text-[#facc15]">
+                    <i className="fa-solid fa-check" />
+                  </div>
+                  <p className="text-base leading-relaxed text-gray-300">
+                    Hari libur nasional dan akhir pekan layanan tidak beroperasi
+                  </p>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#facc15]/10 text-xs text-[#facc15]">
+                    <i className="fa-solid fa-check" />
+                  </div>
+                  <p className="text-base leading-relaxed text-gray-300">
+                    Permohonan informasi dapat diajukan secara langsung maupun melalui formulir elektronik
+                  </p>
+                </li>
+              </ul>
+
+              <div className="mt-8 rounded-2xl bg-[#facc15]/5 px-5 py-3">
+                <p className="text-sm text-[#facc15]/80">
+                  <i className="fa-solid fa-phone mr-2" />
+                  Hubungi PPID untuk informasi lebih lanjut
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 

@@ -13,7 +13,12 @@ import {
 export const runtime = "nodejs";
 
 async function verifyAdmin(request: NextRequest) {
-  return auth.api.getSession({ headers: request.headers });
+  try {
+    return await auth.api.getSession({ headers: request.headers });
+  } catch (error) {
+    console.error("[admin/penginapan] getSession error:", error);
+    return null;
+  }
 }
 
 function unauthorized() {
@@ -87,10 +92,10 @@ function handleError(error: unknown, fallback: string) {
 
 // GET /api/admin/penginapan - Daftar semua penginapan (termasuk nonaktif).
 export async function GET(request: NextRequest) {
-  const session = await verifyAdmin(request);
-  if (!session) return unauthorized();
-
   try {
+    const session = await verifyAdmin(request);
+    if (!session) return unauthorized();
+
     const data = await getPenginapan(true);
     return NextResponse.json({
       success: true,
@@ -104,10 +109,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/penginapan - Tambah penginapan.
 export async function POST(request: NextRequest) {
-  const session = await verifyAdmin(request);
-  if (!session) return unauthorized();
-
   try {
+    const session = await verifyAdmin(request);
+    if (!session) return unauthorized();
+
     const formData = await request.formData();
     const parsed = readBaseFields(formData);
     if (!parsed.success) {
@@ -134,10 +139,10 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/admin/penginapan - Ubah penginapan.
 export async function PUT(request: NextRequest) {
-  const session = await verifyAdmin(request);
-  if (!session) return unauthorized();
-
   try {
+    const session = await verifyAdmin(request);
+    if (!session) return unauthorized();
+
     const formData = await request.formData();
     const idStr = formData.get("id")?.toString();
     if (!idStr) {
@@ -180,10 +185,10 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/admin/penginapan - Hapus penginapan (id di body JSON).
 export async function DELETE(request: NextRequest) {
-  const session = await verifyAdmin(request);
-  if (!session) return unauthorized();
-
   try {
+    const session = await verifyAdmin(request);
+    if (!session) return unauthorized();
+
     const body = await request.json();
     if (!body?.id) {
       return NextResponse.json(

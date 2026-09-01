@@ -19,8 +19,9 @@ const exploreRoutes = new Set([
 const informationRoutes = new Set([
   "/informasi",
   "/informasi-berkala",
+  "/informasi-serta-merta",
   "/berita",
-  "/laporan",
+  "/informasi-setiap-saat",
   "/informasi-dikecualikan",
 ]);
 const serviceRoutes = new Set(["/layanan-informasi"]);

@@ -95,15 +95,15 @@ export function PublicHeaderShell() {
           </div>
 
           <div className="nav-dropdown">
-            <Link href="/informasi" className={`header__nav-link ${["/informasi", "/informasi-berkala", "/berita", "/laporan", "/informasi-dikecualikan"].some((p) => pathname.startsWith(p)) ? "active" : ""}`}>
+            <Link href="/informasi" className={`header__nav-link ${["/informasi", "/informasi-berkala", "/informasi-serta-merta", "/berita", "/informasi-setiap-saat", "/informasi-dikecualikan"].some((p) => pathname.startsWith(p)) ? "active" : ""}`}>
               Informasi <i className="fa-solid fa-chevron-down"></i>
             </Link>
 
             <div className="nav-dropdown__menu">
               <Link href="/informasi">Informasi</Link>
               <Link href="/informasi-berkala">Informasi Berkala</Link>
-              <Link href="/berita">Informasi Serta Merta</Link>
-              <Link href="/laporan">Laporan Setiap Saat</Link>
+              <Link href="/informasi-serta-merta">Informasi Serta Merta</Link>
+              <Link href="/informasi-setiap-saat">Informasi Setiap Saat</Link>
               <Link href="/informasi-dikecualikan">
                 Informasi yang Dikecualikan
               </Link>
@@ -136,6 +136,12 @@ export function PublicHeaderShell() {
               </Link>
               <Link href="/layanan-informasi#hak-hak-pemohon">
                 Hak-Hak Pemohon Informasi
+              </Link>
+              <Link href="/layanan-informasi#estimasi-waktu-pelayanan">
+                Estimasi Waktu Pelayanan
+              </Link>
+              <Link href="/layanan-informasi#jadwal-pelayanan-informasi-publik">
+                Jadwal Pelayanan Informasi Publik
               </Link>
               <Link href="/layanan-informasi#formulir">Formulir Layanan</Link>
               <Link href="/layanan-informasi#pengaduan">

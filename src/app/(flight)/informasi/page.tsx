@@ -11,7 +11,7 @@ const infoCards = [
     cta: "Lihat Informasi",
   },
   {
-    href: "/berita",
+    href: "/informasi-serta-merta",
     icon: "fa-newspaper",
     title: "Informasi Serta Merta",
     description:
@@ -19,9 +19,9 @@ const infoCards = [
     cta: "Selengkapnya",
   },
   {
-    href: "/laporan",
+    href: "/informasi-setiap-saat",
     icon: "fa-file-invoice",
-    title: "Laporan Publik",
+    title: "Informasi Setiap Saat",
     description:
       "Akses dokumen akuntabilitas, LAKIP, serta laporan kinerja tahunan UPBU Tardamu.",
     cta: "Unduh Dokumen",
@@ -29,7 +29,7 @@ const infoCards = [
   {
     href: "/informasi-dikecualikan",
     icon: "fa-shield-halved",
-    title: "Info Terbatas",
+    title: "Informasi Dikecualikan",
     description:
       "Daftar informasi yang dikecualikan sesuai dengan UU Keterbukaan Informasi Publik.",
     cta: "Lihat Regulasi",

@@ -29,6 +29,10 @@ const workUnits = [
     description:
       "Unit AVSEC menjaga keamanan penerbangan melalui pemeriksaan penumpang dan barang, pengawasan area terminal, serta pengendalian akses menuju area terbatas bandara.",
     duties: ["Pemeriksaan keamanan", "Pengawasan akses", "Perlindungan objek vital"],
+    licenseDoc: {
+      label: "Daftar Lisensi Personel AVSEC",
+      href: "/assets/pdf/lisensi/daftar-lisensi-avsec.pdf",
+    },
   },
   {
     title: "Unit PKP-PK",
@@ -40,6 +44,10 @@ const workUnits = [
       "Unit PKP-PK bertanggung jawab pada kesiapsiagaan pertolongan kecelakaan penerbangan dan pemadam kebakaran, dengan personel serta peralatan yang disiapkan untuk respons cepat.",
     link: "https://sites.google.com/view/aerofiresafetyhub/aero-tardamu",
     duties: ["Kesiapan darurat", "Pemadaman kebakaran", "Rescue operation"],
+    licenseDoc: {
+      label: "Daftar Lisensi Personel PKP-PK",
+      href: "/assets/pdf/lisensi/daftar-lisensi-pkp-pk.pdf",
+    },
   },
   {
     title: "Unit Bangunan dan Landasan",
@@ -549,6 +557,33 @@ export default function UnitKerjaPage() {
                             </div>
                             <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-white/15 bg-[#facc15] text-[#111928] transition duration-300 group-hover:rotate-3 group-hover:scale-105">
                               <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    ) : null}
+
+                    {/* License Document PDF */}
+                    {unit.licenseDoc ? (
+                      <a
+                        href={unit.licenseDoc.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group mb-10 block overflow-hidden rounded-lg border border-[#facc15]/30 bg-gradient-to-br from-white/[0.09] via-white/[0.045] to-[#facc15]/[0.07] p-[1px] shadow-[0_22px_60px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1 hover:border-[#facc15]/70 hover:shadow-[0_26px_70px_rgba(250,204,21,0.12)]"
+                      >
+                        <div className="relative overflow-hidden rounded-[7px] bg-[#111928]/55 px-5 py-5 backdrop-blur-md">
+                          <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-[#facc15]/15 blur-2xl transition duration-300 group-hover:bg-[#facc15]/25"></div>
+                          <div className="relative flex items-start justify-between gap-5">
+                            <div>
+                              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.24em] text-[#facc15]">
+                                Lisensi Personel
+                              </p>
+                              <p className="mt-3 text-sm leading-6 text-white/62">
+                                {unit.licenseDoc.label}
+                              </p>
+                            </div>
+                            <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-white/15 bg-[#facc15] text-[#111928] transition duration-300 group-hover:rotate-3 group-hover:scale-105">
+                              <i className="fa-solid fa-file-pdf text-sm"></i>
                             </span>
                           </div>
                         </div>
