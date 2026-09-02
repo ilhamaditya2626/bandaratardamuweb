@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 import { DynamicImage } from "@/components/dynamic-image";
 import { getAllNews } from "@/services/news.service";
+import { EmployeeDataSection } from "./employee-data-section";
 
 const quickStats = [
   { label: "Alamat", value: "Jl. Trans Seba Bolou, Kel. Mebba, Kec. Sabu Barat/ Kab. Sabu Raijua / Propinsi Nusa Tenggara Timur", icon: "fa-location-dot" },
@@ -292,6 +293,14 @@ export default async function InformasiBerkalaPage() {
   return (
     <div className="bg-[#111928] text-gray-200">
       <style>{`
+        html {
+          scroll-behavior: smooth;
+        }
+
+        section[id] {
+          scroll-margin-top: 110px;
+        }
+
         @keyframes berkalaFadeUp {
           from { opacity: 0; transform: translateY(28px); }
           to { opacity: 1; transform: translateY(0); }
@@ -446,8 +455,9 @@ export default async function InformasiBerkalaPage() {
               ["Struktur", "#struktur"],
               ["Pejabat", "#pejabat"],
               ["Laporan", "#laporan"],
-              ["Pengaduan", "#pengaduan"],
+              ["Kepegawaian", "#data-kepegawaian"],
               ["Berita", "#berita"],
+              ["Pengaduan", "#pengaduan"],
             ].map(([label, href]) => (
               <a
                 key={href}
@@ -888,6 +898,8 @@ export default async function InformasiBerkalaPage() {
             </div>
           </div>
         </section>
+
+        <EmployeeDataSection />
 
         <section id="berita" className="scroll-mt-28 border-b border-white/5 bg-[#111928] py-24">
           <div className="mx-auto max-w-7xl px-6">
