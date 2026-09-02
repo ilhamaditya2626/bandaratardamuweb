@@ -889,7 +889,7 @@ export default async function InformasiBerkalaPage() {
           </div>
         </section>
 
-        <section id="berita-terbaru" className="border-b border-white/5 bg-[#111928] py-24">
+        <section id="berita" className="scroll-mt-28 border-b border-white/5 bg-[#111928] py-24">
           <div className="mx-auto max-w-7xl px-6">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <SectionHeading
