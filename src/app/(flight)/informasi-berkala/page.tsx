@@ -5,6 +5,7 @@ import { PageHero, serifStyle } from "../_components/info-page-shell";
 import { DynamicImage } from "@/components/dynamic-image";
 import { getAllNews } from "@/services/news.service";
 import { EmployeeDataSection } from "./employee-data-section";
+import { DocumentCards } from "@/components/information/document-cards";
 
 const quickStats = [
   { label: "Alamat", value: "Jl. Trans Seba Bolou, Kel. Mebba, Kec. Sabu Barat/ Kab. Sabu Raijua / Propinsi Nusa Tenggara Timur", icon: "fa-location-dot" },
@@ -218,6 +219,8 @@ const reportGroups = [
     ],
   },
 ];
+
+const reportCategories = ["annual_report", "work_budget", "financial_report"];
 
 const complaintChannels = [
   { label: "Email PPID", value: "bandaratardamu@gmail.com", icon: "fa-envelope" },
@@ -854,7 +857,7 @@ export default async function InformasiBerkalaPage() {
             />
 
             <div className="grid gap-6 lg:grid-cols-3">
-              {reportGroups.map((group) => (
+              {reportGroups.map((group, index) => (
                 <article key={group.title} className="rounded-[28px] border border-white/5 bg-[#111928]/70 p-8">
                   <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15]">
                     <i className={`fa-solid ${group.icon}`}></i>
@@ -863,21 +866,7 @@ export default async function InformasiBerkalaPage() {
                     {group.title}
                   </h3>
                   <p className="mb-7 text-sm leading-7 text-gray-400">{group.summary}</p>
-                  <div className="space-y-3">
-                    {group.files.map((file) => (
-                      <Link
-                        key={file.slug}
-                        href={`/informasi-berkala/dokumen/${file.slug}`}
-                        className="group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-4 text-sm text-gray-300 transition hover:border-[#facc15]/70 hover:bg-[#facc15]/10 hover:text-white"
-                      >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
-                          <i className="fa-solid fa-file-pdf"></i>
-                        </span>
-                        <span className="min-w-0 flex-1 leading-6">{file.label}</span>
-                        <i className="fa-solid fa-eye text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
-                      </Link>
-                    ))}
-                  </div>
+                  <DocumentCards category={reportCategories[index]} />
                 </article>
               ))}
             </div>

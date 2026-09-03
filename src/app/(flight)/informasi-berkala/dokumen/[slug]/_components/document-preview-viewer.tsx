@@ -52,7 +52,7 @@ export function DocumentPreviewViewer({
           </div>
           <p className="mt-1 text-sm text-gray-400">
             Menampilkan <span className="font-semibold text-gray-200">{previewPages}</span> dari{" "}
-            <span className="font-semibold text-gray-200">{totalPages}</span> halaman pertama (sekitar 20%).
+            <span className="font-semibold text-gray-200">{totalPages}</span> halaman pertama.
           </p>
         </div>
 

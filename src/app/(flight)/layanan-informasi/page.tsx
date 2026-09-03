@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
+import { PpidForms, RequestStatistics } from "@/components/information/ppid-forms";
 
 type TabKey = "berkala" | "setiap-saat" | "serta-merta" | "dikecualikan";
 
@@ -687,23 +688,27 @@ const imagePanels = [
 
 const formCards = [
   {
-    href: "https://forms.gle/6N2LZZqUjs8HBjQW7",
+    type: "information" as const,
     icon: "fa-file-invoice",
     title: "Permohonan Informasi",
+    badge: "Formulir Resmi",
     description:
       "Gunakan formulir ini untuk mengajukan permintaan informasi publik secara resmi.",
   },
   {
-    href: "https://forms.gle/YprafGdtnNjX2FpB9",
+    type: "objection" as const,
     icon: "fa-file-shield",
     title: "Pengajuan Keberatan",
+    badge: "Formulir Resmi",
     description:
       "Formulir resmi untuk menyampaikan keberatan atas tanggapan permintaan informasi.",
   },
   {
+    type: "sop" as const,
     href: "https://drive.google.com/drive/u/0/my-drive",
     icon: "fa-file-lines",
     title: "SOP",
+    badge: "Dokumen Panduan",
     description:
       "Panduan prosedur pelayanan informasi publik dan standar operasional yang berlaku di unit kerja.",
   },
@@ -739,6 +744,26 @@ const complaintChannels = [
 export default function LayananInformasiPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("berkala");
   const [isServiceOpen, setIsServiceOpen] = useState<boolean | null>(null);
+  const [activeFormType, setActiveFormType] = useState<"information" | "objection" | null>(null);
+
+  const handleCardClick = (type: "information" | "objection") => {
+    if (activeFormType === type) {
+      const el = document.getElementById("form-ppid");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    setActiveFormType(type);
+    setTimeout(() => {
+      const el = document.getElementById("form-ppid");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+  };
+
+  const handleCloseForm = () => {
+    setActiveFormType(null);
+    const el = document.getElementById("formulir");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const rows = useMemo(
     () => (activeTab === "dikecualikan" ? [] : infoRows[activeTab]),
@@ -784,9 +809,15 @@ export default function LayananInformasiPage() {
   }, []);
 
   useEffect(() => {
-    const scrollToHash = () => {
+    const handleHash = () => {
       const hash = window.location.hash.replace("#", "");
       if (!hash) return;
+
+      if (hash === "form-ppid" || hash === "formulir-permohonan") {
+        setActiveFormType("information");
+      } else if (hash === "formulir-keberatan") {
+        setActiveFormType("objection");
+      }
 
       const target = document.getElementById(hash);
       if (!target) return;
@@ -796,11 +827,11 @@ export default function LayananInformasiPage() {
       });
     };
 
-    scrollToHash();
-    window.addEventListener("hashchange", scrollToHash);
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
 
     return () => {
-      window.removeEventListener("hashchange", scrollToHash);
+      window.removeEventListener("hashchange", handleHash);
     };
   }, []);
 
@@ -1005,30 +1036,122 @@ export default function LayananInformasiPage() {
             <h2 className="mb-4 text-3xl text-white md:text-4xl" style={serifStyle}>
               Formulir Layanan Elektronik
             </h2>
-            <p className="text-gray-500">
-              Silahkan pilih jenis formulir yang ingin Anda akses melalui Google Form
+            <p className="text-gray-400">
+              Silakan pilih jenis formulir di bawah untuk menampilkan formulir permohonan atau pengajuan keberatan.
             </p>
           </div>
 
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {formCards.map((card) => (
-              <a
-                key={card.title}
-                href={card.href}
-                target={card.href.startsWith("http") ? "_blank" : undefined}
-                rel={card.href.startsWith("http") ? "noreferrer" : undefined}
-                className="group rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]"
-              >
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15] transition group-hover:scale-110">
-                    <i className={`fa-solid ${card.icon}`}></i>
+            {formCards.map((card) => {
+              if (card.type === "sop") {
+                return (
+                  <a
+                    key={card.title}
+                    href={card.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex flex-col justify-between rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]"
+                  >
+                    <div>
+                      <div className="mb-8 flex items-center justify-between">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15] transition group-hover:scale-110">
+                          <i className={`fa-solid ${card.icon}`}></i>
+                        </div>
+                        <i className="fa-solid fa-arrow-up-right-from-square text-gray-600 group-hover:text-[#facc15]"></i>
+                      </div>
+                      <span className="inline-block mb-2 rounded bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        {card.badge}
+                      </span>
+                      <h3 className="mb-2 text-xl font-bold text-white">{card.title}</h3>
+                      <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
+                    </div>
+                    <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#facc15]">
+                      <span>Buka Dokumen SOP</span>
+                      <i className="fa-solid fa-arrow-up-right-from-square text-[10px]" />
+                    </div>
+                  </a>
+                );
+              }
+
+              const isSelected = activeFormType === card.type;
+              return (
+                <button
+                  key={card.title}
+                  type="button"
+                  onClick={() => handleCardClick(card.type)}
+                  className={`group flex flex-col justify-between rounded-[32px] p-10 text-left transition-all duration-500 cursor-pointer ${
+                    isSelected
+                      ? "border-2 border-[#facc15] bg-[#1f2937] shadow-[0_0_40px_rgba(250,204,21,0.25)] scale-[1.02]"
+                      : "border border-white/5 bg-[rgba(31,41,55,0.6)] hover:border-[#facc15]/60 hover:bg-[#1f2937]"
+                  }`}
+                >
+                  <div>
+                    <div className="mb-8 flex items-center justify-between">
+                      <div
+                        className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl transition duration-300 ${
+                          isSelected
+                            ? "bg-[#facc15] text-[#111928] scale-110 shadow-lg"
+                            : "bg-[#facc15]/10 text-[#facc15] group-hover:scale-110"
+                        }`}
+                      >
+                        <i className={`fa-solid ${card.icon}`}></i>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition ${
+                          isSelected
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            : "bg-white/5 text-gray-400 group-hover:text-[#facc15]"
+                        }`}
+                      >
+                        {isSelected ? "Sedang Dibuka" : card.badge}
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-bold text-white transition-colors group-hover:text-[#facc15]">
+                      {card.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
                   </div>
-                  <i className="fa-solid fa-arrow-up-right-from-square text-gray-600 group-hover:text-[#facc15]"></i>
+
+                  <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-4 text-xs font-bold uppercase tracking-wider">
+                    <span className={isSelected ? "text-[#facc15]" : "text-gray-400 group-hover:text-[#facc15]"}>
+                      {isSelected ? "Formulir Aktif" : "Klik Untuk Membuka"}
+                    </span>
+                    <i
+                      className={`fa-solid ${
+                        isSelected
+                          ? "fa-chevron-down text-[#facc15]"
+                          : "fa-arrow-right text-gray-500 group-hover:translate-x-1 group-hover:text-[#facc15]"
+                      } transition-all`}
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div id="form-ppid" className="mt-12 scroll-mt-28">
+            {activeFormType ? (
+              <div className="animate-in fade-in duration-500">
+                <PpidForms
+                  defaultKind={activeFormType}
+                  onClose={handleCloseForm}
+                />
+              </div>
+            ) : (
+              <div className="mx-auto max-w-5xl rounded-[30px] border border-dashed border-white/10 bg-[#1f2937]/30 p-12 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15] mb-4">
+                  <i className="fa-solid fa-arrow-pointer" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">{card.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
-              </a>
-            ))}
+                <h3 className="text-xl font-bold text-white mb-2" style={serifStyle}>
+                  Pilih Formulir Layanan di Atas
+                </h3>
+                <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
+                  Silakan klik kartu <b>Permohonan Informasi</b> atau <b>Pengajuan Keberatan</b> di atas untuk menampilkan formulir yang ingin Anda ajukan.
+                </p>
+              </div>
+            )}
+
+            <RequestStatistics />
           </div>
         </section>
 

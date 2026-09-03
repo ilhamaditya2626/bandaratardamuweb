@@ -1,5 +1,5 @@
 /* Font Awesome 6 Free — SUBSET (dibuat otomatis oleh scripts/build-fa-subset.mjs)
-   Hanya berisi 132 ikon yang dipakai. Jangan diedit manual. */
+   Hanya berisi 138 ikon yang dipakai. Jangan diedit manual. */
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:swap;src:url(/fonts/fa/fa-solid-900.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-regular-400.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Brands";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-brands-400.woff2) format("woff2")}
@@ -11,6 +11,7 @@
 .fa-spin{animation:fa-spin 2s linear infinite}
 @keyframes fa-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .fa-arrow-left::before{content:"\f060"}
+.fa-arrow-pointer::before{content:"\f245"}
 .fa-arrow-right::before{content:"\f061"}
 .fa-arrow-up-right-from-square::before{content:"\f08e"}
 .fa-bars::before{content:"\f0c9"}
@@ -24,10 +25,12 @@
 .fa-bus::before{content:"\f207"}
 .fa-calendar::before{content:"\f133"}
 .fa-calendar-check::before{content:"\f274"}
+.fa-calendar-day::before{content:"\f783"}
 .fa-calendar-days::before{content:"\f073"}
 .fa-camera::before{content:"\f030"}
 .fa-car::before{content:"\f1b9"}
 .fa-chair::before{content:"\f6c0"}
+.fa-chart-column::before{content:"\e0e3"}
 .fa-chart-line::before{content:"\f201"}
 .fa-check::before{content:"\f00c"}
 .fa-chevron-down::before{content:"\f078"}
@@ -37,6 +40,7 @@
 .fa-circle-check::before{content:"\f058"}
 .fa-circle-exclamation::before{content:"\f06a"}
 .fa-circle-info::before{content:"\f05a"}
+.fa-circle-notch::before{content:"\f1ce"}
 .fa-circle-question::before{content:"\f059"}
 .fa-clipboard-list::before{content:"\f46d"}
 .fa-clock::before{content:"\f017"}
@@ -58,6 +62,7 @@
 .fa-file-invoice::before{content:"\f570"}
 .fa-file-lines::before{content:"\f15c"}
 .fa-file-pdf::before{content:"\f1c1"}
+.fa-file-pen::before{content:"\f31c"}
 .fa-file-shield::before{content:"\e4f0"}
 .fa-fire-extinguisher::before{content:"\f134"}
 .fa-folder-open::before{content:"\f07c"}
@@ -83,6 +88,7 @@
 .fa-motorcycle::before{content:"\f21c"}
 .fa-mug-hot::before{content:"\f7b6"}
 .fa-newspaper::before{content:"\f1ea"}
+.fa-paper-plane::before{content:"\f1d8"}
 .fa-parking::before{content:"\f540"}
 .fa-pen-nib::before{content:"\f5ad"}
 .fa-pen-to-square::before{content:"\f044"}

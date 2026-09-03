@@ -128,7 +128,7 @@ export function EmployeeDataSection() {
           </ChartCard>
 
           <ChartCard title="Tingkat Pendidikan">
-            <div className="h-[265px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={educationData} margin={{ top: 12, right: 0, left: -22, bottom: 0 }}><XAxis dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={tooltipStyle} labelFormatter={(label) => { const item = educationData.find((entry) => entry.name === label); return `${label} - ${item?.value ?? 0} personel`; }} formatter={(value) => [`${value} personel`, "Jumlah Pegawai"]} /><Bar dataKey="value" radius={[8, 8, 0, 0]}>{educationData.map((item) => <Cell key={item.name} fill={item.fill} />)}</Bar></BarChart></ResponsiveContainer></div>
+            <div className="h-[265px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={educationData} margin={{ top: 12, right: 10, left: -10, bottom: 0 }}><XAxis dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={tooltipStyle} labelFormatter={(label) => { const item = educationData.find((entry) => entry.name === label); return `${label} - ${item?.value ?? 0} personel`; }} formatter={(value) => [`${value} personel`, "Jumlah Pegawai"]} /><Bar dataKey="value" radius={[8, 8, 0, 0]}>{educationData.map((item) => <Cell key={item.name} fill={item.fill} />)}</Bar></BarChart></ResponsiveContainer></div>
             <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-gray-400">Pendidikan SMA/SMK masih mendominasi, dengan pengembangan kompetensi terus berjalan.</p>
           </ChartCard>
 
@@ -137,7 +137,44 @@ export function EmployeeDataSection() {
           </ChartCard>
 
           <ChartCard title="Rekapitulasi SDM per Unit Kerja" className="xl:col-span-2">
-            <div className="h-[350px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={unitData} margin={{ top: 10, right: 5, left: -18, bottom: 0 }} barGap={4}><XAxis dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 10 }} axisLine={false} tickLine={false} interval={0} /><YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} tickFormatter={(value) => `${value} Personel`} domain={[0, 14]} axisLine={false} tickLine={false} /><Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value} personel`, "Jumlah"]} /><Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} /><Bar dataKey="pns" name="PNS/CPNS" fill="#4f7fee" radius={[7, 7, 0, 0]} /><Bar dataKey="pppk" name="PPPK" fill="#a78bfa" radius={[7, 7, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="h-[380px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={unitData}
+                  margin={{ top: 10, right: 10, left: 15, bottom: 25 }}
+                  barGap={3}
+                >
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#cbd5e1", fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    interval={0}
+                    angle={-45}
+                    textAnchor="end"
+                    height={65}
+                    dy={4}
+                  />
+                  <YAxis
+                    width={78}
+                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                    tickFormatter={(value) => `${value} Personel`}
+                    domain={[0, 14]}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value) => [`${value} personel`, "Jumlah"]}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: "12px", paddingTop: "6px" }}
+                  />
+                  <Bar dataKey="pns" name="PNS/CPNS" fill="#4f7fee" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="pppk" name="PPPK" fill="#a78bfa" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </ChartCard>
 
           <ChartCard title="Komposisi Jabatan">

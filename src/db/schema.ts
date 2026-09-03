@@ -121,6 +121,47 @@ export const feedbackSubmissions = mysqlTable("feedback_submissions", {
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── PPID: PERMOHONAN INFORMASI & KEBERATAN ──────────────────
+export const informationRequests = mysqlTable("information_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  request_type: varchar("request_type", { length: 20 }).notNull(), // information | objection
+  email: varchar("email", { length: 255 }).notNull(),
+  name: varchar("name", { length: 150 }).notNull(),
+  phone: varchar("phone", { length: 40 }).notNull(),
+  address: text("address").notNull(),
+  occupation: varchar("occupation", { length: 150 }).notNull(),
+  identity_type: varchar("identity_type", { length: 20 }).notNull(),
+  identity_number: varchar("identity_number", { length: 120 }).notNull(),
+  identity_file_url: text("identity_file_url").notNull(),
+  institution: varchar("institution", { length: 255 }),
+  information_detail: text("information_detail"),
+  purpose: text("purpose"),
+  supporting_file_url: text("supporting_file_url"),
+  objection_reason: varchar("objection_reason", { length: 255 }),
+  objection_reason_other: text("objection_reason_other"),
+  case_position: text("case_position"),
+  submitted_on: date("submitted_on", { mode: "string" }).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending | accepted | rejected
+  admin_note: text("admin_note"),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ─── DOKUMEN PUBLIK YANG DIKELOLA ADMIN ─────────────────────
+export const publicDocuments = mysqlTable("public_documents", {
+  id: int("id").autoincrement().primaryKey(),
+  category: varchar("category", { length: 40 }).notNull(), // annual_report | work_budget | financial_report | lakip | dip | dik
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  document_date: date("document_date", { mode: "string" }),
+  file_url: text("file_url").notNull(),
+  file_name: varchar("file_name", { length: 255 }).notNull(),
+  total_pages: int("total_pages").default(0).notNull(),
+  is_published: boolean("is_published").default(true).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── PENGINAPAN (Akomodasi Penginapan) ───────────────────────
 export const penginapan = mysqlTable("penginapan", {
   id: int("id").autoincrement().primaryKey(),

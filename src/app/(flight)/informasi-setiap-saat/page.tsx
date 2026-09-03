@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
+import { DocumentCards } from "@/components/information/document-cards";
 
 const lakipDocs = [{ label: "LAKIP 2024.pdf", slug: "laporan-tahunan-2024" }, { label: "LAKIP 2025.pdf", slug: "laporan-tahunan-2025" }];
 const dipDocs = [{ label: "DIP 2024.pdf", slug: "dip-2024" }, { label: "DIP 2025.pdf", slug: "dip-2025" }];
@@ -62,7 +63,7 @@ export default function InformasiSetiapSaatPage() {
               <i className="fa-solid fa-file-invoice mb-6 text-5xl text-[#facc15]"></i>
               <h4 className="mb-6 font-semibold text-white">Dokumen LAKIP</h4>
               <div className="w-full space-y-3">
-                {lakipDocs.map((doc) => (
+                {false && lakipDocs.map((doc) => (
                   <Link
                     key={doc.slug}
                     href={`/informasi-berkala/dokumen/${doc.slug}`}
@@ -70,7 +71,7 @@ export default function InformasiSetiapSaatPage() {
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc.label}</span><i className="fa-solid fa-eye ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
                   </Link>
-                ))}
+                ))}<DocumentCards category="lakip" />
               </div>
             </div>
           </div>
@@ -115,7 +116,7 @@ export default function InformasiSetiapSaatPage() {
               <i className="fa-solid fa-file-lines mb-6 text-5xl text-[#facc15]"></i>
               <h4 className="mb-6 font-semibold text-white">Dokumen DIP</h4>
               <div className="w-full space-y-3">
-                {dipDocs.map((doc) => (
+                {false && dipDocs.map((doc) => (
                   <Link
                     key={doc.slug}
                     href={`/informasi-berkala/dokumen/${doc.slug}`}
@@ -123,7 +124,7 @@ export default function InformasiSetiapSaatPage() {
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc.label}</span><i className="fa-solid fa-eye ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
                   </Link>
-                ))}
+                ))}<DocumentCards category="dip" />
               </div>
             </div>
           </div>
@@ -164,7 +165,7 @@ export default function InformasiSetiapSaatPage() {
               <i className="fa-solid fa-file-invoice mb-6 text-5xl text-[#facc15]"></i>
               <h4 className="mb-6 font-semibold text-white">Dokumen DIK</h4>
               <div className="w-full space-y-3">
-                {dikDocs.map((doc) => (
+                {false && dikDocs.map((doc) => (
                   <Link
                     key={doc.slug}
                     href={`/informasi-berkala/dokumen/${doc.slug}`}
@@ -172,7 +173,7 @@ export default function InformasiSetiapSaatPage() {
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i className="fa-solid fa-file-pdf"></i></span><span className="min-w-0 flex-1 truncate">{doc.label}</span><i className="fa-solid fa-eye ml-auto shrink-0 text-xs text-gray-500 transition group-hover:text-[#facc15]"></i>
                   </Link>
-                ))}
+                ))}<DocumentCards category="dik" />
               </div>
             </div>
           </div>
