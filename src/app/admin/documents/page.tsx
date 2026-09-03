@@ -5,6 +5,7 @@ import {
   FileText, 
   Upload, 
   Trash2, 
+  Pencil,
   CheckCircle, 
   AlertCircle, 
   ExternalLink, 
@@ -38,6 +39,8 @@ export default function DocumentsAdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [editingDocument, setEditingDocument] = useState<PublicDoc | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const loadDocuments = async () => {
     setIsLoading(true);
@@ -112,6 +115,39 @@ export default function DocumentsAdminPage() {
     } catch (err) {
       console.error("Delete document error:", err);
       setNotice({ type: "error", message: "Terjadi kesalahan saat menghapus dokumen." });
+    }
+  }
+
+  async function editDocument(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editingDocument) return;
+    setIsSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      const response = await fetch("/api/admin/documents", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingDocument.id,
+          title: formData.get("title"),
+          category: formData.get("category"),
+          document_date: formData.get("document_date"),
+          description: formData.get("description"),
+        }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setNotice({ type: "success", message: "Dokumen berhasil diperbarui." });
+        setEditingDocument(null);
+        loadDocuments();
+      } else {
+        setNotice({ type: "error", message: data.error || "Gagal memperbarui dokumen." });
+      }
+    } catch (err) {
+      console.error("Edit document error:", err);
+      setNotice({ type: "error", message: "Terjadi kesalahan saat memperbarui dokumen." });
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -298,6 +334,13 @@ export default function DocumentsAdminPage() {
                       <ExternalLink className="h-4 w-4" />
                     </a>
                     <button
+                      onClick={() => setEditingDocument(d)}
+                      className="rounded p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
+                      title="Edit dokumen"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => remove(d.id, d.title)}
                       className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
                       title="Hapus dokumen"
@@ -311,6 +354,42 @@ export default function DocumentsAdminPage() {
           </div>
         </section>
       </div>
+
+      {editingDocument && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form onSubmit={editDocument} className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+              <h3 className="text-lg font-bold text-gray-900">Edit Dokumen Publik</h3>
+              <button type="button" onClick={() => setEditingDocument(null)} className="text-gray-400 hover:text-gray-700" title="Tutup">✕</button>
+            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Judul Dokumen
+              <input name="title" required defaultValue={editingDocument.title} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+            </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+                Kategori
+                <select name="category" defaultValue={editingDocument.category} className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:border-blue-500">
+                  {Object.entries(labels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}
+                </select>
+              </label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+                Tanggal Dokumen
+                <input name="document_date" type="date" defaultValue={editingDocument.document_date || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+              </label>
+            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Keterangan Singkat
+              <textarea name="description" rows={3} defaultValue={editingDocument.description || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+            </label>
+            <p className="text-xs text-gray-500">File PDF tidak diubah. Untuk mengganti file, hapus dokumen ini lalu unggah versi baru.</p>
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+              <button type="button" onClick={() => setEditingDocument(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">Batal</button>
+              <button type="submit" disabled={isSaving} className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50">{isSaving ? "Menyimpan..." : "Simpan Perubahan"}</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

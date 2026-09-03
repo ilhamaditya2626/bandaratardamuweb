@@ -705,7 +705,7 @@ const formCards = [
   },
   {
     type: "sop" as const,
-    href: "https://drive.google.com/drive/u/0/my-drive",
+    href: "https://drive.google.com/drive/u/0/folders/1WoGJIgNIVy-GwD4kzPB7t68thXMzbPQL",
     icon: "fa-file-lines",
     title: "SOP",
     badge: "Dokumen Panduan",
@@ -713,6 +713,9 @@ const formCards = [
       "Panduan prosedur pelayanan informasi publik dan standar operasional yang berlaku di unit kerja.",
   },
 ];
+
+const publicInformationReportUrl =
+  process.env.NEXT_PUBLIC_PUBLIC_INFORMATION_REPORT_URL || "https://drive.google.com/";
 
 const complaintChannels = [
   {
@@ -1130,28 +1133,38 @@ export default function LayananInformasiPage() {
           </div>
 
           <div id="form-ppid" className="mt-12 scroll-mt-28">
-            {activeFormType ? (
+            {activeFormType && (
               <div className="animate-in fade-in duration-500">
                 <PpidForms
                   defaultKind={activeFormType}
                   onClose={handleCloseForm}
                 />
               </div>
-            ) : (
-              <div className="mx-auto max-w-5xl rounded-[30px] border border-dashed border-white/10 bg-[#1f2937]/30 p-12 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15] mb-4">
-                  <i className="fa-solid fa-arrow-pointer" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2" style={serifStyle}>
-                  Pilih Formulir Layanan di Atas
-                </h3>
-                <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-                  Silakan klik kartu <b>Permohonan Informasi</b> atau <b>Pengajuan Keberatan</b> di atas untuk menampilkan formulir yang ingin Anda ajukan.
-                </p>
-              </div>
             )}
 
             <RequestStatistics />
+
+            <a
+              href={publicInformationReportUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group mx-auto mt-8 flex max-w-5xl items-center justify-between gap-6 rounded-[30px] border border-white/10 bg-[#1f2937]/70 p-6 transition-all duration-300 hover:border-[#facc15]/60 hover:bg-[#1f2937] md:p-8"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15] transition group-hover:scale-105">
+                  <i className="fa-solid fa-file-lines" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white md:text-xl">
+                    Daftar Laporan Penyampaian Informasi Publik
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Lihat laporan penyampaian informasi publik melalui Google Drive.
+                  </p>
+                </div>
+              </div>
+              <i className="fa-solid fa-arrow-up-right-from-square shrink-0 text-[#facc15] transition group-hover:translate-x-1" />
+            </a>
           </div>
         </section>
 

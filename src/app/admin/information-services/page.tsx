@@ -3,13 +3,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { 
   FileText, 
-  Upload, 
-  Trash2, 
+  Pencil,
+  Trash2,
   CheckCircle, 
   XCircle, 
   Clock, 
   AlertCircle,
-  FileCheck,
   Building2,
   Phone,
   Mail,
@@ -17,15 +16,6 @@ import {
   ExternalLink,
   Loader2
 } from "lucide-react";
-
-const labels: Record<string, string> = {
-  annual_report: "Laporan Tahunan",
-  work_budget: "Rencana Kerja Anggaran",
-  financial_report: "Laporan Keuangan",
-  lakip: "LAKIP",
-  dip: "DIP",
-  dik: "DIK",
-};
 
 const months = [
   { value: "1", label: "Januari" },
@@ -66,26 +56,13 @@ interface InformationRequest {
   created_at: string;
 }
 
-interface PublicDoc {
-  id: number;
-  category: string;
-  title: string;
-  description?: string | null;
-  document_date?: string | null;
-  file_url: string;
-  file_name: string;
-  total_pages: number;
-  is_published: boolean;
-  created_at: string;
-}
-
 export default function InformationServicesAdmin() {
   const [requests, setRequests] = useState<InformationRequest[]>([]);
-  const [docs, setDocs] = useState<PublicDoc[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
   const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<InformationRequest | null>(null);
+  const [editingRequest, setEditingRequest] = useState<InformationRequest | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const now = new Date();
   const currentMonthStr = String(now.getMonth() + 1);
@@ -117,10 +94,7 @@ export default function InformationServicesAdmin() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [resRequests, resDocs] = await Promise.all([
-        fetch("/api/admin/information-requests"),
-        fetch("/api/admin/documents"),
-      ]);
+      const resRequests = await fetch("/api/admin/information-requests");
 
       if (resRequests.ok) {
         const jsonRequests = await resRequests.json();
@@ -129,12 +103,6 @@ export default function InformationServicesAdmin() {
         console.error("Failed to fetch information requests:", resRequests.status);
       }
 
-      if (resDocs.ok) {
-        const jsonDocs = await resDocs.json();
-        setDocs(Array.isArray(jsonDocs.data) ? jsonDocs.data : []);
-      } else {
-        console.error("Failed to fetch documents:", resDocs.status);
-      }
     } catch (err) {
       console.error("Error loading PPID admin data:", err);
       setNotice({ type: "error", message: "Gagal memuat data dari server." });
@@ -170,60 +138,56 @@ export default function InformationServicesAdmin() {
     }
   }
 
-  async function handleUpload(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsUploading(true);
-    setNotice(null);
-
-    const formEl = e.currentTarget;
+  async function handleRemoveRequest(id: number, name: string) {
+    if (!confirm(`Hapus permohonan dari "${name}"?`)) return;
     try {
-      const formData = new FormData(formEl);
-      const res = await fetch("/api/admin/documents", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setNotice({
-          type: "success",
-          message: `Dokumen berhasil dipublikasikan (${data.total_pages || 0} halaman).`,
-        });
-        formEl.reset();
-        loadData();
-      } else {
-        setNotice({ type: "error", message: data.error || "Unggahan gagal dilakukan." });
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-      setNotice({ type: "error", message: "Terjadi kesalahan jaringan saat mengunggah." });
-    } finally {
-      setIsUploading(false);
-    }
-  }
-
-  async function handleRemoveDoc(id: number, title: string) {
-    if (!confirm(`Hapus dokumen "${title}"?`)) return;
-
-    try {
-      const res = await fetch("/api/admin/documents", {
+      const res = await fetch("/api/admin/information-requests", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
       const data = await res.json();
-
       if (res.ok && data.success) {
-        setNotice({ type: "success", message: "Dokumen berhasil dihapus." });
+        setNotice({ type: "success", message: "Permohonan berhasil dihapus." });
+        setSelectedRequest(null);
         loadData();
       } else {
-        setNotice({ type: "error", message: data.error || "Gagal menghapus dokumen." });
+        setNotice({ type: "error", message: data.error || "Gagal menghapus permohonan." });
       }
     } catch (err) {
-      console.error("Delete doc error:", err);
-      setNotice({ type: "error", message: "Terjadi kesalahan saat menghapus dokumen." });
+      console.error("Delete request error:", err);
+      setNotice({ type: "error", message: "Terjadi kesalahan saat menghapus permohonan." });
     }
   }
+
+  async function handleEditRequest(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editingRequest) return;
+    setIsSaving(true);
+    const formData = new FormData(e.currentTarget);
+    const fields = Object.fromEntries(formData.entries());
+    try {
+      const res = await fetch("/api/admin/information-requests", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingRequest.id, ...fields }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNotice({ type: "success", message: "Permohonan berhasil diperbarui." });
+        setEditingRequest(null);
+        loadData();
+      } else {
+        setNotice({ type: "error", message: data.error || "Gagal memperbarui permohonan." });
+      }
+    } catch (err) {
+      console.error("Edit request error:", err);
+      setNotice({ type: "error", message: "Terjadi kesalahan saat memperbarui permohonan." });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
 
   return (
     <div className="space-y-8">
@@ -234,7 +198,7 @@ export default function InformationServicesAdmin() {
             Layanan Informasi PPID
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            Kelola permohonan informasi publik, keberatan, serta publikasi dokumen resmi bandara.
+            Kelola permohonan informasi publik dan pernyataan keberatan masyarakat.
           </p>
         </div>
       </div>
@@ -264,174 +228,6 @@ export default function InformationServicesAdmin() {
           </button>
         </div>
       )}
-
-      {/* Grid: Upload & Document List */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Upload Form */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Upload className="h-5 w-5" />
-            </span>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">Unggah Dokumen Publik</h3>
-              <p className="text-xs text-gray-500">Publikasikan file PDF dokumen transparansi</p>
-            </div>
-          </div>
-
-          <form onSubmit={handleUpload} className="mt-5 space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Judul Dokumen <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="title"
-                required
-                placeholder="Contoh: Laporan Tahunan Pelayanan Bandara 2025"
-                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                  Kategori <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="category"
-                  required
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white"
-                >
-                  {Object.entries(labels).map(([k, v]) => (
-                    <option value={k} key={k}>
-                      {v}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                  Tanggal Dokumen
-                </label>
-                <input
-                  name="document_date"
-                  type="date"
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Keterangan Singkat (Opsional)
-              </label>
-              <textarea
-                name="description"
-                rows={2}
-                placeholder="Ringkasan atau keterangan isi dokumen..."
-                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                File PDF <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="file"
-                required
-                accept="application/pdf"
-                type="file"
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isUploading}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Mengunggah...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4" />
-                  Unggah & Publikasikan
-                </>
-              )}
-            </button>
-          </form>
-        </section>
-
-        {/* Existing Documents */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                <FileCheck className="h-5 w-5" />
-              </span>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Dokumen Terpublikasi</h3>
-                <p className="text-xs text-gray-500">{docs.length} dokumen tersedia</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex-1 overflow-y-auto max-h-[420px] divide-y divide-gray-100">
-            {isLoading ? (
-              <div className="py-12 text-center text-sm text-gray-400">
-                <Loader2 className="mx-auto h-6 w-6 animate-spin mb-2 text-gray-400" />
-                Memuat dokumen...
-              </div>
-            ) : docs.length === 0 ? (
-              <div className="py-12 text-center text-sm text-gray-400">
-                Belum ada dokumen yang dipublikasikan.
-              </div>
-            ) : (
-              docs.map((d) => (
-                <div key={d.id} className="flex items-center justify-between gap-4 py-3 group">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold text-gray-900">
-                        {d.title}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                      <span className="rounded bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
-                        {labels[d.category] || d.category}
-                      </span>
-                      <span>{d.total_pages} halaman</span>
-                      {d.document_date && <span>• {d.document_date}</span>}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <a
-                      href={d.file_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
-                      title="Lihat file"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                    <button
-                      onClick={() => handleRemoveDoc(d.id, d.title)}
-                      className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
-                      title="Hapus dokumen"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      </div>
 
       {/* Requests Table */}
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -584,6 +380,22 @@ export default function InformationServicesAdmin() {
                       </span>
                     </td>
                     <td className="p-4 whitespace-nowrap text-right space-x-2">
+                      <button
+                        onClick={() => setEditingRequest(r)}
+                        className="inline-flex items-center gap-1 rounded bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                        title="Edit permohonan"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleRemoveRequest(r.id, r.name)}
+                        className="inline-flex items-center gap-1 rounded bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700"
+                        title="Hapus permohonan"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Hapus
+                      </button>
                       {r.status !== "accepted" && (
                         <button
                           onClick={() => handleStatusUpdate(r.id, "accepted")}
@@ -724,6 +536,18 @@ export default function InformationServicesAdmin() {
               >
                 Tutup
               </button>
+              <button
+                onClick={() => setEditingRequest(selectedRequest)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </button>
+              <button
+                onClick={() => handleRemoveRequest(selectedRequest.id, selectedRequest.name)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Hapus
+              </button>
               {selectedRequest.status !== "accepted" && (
                 <button
                   onClick={() => {
@@ -748,6 +572,49 @@ export default function InformationServicesAdmin() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {editingRequest && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+          <form onSubmit={handleEditRequest} className="max-h-[90vh] w-full max-w-2xl space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+              <h3 className="text-lg font-bold text-gray-900">Edit Permohonan #{editingRequest.id}</h3>
+              <button type="button" onClick={() => setEditingRequest(null)} className="text-gray-400 hover:text-gray-700" title="Tutup">✕</button>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(["name", "email", "phone", "occupation"] as const).map((field) => (
+                <label key={field} className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+                  {field === "name" ? "Nama" : field === "email" ? "Email" : field === "phone" ? "No. Telepon" : "Pekerjaan"}
+                  <input name={field} required defaultValue={editingRequest[field]} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+                </label>
+              ))}
+            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Alamat
+              <textarea name="address" required rows={2} defaultValue={editingRequest.address} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+            </label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Instansi / Lembaga
+              <input name="institution" defaultValue={editingRequest.institution || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+            </label>
+            {editingRequest.request_type === "information" ? (
+              <>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">Rincian Informasi<textarea name="information_detail" rows={3} defaultValue={editingRequest.information_detail || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" /></label>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">Tujuan Penggunaan<textarea name="purpose" rows={2} defaultValue={editingRequest.purpose || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" /></label>
+              </>
+            ) : (
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">Kasus Posisi<textarea name="case_position" rows={3} defaultValue={editingRequest.case_position || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" /></label>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">Tanggal Pengajuan<input name="submitted_on" type="date" required defaultValue={editingRequest.submitted_on} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" /></label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">Catatan Admin<textarea name="admin_note" rows={1} defaultValue={editingRequest.admin_note || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" /></label>
+            </div>
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+              <button type="button" onClick={() => setEditingRequest(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">Batal</button>
+              <button type="submit" disabled={isSaving} className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50">{isSaving ? "Menyimpan..." : "Simpan Perubahan"}</button>
+            </div>
+          </form>
         </div>
       )}
     </div>

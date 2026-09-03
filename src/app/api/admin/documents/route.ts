@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { createDocument, deleteDocument, listAllDocumentsAdmin } from "@/services/information.service";
+import { createDocument, deleteDocument, listAllDocumentsAdmin, updateDocument } from "@/services/information.service";
 import { DocumentUploadError, saveUploadedDocument, countPdfPages } from "@/lib/document-upload";
 
 async function allowed(r: NextRequest) {
@@ -81,5 +81,30 @@ export async function DELETE(r: NextRequest) {
   } catch (error) {
     console.error("DELETE /api/admin/documents error:", error);
     return NextResponse.json({ success: false, error: "Gagal menghapus dokumen" }, { status: 500 });
+  }
+}
+
+export async function PATCH(r: NextRequest) {
+  try {
+    if (!await allowed(r)) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const body = await r.json();
+    const id = Number(body.id);
+    const category = String(body.category || "");
+    const title = String(body.title || "").trim();
+    if (!Number.isInteger(id) || !categories.includes(category) || !title) {
+      return NextResponse.json({ success: false, error: "ID, kategori, dan judul wajib diisi." }, { status: 400 });
+    }
+    await updateDocument(id, {
+      category,
+      title,
+      description: typeof body.description === "string" ? body.description.trim() || null : null,
+      document_date: typeof body.document_date === "string" ? body.document_date || null : null,
+    });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("PATCH /api/admin/documents error:", error);
+    return NextResponse.json({ success: false, error: "Gagal memperbarui dokumen" }, { status: 500 });
   }
 }

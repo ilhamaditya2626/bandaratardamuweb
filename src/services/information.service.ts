@@ -44,6 +44,10 @@ export async function requestStats(year?: string, month?: string) {
 }
 export async function listRequests() { return db.select().from(informationRequests).orderBy(desc(informationRequests.created_at)); }
 export async function updateRequestStatus(id: number, status: string, admin_note?: string) { await db.update(informationRequests).set({ status, admin_note, updated_at: new Date() }).where(eq(informationRequests.id, id)); }
+export async function updateInformationRequest(id: number, data: Partial<typeof informationRequests.$inferInsert>) {
+  await db.update(informationRequests).set({ ...data, updated_at: new Date() }).where(eq(informationRequests.id, id));
+}
+export async function deleteInformationRequest(id: number) { return db.delete(informationRequests).where(eq(informationRequests.id, id)); }
 export async function listDocuments(category?: string, latestOnly = false) {
   const where = category ? and(eq(publicDocuments.category, category), eq(publicDocuments.is_published, true)) : eq(publicDocuments.is_published, true);
   const query = db.select().from(publicDocuments).where(where).orderBy(desc(publicDocuments.document_date), desc(publicDocuments.created_at));
@@ -51,5 +55,8 @@ export async function listDocuments(category?: string, latestOnly = false) {
 }
 export async function listAllDocumentsAdmin() { return db.select().from(publicDocuments).orderBy(desc(publicDocuments.created_at)); }
 export async function createDocument(data: typeof publicDocuments.$inferInsert) { return db.insert(publicDocuments).values(data); }
+export async function updateDocument(id: number, data: Partial<typeof publicDocuments.$inferInsert>) {
+  await db.update(publicDocuments).set({ ...data, updated_at: new Date() }).where(eq(publicDocuments.id, id));
+}
 export async function deleteDocument(id: number) { return db.delete(publicDocuments).where(eq(publicDocuments.id, id)); }
 export async function getDocument(id: number) { const [document] = await db.select().from(publicDocuments).where(and(eq(publicDocuments.id, id), eq(publicDocuments.is_published, true))).limit(1); return document; }

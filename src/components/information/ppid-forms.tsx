@@ -72,17 +72,18 @@ export function PpidForms({ defaultKind, onClose }: PpidFormsProps = {}) {
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setSending(true);
     setMessage("");
     try {
       const res = await fetch("/api/information-requests", {
         method: "POST",
-        body: new FormData(e.currentTarget),
+        body: new FormData(form),
       });
       const json = await res.json();
       setSending(false);
       setMessage(json.message || json.error || "Tanggapan diterima.");
-      if (res.ok) e.currentTarget.reset();
+      if (res.ok) form.reset();
     } catch (err) {
       console.error("Form submit error:", err);
       setSending(false);
@@ -281,7 +282,16 @@ export function PpidForms({ defaultKind, onClose }: PpidFormsProps = {}) {
           </div>
         )}
 
-        <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-white/10 pt-6">
+        <div className="mt-8 border-t border-white/10 pt-6">
+          <p className="flex items-start gap-2 text-xs leading-relaxed text-gray-400">
+            <i className="fa-solid fa-shield-halved mt-0.5 shrink-0 text-[#facc15]" />
+            <span>
+              Data pribadi Anda akan dijaga dengan aman dan tidak disebarluaskan
+              kepada pihak lain tanpa persetujuan atau dasar hukum yang sah.
+            </span>
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center gap-4">
           <button
             type="submit"
             disabled={sending}
@@ -309,6 +319,7 @@ export function PpidForms({ defaultKind, onClose }: PpidFormsProps = {}) {
               Batal & Tutup
             </button>
           )}
+          </div>
         </div>
       </form>
     </div>
