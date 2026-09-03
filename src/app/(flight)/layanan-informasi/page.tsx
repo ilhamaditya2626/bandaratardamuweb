@@ -715,7 +715,7 @@ const formCards = [
 ];
 
 const publicInformationReportUrl =
-  process.env.NEXT_PUBLIC_PUBLIC_INFORMATION_REPORT_URL || "https://drive.google.com/";
+  process.env.NEXT_PUBLIC_PUBLIC_INFORMATION_REPORT_URL || "https://drive.google.com/drive/u/0/folders/1Uu4w7GlIonObrbOou7Q2Ll48jaF9yAqD";
 
 const complaintChannels = [
   {
