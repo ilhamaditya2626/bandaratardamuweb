@@ -748,6 +748,7 @@ export default function LayananInformasiPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("berkala");
   const [isServiceOpen, setIsServiceOpen] = useState<boolean | null>(null);
   const [activeFormType, setActiveFormType] = useState<"information" | "objection" | null>(null);
+  const [showComplaintImage, setShowComplaintImage] = useState(false);
 
   const handleCardClick = (type: "information" | "objection") => {
     if (activeFormType === type) {
@@ -1331,6 +1332,69 @@ export default function LayananInformasiPage() {
                 Kementerian Perhubungan.
               </p>
             </div>
+
+            {/* Infografis Tata Cara Pengaduan */}
+            <div className="mb-16">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#facc15]/10 text-lg text-[#facc15]">
+                  <i className="fa-solid fa-route" />
+                </div>
+                <div>
+                  <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#facc15] border border-[#facc15]/20">
+                    Infografis Layanan
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowComplaintImage(true)}
+                className="group relative mx-auto block w-full max-w-2xl cursor-zoom-in overflow-hidden rounded-[2rem] border border-white/10 bg-[#1f2937] shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#facc15]/40 hover:shadow-[0_20px_60px_rgba(250,204,21,0.1)]"
+              >
+                <Image
+                  src="/assets/images/tata-cara-pengaduan.jpg"
+                  alt="Infografis Tata Cara Pengaduan Masyarakat"
+                  width={900}
+                  height={1200}
+                  sizes="(max-width: 768px) 100vw, 672px"
+                  className="h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/20">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#facc15] text-[#111928] opacity-0 shadow-lg transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 scale-75">
+                    <i className="fa-solid fa-magnifying-glass-plus text-lg" />
+                  </span>
+                </div>
+              </button>
+              <p className="mt-3 text-center text-xs text-gray-500">
+                <i className="fa-solid fa-hand-pointer mr-1" /> Klik gambar untuk memperbesar
+              </p>
+            </div>
+
+            {/* Modal Preview Gambar Tata Cara Pengaduan */}
+            {showComplaintImage && (
+              <div
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                onClick={() => setShowComplaintImage(false)}
+              >
+                <div className="relative max-h-[90vh] max-w-3xl w-full overflow-auto rounded-2xl" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => setShowComplaintImage(false)}
+                    className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
+                  >
+                    <i className="fa-solid fa-xmark text-lg" />
+                  </button>
+                  <Image
+                    src="/assets/images/tata-cara-pengaduan.jpg"
+                    alt="Infografis Tata Cara Pengaduan Masyarakat - Ukuran Penuh"
+                    width={900}
+                    height={1200}
+                    sizes="90vw"
+                    className="h-auto w-full rounded-2xl"
+                    priority
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
               {complaintChannels.map((item) => (
