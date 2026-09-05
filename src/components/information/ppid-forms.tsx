@@ -173,10 +173,6 @@ export function PpidForms({ defaultKind, onClose }: PpidFormsProps = {}) {
           {base.map((x) => (
             <Field key={x.name} {...x} />
           ))}
-          <Field
-            name="identity_number"
-            label="Nomor Identitas (NPWP/KTP/SIM/Paspor)"
-          />
           <label className="block text-sm font-semibold text-gray-200">
             Jenis Identitas <span className="text-red-400">*</span>
             <select
@@ -190,6 +186,10 @@ export function PpidForms({ defaultKind, onClose }: PpidFormsProps = {}) {
               <option value="Paspor">Paspor</option>
             </select>
           </label>
+          <Field
+            name="identity_number"
+            label="Nomor Identitas (NPWP/KTP/SIM/Paspor)"
+          />
           <label className="block text-sm font-semibold text-gray-200">
             Unggah Foto Identitas <span className="text-red-400">*</span>
             <input

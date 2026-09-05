@@ -754,36 +754,50 @@ export default function LayananInformasiPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const handleFormDeepLink = () => {
-      const params = new URLSearchParams(window.location.search);
-      const formParam = params.get("form")?.toLowerCase();
+    const handleUrlNavigation = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const formParam = searchParams.get("form")?.toLowerCase();
+      const hash = window.location.hash.replace("#", "");
 
+      // Prioritaskan query parameter ?form=...
       if (
-        formParam === "permohonan" ||
-        formParam === "informasi" ||
-        formParam === "permohonan-informasi"
-      ) {
-        setActiveFormType("information");
-        setTimeout(() => {
-          const el = document.getElementById("form-ppid");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 300);
-      } else if (
         formParam === "keberatan" ||
         formParam === "pengajuan-keberatan" ||
         formParam === "pernyataan-keberatan"
       ) {
         setActiveFormType("objection");
+      } else if (
+        formParam === "permohonan" ||
+        formParam === "informasi" ||
+        formParam === "permohonan-informasi"
+      ) {
+        setActiveFormType("information");
+      } else if (hash === "formulir-keberatan") {
+        setActiveFormType("objection");
+      } else if (hash === "form-ppid" || hash === "formulir-permohonan") {
+        setActiveFormType("information");
+      }
+
+      // Scroll ke elemen target
+      const targetId = hash || (formParam ? "form-ppid" : null);
+      if (targetId) {
         setTimeout(() => {
-          const el = document.getElementById("form-ppid");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          const target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         }, 300);
       }
     };
 
-    handleFormDeepLink();
-    window.addEventListener("popstate", handleFormDeepLink);
-    return () => window.removeEventListener("popstate", handleFormDeepLink);
+    handleUrlNavigation();
+    window.addEventListener("popstate", handleUrlNavigation);
+    window.addEventListener("hashchange", handleUrlNavigation);
+
+    return () => {
+      window.removeEventListener("popstate", handleUrlNavigation);
+      window.removeEventListener("hashchange", handleUrlNavigation);
+    };
   }, []);
 
   const handleCardClick = (type: "information" | "objection") => {
@@ -846,33 +860,6 @@ export default function LayananInformasiPage() {
     updateServiceStatus();
     const interval = setInterval(updateServiceStatus, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleHash = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (!hash) return;
-
-      if (hash === "form-ppid" || hash === "formulir-permohonan") {
-        setActiveFormType("information");
-      } else if (hash === "formulir-keberatan") {
-        setActiveFormType("objection");
-      }
-
-      const target = document.getElementById(hash);
-      if (!target) return;
-
-      requestAnimationFrame(() => {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    };
-
-    handleHash();
-    window.addEventListener("hashchange", handleHash);
-
-    return () => {
-      window.removeEventListener("hashchange", handleHash);
-    };
   }, []);
 
   return (
@@ -1173,6 +1160,7 @@ export default function LayananInformasiPage() {
             {activeFormType && (
               <div className="animate-in fade-in duration-500">
                 <PpidForms
+                  key={activeFormType}
                   defaultKind={activeFormType}
                   onClose={handleCloseForm}
                 />

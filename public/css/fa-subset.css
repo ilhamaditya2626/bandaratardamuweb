@@ -1,5 +1,5 @@
 /* Font Awesome 6 Free — SUBSET (dibuat otomatis oleh scripts/build-fa-subset.mjs)
-   Hanya berisi 138 ikon yang dipakai. Jangan diedit manual. */
+   Hanya berisi 140 ikon yang dipakai. Jangan diedit manual. */
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:swap;src:url(/fonts/fa/fa-solid-900.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-regular-400.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Brands";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-brands-400.woff2) format("woff2")}
@@ -11,7 +11,6 @@
 .fa-spin{animation:fa-spin 2s linear infinite}
 @keyframes fa-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .fa-arrow-left::before{content:"\f060"}
-.fa-arrow-pointer::before{content:"\f245"}
 .fa-arrow-right::before{content:"\f061"}
 .fa-arrow-up-right-from-square::before{content:"\f08e"}
 .fa-bars::before{content:"\f0c9"}
@@ -59,6 +58,7 @@
 .fa-eye::before{content:"\f06e"}
 .fa-facebook-f::before{content:"\f39e"}
 .fa-fan::before{content:"\f863"}
+.fa-file-circle-exclamation::before{content:"\e4eb"}
 .fa-file-invoice::before{content:"\f570"}
 .fa-file-lines::before{content:"\f15c"}
 .fa-file-pdf::before{content:"\f1c1"}
@@ -71,6 +71,7 @@
 .fa-gears::before{content:"\f085"}
 .fa-globe::before{content:"\f0ac"}
 .fa-hand-holding-heart::before{content:"\f4be"}
+.fa-hand-pointer::before{content:"\f25a"}
 .fa-handshake-angle::before{content:"\f4c4"}
 .fa-headset::before{content:"\f590"}
 .fa-house::before{content:"\f015"}
@@ -82,6 +83,7 @@
 .fa-list::before{content:"\f03a"}
 .fa-location-arrow::before{content:"\f124"}
 .fa-location-dot::before{content:"\f3c5"}
+.fa-magnifying-glass-plus::before{content:"\f00e"}
 .fa-map-location-dot::before{content:"\f5a0"}
 .fa-moon::before{content:"\f186"}
 .fa-mosque::before{content:"\f678"}
