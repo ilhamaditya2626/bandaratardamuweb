@@ -16,6 +16,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.91.2",
     "@tanstack/react-query-devtools": "^5.91.3",
+    "@types/qrcode": "^1.5.6",
     "better-auth": "^1.5.5",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -24,6 +25,7 @@
     "lucide-react": "^0.577.0",
     "mysql2": "^3.22.5",
     "next": "16.1.7",
+    "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "recharts": "^3.8.0",

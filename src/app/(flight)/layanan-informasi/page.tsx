@@ -750,6 +750,42 @@ export default function LayananInformasiPage() {
   const [activeFormType, setActiveFormType] = useState<"information" | "objection" | null>(null);
   const [showComplaintImage, setShowComplaintImage] = useState(false);
 
+  // Auto open form when accessed with deep link / query param (e.g. from QR code scan or direct link)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleFormDeepLink = () => {
+      const params = new URLSearchParams(window.location.search);
+      const formParam = params.get("form")?.toLowerCase();
+
+      if (
+        formParam === "permohonan" ||
+        formParam === "informasi" ||
+        formParam === "permohonan-informasi"
+      ) {
+        setActiveFormType("information");
+        setTimeout(() => {
+          const el = document.getElementById("form-ppid");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      } else if (
+        formParam === "keberatan" ||
+        formParam === "pengajuan-keberatan" ||
+        formParam === "pernyataan-keberatan"
+      ) {
+        setActiveFormType("objection");
+        setTimeout(() => {
+          const el = document.getElementById("form-ppid");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      }
+    };
+
+    handleFormDeepLink();
+    window.addEventListener("popstate", handleFormDeepLink);
+    return () => window.removeEventListener("popstate", handleFormDeepLink);
+  }, []);
+
   const handleCardClick = (type: "information" | "objection") => {
     if (activeFormType === type) {
       const el = document.getElementById("form-ppid");
