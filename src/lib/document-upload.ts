@@ -4,6 +4,12 @@ import path from "path";
 const MAX_DOCUMENT_SIZE = 20 * 1024 * 1024;
 export class DocumentUploadError extends Error {}
 
+// Pada VPS, isi UPLOAD_DIR dengan lokasi di luar folder aplikasi/deploy.
+// Fallback ini hanya untuk pengembangan lokal.
+export function getUploadDirectory() {
+  return process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
+}
+
 // PDF menyimpan setiap halaman sebagai objek `/Type /Page`; `Pages` (pohon
 // halaman) sengaja tidak ikut dihitung oleh ekspresi ini.
 export async function countPdfPages(file: File): Promise<number> {
@@ -19,7 +25,7 @@ export async function saveUploadedDocument(file: File, folder: "documents" | "pp
   const ext = file.type === "application/pdf" ? ".pdf" : `.${file.name.split(".").pop()?.toLowerCase() || "bin"}`;
   const base = path.parse(file.name).name.replace(/[^a-zA-Z0-9-_]/g, "_").slice(0, 80) || "file";
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${base}${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads", folder);
+  const dir = path.join(getUploadDirectory(), folder);
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(path.join(dir, fileName), Buffer.from(await file.arrayBuffer()));
   return `/uploads/${folder}/${fileName}`;

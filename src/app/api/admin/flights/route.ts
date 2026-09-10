@@ -28,6 +28,29 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // LiteSpeed pada server produksi menolak PUT dan DELETE. Semua mutasi
+    // admin dikirim melalui POST agar tidak dihentikan sebelum mencapai API.
+    if (body.action === "delete") {
+      const id = Number(body.id);
+      if (!Number.isInteger(id)) {
+        return NextResponse.json({ success: false, error: "Field 'id' wajib diisi" }, { status: 400 });
+      }
+      const flight = await deleteFlight(id);
+      if (!flight) {
+        return NextResponse.json({ success: false, error: "Penerbangan tidak ditemukan" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: flight });
+    }
+
+    if (body.id) {
+      const { id, ...data } = body;
+      const flight = await updateFlight(id, data);
+      if (!flight) {
+        return NextResponse.json({ success: false, error: "Penerbangan tidak ditemukan" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: flight });
+    }
+
     // Validate required fields
     const required = ["flight_no", "airline", "type", "scheduled_time", "flight_date"];
     for (const field of required) {

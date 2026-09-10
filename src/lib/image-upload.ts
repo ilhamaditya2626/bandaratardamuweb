@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
+import { getUploadDirectory } from "@/lib/document-upload";
 
 // Batas & konfigurasi pemrosesan gambar (samakan dengan fitur Berita).
 const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
@@ -36,7 +37,7 @@ export async function saveImageAsWebp(
     throw new ImageUploadError("Ukuran gambar maksimal 15 MB");
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  const uploadDir = getUploadDirectory();
   await fs.mkdir(uploadDir, { recursive: true });
 
   const inputBuffer = Buffer.from(await image.arrayBuffer());

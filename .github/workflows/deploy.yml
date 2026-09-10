@@ -37,8 +37,15 @@ jobs:
             cp -r .next/static .next/standalone/.next/static
 
             TARGET_BASE="$(dirname "$PWD")/.next"
+            PERSISTENT_UPLOADS="$(dirname "$PWD")/uploads"
 
             mkdir -p "$TARGET_BASE"
+            mkdir -p "$PERSISTENT_UPLOADS"
+
+            # Selamatkan unggahan yang masih ada sebelum build runtime lama diganti.
+            if [ -d "$TARGET_BASE/standalone/public/uploads" ]; then
+              cp -a "$TARGET_BASE/standalone/public/uploads/." "$PERSISTENT_UPLOADS/"
+            fi
             rm -rf "$TARGET_BASE/standalone"
             mv .next/standalone "$TARGET_BASE/standalone"
 
@@ -50,5 +57,4 @@ jobs:
             fi
 
             cd "$TARGET_BASE/standalone"
-            nohup node server.js > ../server.log 2>&1 &
-                  
+            nohup env UPLOAD_DIR="$PERSISTENT_UPLOADS" node server.js > ../server.log 2>&1 &
