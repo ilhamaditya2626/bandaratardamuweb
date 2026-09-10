@@ -23,45 +23,66 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function handleUpdateRequest(request: NextRequest) {
+async function executeUpdateRequest(body: any) {
+  const id = Number(body.id);
+  if (!Number.isInteger(id)) {
+    return NextResponse.json({ success: false, error: "ID tidak valid" }, { status: 400 });
+  }
+  if (body.status !== undefined) {
+    if (!["pending", "accepted", "rejected"].includes(body.status)) {
+      return NextResponse.json({ success: false, error: "Data status tidak valid" }, { status: 400 });
+    }
+    await updateRequestStatus(id, body.status, typeof body.admin_note === "string" ? body.admin_note : undefined);
+  } else {
+    const fields = Object.fromEntries(
+      ["name", "email", "phone", "address", "occupation", "institution", "information_detail", "purpose", "objection_reason", "objection_reason_other", "case_position", "submitted_on", "admin_note"]
+        .filter((field) => typeof body[field] === "string")
+        .map((field) => [field, body[field].trim() || null])
+    );
+    if (!Object.keys(fields).length) {
+      return NextResponse.json({ success: false, error: "Tidak ada data yang diubah" }, { status: 400 });
+    }
+    await updateInformationRequest(id, fields);
+  }
+  return NextResponse.json({ success: true });
+}
+
+export async function POST(request: NextRequest) {
   try {
     if (!await allowed(request)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json();
-    const id = Number(body.id);
-    if (!Number.isInteger(id)) {
-      return NextResponse.json({ success: false, error: "ID tidak valid" }, { status: 400 });
-    }
-    if (body.status !== undefined) {
-      if (!["pending", "accepted", "rejected"].includes(body.status)) {
-        return NextResponse.json({ success: false, error: "Data status tidak valid" }, { status: 400 });
+    if (body.action === "delete" || body._method === "DELETE") {
+      const id = Number(body.id);
+      if (!Number.isInteger(id)) {
+        return NextResponse.json({ success: false, error: "ID tidak valid" }, { status: 400 });
       }
-      await updateRequestStatus(id, body.status, typeof body.admin_note === "string" ? body.admin_note : undefined);
-    } else {
-      const fields = Object.fromEntries(
-        ["name", "email", "phone", "address", "occupation", "institution", "information_detail", "purpose", "objection_reason", "objection_reason_other", "case_position", "submitted_on", "admin_note"]
-          .filter((field) => typeof body[field] === "string")
-          .map((field) => [field, body[field].trim() || null])
-      );
-      if (!Object.keys(fields).length) {
-        return NextResponse.json({ success: false, error: "Tidak ada data yang diubah" }, { status: 400 });
-      }
-      await updateInformationRequest(id, fields);
+      await deleteInformationRequest(id);
+      return NextResponse.json({ success: true });
     }
-    return NextResponse.json({ success: true });
+    return await executeUpdateRequest(body);
   } catch (error) {
-    console.error("PUT/PATCH /api/admin/information-requests error:", error);
-    return NextResponse.json({ success: false, error: "Gagal memperbarui status" }, { status: 500 });
+    console.error("POST /api/admin/information-requests error:", error);
+    return NextResponse.json({ success: false, error: "Gagal memproses permohonan" }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest) {
-  return handleUpdateRequest(request);
+  try {
+    if (!await allowed(request)) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const body = await request.json();
+    return await executeUpdateRequest(body);
+  } catch (error) {
+    console.error("PUT /api/admin/information-requests error:", error);
+    return NextResponse.json({ success: false, error: "Gagal memperbarui status" }, { status: 500 });
+  }
 }
 
 export async function PATCH(request: NextRequest) {
-  return handleUpdateRequest(request);
+  return PUT(request);
 }
 
 export async function DELETE(request: NextRequest) {

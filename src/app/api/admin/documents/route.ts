@@ -31,6 +31,19 @@ export async function POST(r: NextRequest) {
     if (!await allowed(r)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    const contentType = r.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const body = await r.json();
+      if (body.action === "delete" || body._method === "DELETE") {
+        const id = Number(body.id);
+        if (!Number.isInteger(id)) {
+          return NextResponse.json({ success: false, error: "ID tidak valid" }, { status: 400 });
+        }
+        await deleteDocument(id);
+        return NextResponse.json({ success: true });
+      }
+      return await executeUpdateDocument(body);
+    }
     const f = await r.formData();
     const category = String(f.get("category") || "");
     const title = String(f.get("title") || "").trim();
@@ -84,25 +97,29 @@ export async function DELETE(r: NextRequest) {
   }
 }
 
+async function executeUpdateDocument(body: any) {
+  const id = Number(body.id);
+  const category = String(body.category || "");
+  const title = String(body.title || "").trim();
+  if (!Number.isInteger(id) || !categories.includes(category) || !title) {
+    return NextResponse.json({ success: false, error: "ID, kategori, dan judul wajib diisi." }, { status: 400 });
+  }
+  await updateDocument(id, {
+    category,
+    title,
+    description: typeof body.description === "string" ? body.description.trim() || null : null,
+    document_date: typeof body.document_date === "string" ? body.document_date || null : null,
+  });
+  return NextResponse.json({ success: true });
+}
+
 async function handleUpdateDocument(r: NextRequest) {
   try {
     if (!await allowed(r)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
     const body = await r.json();
-    const id = Number(body.id);
-    const category = String(body.category || "");
-    const title = String(body.title || "").trim();
-    if (!Number.isInteger(id) || !categories.includes(category) || !title) {
-      return NextResponse.json({ success: false, error: "ID, kategori, dan judul wajib diisi." }, { status: 400 });
-    }
-    await updateDocument(id, {
-      category,
-      title,
-      description: typeof body.description === "string" ? body.description.trim() || null : null,
-      document_date: typeof body.document_date === "string" ? body.document_date || null : null,
-    });
-    return NextResponse.json({ success: true });
+    return await executeUpdateDocument(body);
   } catch (error) {
     console.error("PUT/PATCH /api/admin/documents error:", error);
     return NextResponse.json({ success: false, error: "Gagal memperbarui dokumen" }, { status: 500 });

@@ -100,17 +100,22 @@ export default function DocumentsAdminPage() {
 
     try {
       const response = await fetch("/api/admin/documents", {
-        method: "DELETE",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ action: "delete", id }),
       });
-      const data = await response.json();
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Fallback
+      }
 
-      if (response.ok && data.success) {
+      if (response.ok && data?.success) {
         setNotice({ type: "success", message: "Dokumen berhasil dihapus." });
         loadDocuments();
       } else {
-        setNotice({ type: "error", message: data.error || "Gagal menghapus dokumen." });
+        setNotice({ type: "error", message: data?.error || `Gagal menghapus dokumen (${response.status}).` });
       }
     } catch (err) {
       console.error("Delete document error:", err);
@@ -125,7 +130,7 @@ export default function DocumentsAdminPage() {
     const formData = new FormData(e.currentTarget);
     try {
       const response = await fetch("/api/admin/documents", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: editingDocument.id,

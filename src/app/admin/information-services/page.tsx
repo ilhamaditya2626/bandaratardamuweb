@@ -118,7 +118,7 @@ export default function InformationServicesAdmin() {
   async function handleStatusUpdate(id: number, newStatus: "accepted" | "rejected") {
     try {
       const res = await fetch("/api/admin/information-requests", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: newStatus }),
       });
@@ -147,9 +147,9 @@ export default function InformationServicesAdmin() {
     if (!confirm(`Hapus permohonan dari "${name}"?`)) return;
     try {
       const res = await fetch("/api/admin/information-requests", {
-        method: "DELETE",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ action: "delete", id }),
       });
       let data: any = null;
       try {
@@ -178,7 +178,7 @@ export default function InformationServicesAdmin() {
     const fields = Object.fromEntries(formData.entries());
     try {
       const res = await fetch("/api/admin/information-requests", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: editingRequest.id, ...fields }),
       });
