@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+async function handleUpdateRequest(request: NextRequest) {
   try {
     if (!await allowed(request)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -51,9 +51,17 @@ export async function PATCH(request: NextRequest) {
     }
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("PATCH /api/admin/information-requests error:", error);
+    console.error("PUT/PATCH /api/admin/information-requests error:", error);
     return NextResponse.json({ success: false, error: "Gagal memperbarui status" }, { status: 500 });
   }
+}
+
+export async function PUT(request: NextRequest) {
+  return handleUpdateRequest(request);
+}
+
+export async function PATCH(request: NextRequest) {
+  return handleUpdateRequest(request);
 }
 
 export async function DELETE(request: NextRequest) {

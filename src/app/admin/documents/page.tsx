@@ -125,7 +125,7 @@ export default function DocumentsAdminPage() {
     const formData = new FormData(e.currentTarget);
     try {
       const response = await fetch("/api/admin/documents", {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: editingDocument.id,
@@ -135,13 +135,18 @@ export default function DocumentsAdminPage() {
           description: formData.get("description"),
         }),
       });
-      const data = await response.json();
-      if (response.ok && data.success) {
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Fallback
+      }
+      if (response.ok && data?.success) {
         setNotice({ type: "success", message: "Dokumen berhasil diperbarui." });
         setEditingDocument(null);
         loadDocuments();
       } else {
-        setNotice({ type: "error", message: data.error || "Gagal memperbarui dokumen." });
+        setNotice({ type: "error", message: data?.error || `Gagal memperbarui dokumen (${response.status}).` });
       }
     } catch (err) {
       console.error("Edit document error:", err);

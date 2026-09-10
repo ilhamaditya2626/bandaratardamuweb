@@ -667,7 +667,7 @@ export default function FlightsPage() {
 
                 <div className="flex flex-col gap-3">
                   <a
-                    href="https://wa.me/628112113090"
+                    href="https://wa.me/6281120011916"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center justify-center gap-2 rounded-2xl bg-[#111928] py-3 font-bold text-white transition hover:scale-105"

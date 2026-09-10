@@ -84,7 +84,7 @@ export async function DELETE(r: NextRequest) {
   }
 }
 
-export async function PATCH(r: NextRequest) {
+async function handleUpdateDocument(r: NextRequest) {
   try {
     if (!await allowed(r)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -104,7 +104,15 @@ export async function PATCH(r: NextRequest) {
     });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("PATCH /api/admin/documents error:", error);
+    console.error("PUT/PATCH /api/admin/documents error:", error);
     return NextResponse.json({ success: false, error: "Gagal memperbarui dokumen" }, { status: 500 });
   }
+}
+
+export async function PUT(r: NextRequest) {
+  return handleUpdateDocument(r);
+}
+
+export async function PATCH(r: NextRequest) {
+  return handleUpdateDocument(r);
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 import {
   Plane,
   Users,
@@ -103,13 +104,17 @@ export function AdminShell({ children, userName, userEmail }: AdminShellProps) {
               <p className="text-sm font-semibold text-white truncate">{userName}</p>
               <p className="text-xs text-slate-400 truncate">{userEmail}</p>
             </div>
-            <Link
-              href="/api/auth/signout"
+            <button
+              type="button"
+              onClick={async () => {
+                await authClient.signOut();
+                window.location.href = "/login";
+              }}
               className="ml-2 p-2 text-slate-400 hover:text-red-400 rounded-md transition-colors"
               title="Logout"
             >
               <LogOut className="h-5 w-5" />
-            </Link>
+            </button>
           </div>
         </div>
       </aside>
@@ -167,13 +172,17 @@ export function AdminShell({ children, userName, userEmail }: AdminShellProps) {
               <p className="text-sm font-semibold text-white truncate">{userName}</p>
               <p className="text-xs text-slate-400 truncate">{userEmail}</p>
             </div>
-            <Link
-              href="/api/auth/signout"
+            <button
+              type="button"
+              onClick={async () => {
+                await authClient.signOut();
+                window.location.href = "/login";
+              }}
               className="ml-2 p-2 text-slate-400 hover:text-red-400 rounded-md transition-colors"
               title="Logout"
             >
               <LogOut className="h-5 w-5" />
-            </Link>
+            </button>
           </div>
         </div>
       </aside>

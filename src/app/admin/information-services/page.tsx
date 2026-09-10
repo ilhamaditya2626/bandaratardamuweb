@@ -118,19 +118,24 @@ export default function InformationServicesAdmin() {
   async function handleStatusUpdate(id: number, newStatus: "accepted" | "rejected") {
     try {
       const res = await fetch("/api/admin/information-requests", {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: newStatus }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Response wasn't valid JSON (e.g. server/proxy HTML error)
+      }
+      if (res.ok && data?.success) {
         setNotice({
           type: "success",
           message: `Permohonan #${id} berhasil di-${newStatus === "accepted" ? "terima" : "tolak"}.`,
         });
         loadData();
       } else {
-        setNotice({ type: "error", message: data.error || "Gagal mengubah status." });
+        setNotice({ type: "error", message: data?.error || `Gagal mengubah status (${res.status} ${res.statusText}).` });
       }
     } catch (err) {
       console.error("Status update error:", err);
@@ -146,13 +151,18 @@ export default function InformationServicesAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Fallback for non-JSON
+      }
+      if (res.ok && data?.success) {
         setNotice({ type: "success", message: "Permohonan berhasil dihapus." });
         setSelectedRequest(null);
         loadData();
       } else {
-        setNotice({ type: "error", message: data.error || "Gagal menghapus permohonan." });
+        setNotice({ type: "error", message: data?.error || `Gagal menghapus permohonan (${res.status}).` });
       }
     } catch (err) {
       console.error("Delete request error:", err);
@@ -168,17 +178,22 @@ export default function InformationServicesAdmin() {
     const fields = Object.fromEntries(formData.entries());
     try {
       const res = await fetch("/api/admin/information-requests", {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: editingRequest.id, ...fields }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Fallback
+      }
+      if (res.ok && data?.success) {
         setNotice({ type: "success", message: "Permohonan berhasil diperbarui." });
         setEditingRequest(null);
         loadData();
       } else {
-        setNotice({ type: "error", message: data.error || "Gagal memperbarui permohonan." });
+        setNotice({ type: "error", message: data?.error || `Gagal memperbarui permohonan (${res.status}).` });
       }
     } catch (err) {
       console.error("Edit request error:", err);
