@@ -130,7 +130,15 @@ export function DocumentPreviewViewer({
         <div className="relative">
           <iframe
             title={`Pratinjau ${title}`}
-            src={`${previewUrl}#toolbar=0&navpanes=0`}
+            src={
+              isMobile && typeof window !== "undefined" && !window.location.hostname.includes("localhost")
+                ? `https://docs.google.com/viewer?url=${encodeURIComponent(
+                    previewUrl.startsWith("http")
+                      ? previewUrl
+                      : `${window.location.origin}${previewUrl}`
+                  )}&embedded=true`
+                : `${previewUrl}#toolbar=0&navpanes=0`
+            }
             className="h-[680px] w-full bg-white border-0"
           />
           {/* Mobile toggle back button */}

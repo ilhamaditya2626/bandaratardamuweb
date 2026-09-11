@@ -1,6 +1,9 @@
 import Image from "next/image";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 
+const skPpidDriveUrl =
+  process.env.NEXT_PUBLIC_SK_PPID_URL || "https://drive.google.com";
+
 const visionItems = [
   {
     number: "01",
@@ -70,34 +73,6 @@ const tugasDanFungsiItems = [
   },
   {
     id: "03",
-    title: "Direktorat Jenderal Perhubungan Darat",
-    tugas: "Menyelenggarakan perumusan dan pelaksanaan kebijakan di bidang transportasi darat.",
-    fungsi: [
-      "Perumusan kebijakan di bidang penyelenggaraan lalu lintas, angkutan, sarana, prasarana, sistem lalu lintas dan angkutan jalan, sungai, danau, dan penyeberangan, serta keselamatan transportasi darat;",
-      "Pelaksanaan kebijakan di bidang penyelenggaraan lalu lintas, angkutan, sarana, prasarana, sistem lalu lintas dan angkutan jalan, sungai, danau, dan penyeberangan, serta keselamatan transportasi darat;",
-      "Penyusunan norma, standar, prosedur, dan kriteria di bidang penyelenggaraan lalu lintas, angkutan, sarana, prasarana, sistem lalu lintas dan angkutan jalan, sungai, danau, dan penyeberangan, serta keselamatan transportasi darat;",
-      "Pemberian bimbingan teknis dan supervisi di bidang penyelenggaraan lalu lintas, angkutan, sarana, prasarana, sistem lalu lintas dan angkutan jalan, sungai, danau, dan penyeberangan, serta keselamatan transportasi darat;",
-      "Pelaksanaan pemantauan, analisis, evaluasi, dan pelaporan di bidang penyelenggaraan lalu lintas, angkutan, sarana, prasarana, sistem lalu lintas dan angkutan jalan, sungai, danau, dan penyeberangan, serta keselamatan transportasi darat;",
-      "Pelaksanaan administrasi Direktorat Jenderal; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "04",
-    title: "Direktorat Jenderal Perhubungan Laut",
-    tugas: "Menyelenggarakan perumusan dan pelaksanaan kebijakan di bidang pelayaran.",
-    fungsi: [
-      "Perumusan kebijakan di bidang penyelenggaraan angkutan di perairan, kepelabuhanan, keselamatan dan keamanan pelayaran, dan perlindungan di lingkungan maritim;",
-      "Pelaksanaan kebijakan di bidang penyelenggaraan angkutan di perairan, kepelabuhanan, keselamatan dan keamanan pelayaran, dan perlindungan di lingkungan maritim;",
-      "Penyusunan norma, standar, prosedur, dan kriteria di bidang penyelenggaraan angkutan di perairan, kepelabuhanan, keselamatan dan keamanan pelayaran, dan perlindungan di lingkungan maritim;",
-      "Pemberian bimbingan teknis dan supervisi di bidang penyelenggaraan angkutan di perairan, kepelabuhanan, keselamatan dan keamanan pelayaran, dan perlindungan di lingkungan maritim;",
-      "Pelaksanaan pemantauan, analisis, evaluasi, dan pelaporan di bidang penyelenggaraan angkutan di perairan, kepelabuhanan, keselamatan dan keamanan pelayaran, dan perlindungan di lingkungan maritim;",
-      "Pelaksanaan administrasi Direktorat Jenderal; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "05",
     title: "Direktorat Jenderal Perhubungan Udara",
     tugas: "Menyelenggarakan perumusan dan pelaksanaan kebijakan di bidang penerbangan.",
     fungsi: [
@@ -111,75 +86,7 @@ const tugasDanFungsiItems = [
     ]
   },
   {
-    id: "06",
-    title: "Direktorat Jenderal Perkeretaapian",
-    tugas: "Menyelenggarakan perumusan dan pelaksanaan kebijakan di bidang perkeretaapian.",
-    fungsi: [
-      "Perumusan kebijakan di bidang penyelenggaraan lalu lintas, angkutan, sarana, dan prasarana transportasi kereta api, serta peningkatan keselamatan transportasi kereta api;",
-      "Pelaksanaan kebijakan di bidang penyelenggaraan lalu lintas, angkutan, sarana, dan prasarana transportasi kereta api, serta peningkatan keselamatan transportasi kereta api;",
-      "Penyusunan norma, standar, prosedur, dan kriteria di bidang penyelenggaraan lalu lintas, angkutan, sarana, dan prasarana transportasi kereta api, serta peningkatan keselamatan transportasi kereta api;",
-      "Pemberian bimbingan teknis dan supervisi di bidang penyelenggaraan lalu lintas, angkutan, sarana, dan prasarana transportasi kereta api, serta peningkatan keselamatan transportasi kereta api;",
-      "Pelaksanaan pemantauan, analisis, evaluasi, dan pelaporan di bidang penyelenggaraan lalu lintas, angkutan, sarana, dan prasarana transportasi kereta api, serta peningkatan keselamatan transportasi kereta api;",
-      "Pelaksanaan administrasi Direktorat Jenderal; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "07",
-    title: "Ditjen Integrasi Transportasi dan Multimoda",
-    tugas: "Mempunyai tugas menyelenggarakan perumusan dan pelaksanaan kebijakan di bidang integrasi transportasi dan multimoda.",
-    fungsi: [
-      "Perumusan kebijakan di bidang integrasi transportasi dan multimoda;",
-      "Pelaksanaan kebijakan di bidang integrasi transportasi dan multimoda;",
-      "Penyusunan norma, standar, prosedur, dan kriteria di bidang integrasi transportasi dan multimoda;",
-      "Pemberian bimbingan teknis dan supervisi di bidang integrasi transportasi dan multimoda;",
-      "Pelaksanaan pemantauan, analisis, evaluasi, dan pelaporan di bidang integrasi transportasi dan multimoda;",
-      "Pelaksanaan administrasi Direktorat Jenderal; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "08",
-    title: "Inspektorat Jenderal",
-    tugas: "Menyelenggarakan pengawasan intern di lingkungan Kementerian.",
-    fungsi: [
-      "Penyusunan kebijakan teknis pengawasan intern di lingkungan Kementerian;",
-      "Pelaksanaan pengawasan intern terhadap kinerja dan keuangan melalui audit, reviu, evaluasi, pemantauan, dan kegiatan pengawasan lainnya di lingkungan Kementerian;",
-      "Pelaksanaan pengawasan untuk tujuan tertentu atas penugasan Menteri;",
-      "Penyusunan laporan hasil pengawasan di lingkungan Kementerian;",
-      "Pelaksanaan administrasi Inspektorat Jenderal; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "09",
-    title: "Badan Kebijakan Transportasi",
-    tugas: "Menyelenggarakan analisis dan pemberian rekomendasi kebijakan di bidang transportasi.",
-    fungsi: [
-      "Penyusunan kebijakan teknis, rencana, dan program analisis dan pemberian rekomendasi kebijakan transportasi;",
-      "Pelaksanaan analisis dan pemberian rekomendasi kebijakan transportasi;",
-      "Pelaksanaan analisis dan pemberian rekomendasi norma, standar, prosedur, dan kriteria di bidang transportasi;",
-      "Pengelolaan manajemen pengetahuan kebijakan transportasi;",
-      "Pelaksanaan pemantauan dan evaluasi kebijakan di bidang transportasi;",
-      "Pelaksanaan pemantauan, analisis, evaluasi, dan pelaporan pelaksanaan analisis dan pemberian rekomendasi kebijakan transportasi;",
-      "Pelaksanaan administrasi Badan; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "10",
-    title: "Badan Pengembangan SDM Perhubungan",
-    tugas: "Menyelenggarakan pelaksanaan pengembangan sumber daya manusia di bidang transportasi.",
-    fungsi: [
-      "Penyusunan kebijakan teknis, rencana, dan program pengembangan sumber daya manusia di bidang transportasi;",
-      "Pelaksanaan pengembangan sumber daya manusia di bidang transportasi;",
-      "Pelaksanaan pemantauan, analisis, evaluasi, dan pelaporan pelaksanaan pengembangan sumber daya manusia di bidang transportasi;",
-      "Pelaksanaan administrasi Badan; dan",
-      "Pelaksanaan fungsi lain yang diberikan oleh Menteri."
-    ]
-  },
-  {
-    id: "11",
+    id: "04",
     title: "Unit Pelaksana Teknis",
     tugas: "Untuk melaksanakan tugas teknis operasional dan/atau tugas teknis penunjang di lingkungan Kementerian Perhubungan.",
     fungsi: []
@@ -312,7 +219,7 @@ export default function PpidPage() {
                       <h4 className="text-[#facc15] text-xs font-bold uppercase tracking-widest mb-3">
                         Tugas
                       </h4>
-                      <p className="text-sm md:text-base leading-relaxed text-gray-300 bg-white/5 p-4 rounded-xl">
+                      <p className="text-justify text-sm md:text-base leading-relaxed text-gray-300 bg-white/5 p-4 rounded-xl">
                         {item.tugas}
                       </p>
                     </div>
@@ -327,7 +234,7 @@ export default function PpidPage() {
                           {item.fungsi.map((fungsiItem, idx) => (
                             <li key={idx} className="flex gap-3 items-start text-sm md:text-base text-gray-400 leading-relaxed">
                               <span className="mt-1.5 flex h-1.5 w-1.5 shrink-0 rounded-full bg-[#facc15]/60"></span>
-                              <span>{fungsiItem}</span>
+                              <span className="text-justify">{fungsiItem}</span>
                             </li>
                           ))}
                         </ul>
@@ -378,6 +285,87 @@ export default function PpidPage() {
                 <h4 className="font-bold text-white">Muhammad Rizky Fadhil, A.Md.Tra.</h4>
                 <h4 className="font-bold text-white">Ahmad Rayhan Farhan, A.Md.Tra.</h4>
               </div>
+            </div>
+
+            {/* Link Google Drive SK PPID */}
+            <div className="mt-6">
+              <a
+                href={skPpidDriveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-[#1f2937]/90 via-[#1f2937]/70 to-[#111928]/95 p-5 shadow-xl transition-all duration-300 hover:border-[#facc15]/60 hover:bg-[#1f2937] hover:shadow-[0_0_30px_rgba(250,204,21,0.15)] sm:flex-row sm:items-center"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 p-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:border-[#facc15]/40 group-hover:bg-[#facc15]/10">
+                    <svg
+                      className="h-full w-full"
+                      viewBox="0 0 87.3 78"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z"
+                        fill="#0066da"
+                      />
+                      <path
+                        d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44c-.8 1.4-1.2 2.95-1.2 4.5h27.5z"
+                        fill="#00ac47"
+                      />
+                      <path
+                        d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z"
+                        fill="#ea4335"
+                      />
+                      <path
+                        d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z"
+                        fill="#00832d"
+                      />
+                      <path
+                        d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z"
+                        fill="#2684fc"
+                      />
+                      <path
+                        d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z"
+                        fill="#ffba00"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#facc15]">
+                        Dokumen Resmi
+                      </span>
+                      <span className="h-1 w-1 rounded-full bg-[#facc15]/50"></span>
+                      <span className="text-[10px] uppercase tracking-wider text-gray-400">
+                        Google Drive
+                      </span>
+                    </div>
+                    <h4 className="text-base font-bold text-white transition-colors group-hover:text-[#facc15] md:text-lg">
+                      Surat Keputusan (SK) PPID UPBU Tardamu
+                    </h4>
+                    <p className="text-xs text-gray-400">
+                      Klik untuk melihat dan mengunduh berkas SK PPID melalui Google Drive
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex w-full items-center justify-end sm:w-auto">
+                  <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-gray-300 transition-all duration-300 group-hover:border-[#facc15] group-hover:bg-[#facc15] group-hover:text-[#111928]">
+                    <span>Buka SK PPID</span>
+                    <svg
+                      className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </a>
             </div>
           </div>
         </section>

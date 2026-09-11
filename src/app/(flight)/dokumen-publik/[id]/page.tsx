@@ -358,7 +358,15 @@ export default function DocumentPreviewPage({
               <div className="bg-white p-1 sm:p-2">
                 <iframe
                   title={doc.title}
-                  src={`${doc.file_url}#page=1&toolbar=0`}
+                  src={
+                    isMobile && typeof window !== "undefined" && !window.location.hostname.includes("localhost")
+                      ? `https://docs.google.com/viewer?url=${encodeURIComponent(
+                          doc.file_url.startsWith("http")
+                            ? doc.file_url
+                            : `${window.location.origin}${doc.file_url}`
+                        )}&embedded=true`
+                      : `${doc.file_url}#page=1&toolbar=0`
+                  }
                   className="h-[500px] sm:h-[680px] md:h-[760px] w-full rounded-lg sm:rounded-2xl border border-gray-200"
                 />
               </div>
