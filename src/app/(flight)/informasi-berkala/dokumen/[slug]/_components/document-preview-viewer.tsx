@@ -56,28 +56,6 @@ export function DocumentPreviewViewer({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-xs font-bold text-[#facc15] border border-[#facc15]/20">
-            PRATINJAU TERBATAS
-          </span>
-          <a
-            href={previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#facc15] px-4 py-1.5 text-xs font-bold text-[#111928] transition hover:bg-[#eab308] hover:shadow-lg"
-          >
-            <i className="fa-solid fa-arrow-up-right-from-square" />
-            Buka di Tab Baru
-          </a>
-          <a
-            href={previewUrl}
-            download
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
-          >
-            <i className="fa-solid fa-download" />
-            Unduh
-          </a>
-        </div>
       </div>
 
       {/* Main Preview Container */}
@@ -104,14 +82,6 @@ export function DocumentPreviewViewer({
             >
               <i className="fa-solid fa-eye" />
               Buka Pratinjau ({previewPages} Hal)
-            </a>
-            <a
-              href={previewUrl}
-              download={`${title.replace(/[^a-zA-Z0-9-_]/g, "_")}-pratinjau.pdf`}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-gray-200 transition hover:bg-white/10"
-            >
-              <i className="fa-solid fa-download" />
-              Unduh Pratinjau ({previewPages} Hal)
             </a>
           </div>
 
