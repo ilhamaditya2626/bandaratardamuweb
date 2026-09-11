@@ -103,15 +103,15 @@ export function DocumentPreviewViewer({
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#facc15] px-6 py-3.5 text-sm font-bold text-[#111928] shadow-lg shadow-[#facc15]/10 transition hover:-translate-y-0.5 hover:bg-[#eab308]"
             >
               <i className="fa-solid fa-eye" />
-              Buka Pratinjau PDF Sekarang
+              Buka Pratinjau ({previewPages} Hal)
             </a>
             <a
               href={previewUrl}
-              download
+              download={`${title.replace(/[^a-zA-Z0-9-_]/g, "_")}-pratinjau.pdf`}
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-gray-200 transition hover:bg-white/10"
             >
               <i className="fa-solid fa-download" />
-              Unduh Salinan PDF
+              Unduh Pratinjau ({previewPages} Hal)
             </a>
           </div>
 

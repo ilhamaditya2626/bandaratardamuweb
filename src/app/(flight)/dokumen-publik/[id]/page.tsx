@@ -20,7 +20,9 @@ interface DocumentDetail {
   description?: string | null;
   document_date?: string | null;
   total_pages?: number;
+  preview_pages?: number;
   file_url: string;
+  preview_url?: string;
   file_name: string;
   created_at: string;
 }
@@ -60,8 +62,8 @@ export default function DocumentPreviewPage({
       .then((x) => {
         if (x.data) {
           setDoc(x.data);
-          // Verify the file actually exists by making a HEAD request
-          fetch(x.data.file_url, { method: "HEAD" })
+          const targetUrl = x.data.preview_url || x.data.file_url;
+          fetch(targetUrl, { method: "HEAD" })
             .then((res) => setFileExists(res.ok))
             .catch(() => setFileExists(false));
         } else {
@@ -137,7 +139,8 @@ export default function DocumentPreviewPage({
   }
 
   const categoryName = categoryLabels[doc.category] || doc.category;
-  const pages = Math.max(1, Math.ceil((doc.total_pages || 1) * 0.2));
+  const pages = doc.preview_pages || Math.max(1, Math.ceil((doc.total_pages || 1) * 0.2));
+  const previewUrl = doc.preview_url || `/api/documents/${doc.id}/preview`;
   const showInlinePdf = !isMobile || showIframeOnMobile;
 
   return (
@@ -255,8 +258,11 @@ export default function DocumentPreviewPage({
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-xs font-bold text-[#facc15] border border-[#facc15]/20">
+                PRATINJAU TERBATAS 20%
+              </span>
               <a
-                href={doc.file_url}
+                href={previewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-full bg-[#facc15] px-4 py-1.5 text-xs font-bold text-[#111928] transition hover:bg-[#eab308] hover:shadow-lg"
@@ -265,12 +271,12 @@ export default function DocumentPreviewPage({
                 Buka di Tab Baru
               </a>
               <a
-                href={doc.file_url}
-                download
+                href={previewUrl}
+                download={`${doc.file_name.replace(/\.pdf$/i, "")}-pratinjau.pdf`}
                 className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
               >
                 <i className="fa-solid fa-download" />
-                Unduh
+                Unduh Pratinjau
               </a>
             </div>
           </div>
@@ -314,29 +320,29 @@ export default function DocumentPreviewPage({
               </div>
 
               <h3 className="text-lg font-bold text-white mb-2">
-                Pratinjau: {doc.title}
+                Pratinjau ({pages} Halaman): {doc.title}
               </h3>
               <p className="max-w-md mx-auto text-sm text-gray-400 mb-6 leading-relaxed">
-                Untuk kenyamanan membaca di perangkat mobile, kami merekomendasikan membuka dokumen langsung di aplikasi PDF atau di tab baru peramban Anda.
+                Sesuai ketentuan, pratinjau menampilkan {pages} halaman awal (20% dari total {doc.total_pages || 0} halaman). Untuk kenyamanan di ponsel, Anda dapat membukanya langsung di aplikasi PDF atau tab baru peramban.
               </p>
 
               <div className="flex flex-col gap-3 justify-center max-w-sm mx-auto">
                 <a
-                  href={doc.file_url}
+                  href={previewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#facc15] px-6 py-3.5 text-sm font-bold text-[#111928] shadow-lg shadow-[#facc15]/10 transition hover:-translate-y-0.5 hover:bg-[#eab308]"
                 >
                   <i className="fa-solid fa-eye" />
-                  Buka Pratinjau PDF Sekarang
+                  Buka Pratinjau PDF ({pages} Hal)
                 </a>
                 <a
-                  href={doc.file_url}
-                  download
+                  href={previewUrl}
+                  download={`${doc.file_name.replace(/\.pdf$/i, "")}-pratinjau.pdf`}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-gray-200 transition hover:bg-white/10"
                 >
                   <i className="fa-solid fa-download" />
-                  Unduh Salinan PDF
+                  Unduh Salinan Pratinjau ({pages} Hal)
                 </a>
               </div>
 
@@ -361,11 +367,11 @@ export default function DocumentPreviewPage({
                   src={
                     isMobile && typeof window !== "undefined" && !window.location.hostname.includes("localhost")
                       ? `https://docs.google.com/viewer?url=${encodeURIComponent(
-                          doc.file_url.startsWith("http")
-                            ? doc.file_url
-                            : `${window.location.origin}${doc.file_url}`
+                          previewUrl.startsWith("http")
+                            ? previewUrl
+                            : `${window.location.origin}${previewUrl}`
                         )}&embedded=true`
-                      : `${doc.file_url}#page=1&toolbar=0`
+                      : `${previewUrl}#page=1&toolbar=0`
                   }
                   className="h-[500px] sm:h-[680px] md:h-[760px] w-full rounded-lg sm:rounded-2xl border border-gray-200"
                 />

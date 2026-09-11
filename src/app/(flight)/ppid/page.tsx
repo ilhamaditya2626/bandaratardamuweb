@@ -2,7 +2,7 @@ import Image from "next/image";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 
 const skPpidDriveUrl =
-  process.env.NEXT_PUBLIC_SK_PPID_URL || "https://drive.google.com";
+  process.env.NEXT_PUBLIC_SK_PPID_URL || "https://drive.google.com/drive/folders/10iMC8HxaFi5keLdMJPL3QuYTr1pv9-cK";
 
 const visionItems = [
   {
