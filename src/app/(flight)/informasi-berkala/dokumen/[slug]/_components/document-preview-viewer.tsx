@@ -18,7 +18,7 @@ export function DocumentPreviewViewer({
   serifStyle,
 }: DocumentPreviewViewerProps) {
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [showIframeOnMobile, setShowIframeOnMobile] = useState<boolean>(false);
+  const [showLiteModeOnMobile, setShowLiteModeOnMobile] = useState<boolean>(false);
 
   useEffect(() => {
     // Deteksi apakah perangkat mobile / layar kecil
@@ -59,7 +59,7 @@ export function DocumentPreviewViewer({
       </div>
 
       {/* Main Preview Container */}
-      {isMobile && !showIframeOnMobile ? (
+      {isMobile && showLiteModeOnMobile ? (
         /* Mobile-Optimized Friendly Card */
         <div className="p-6 sm:p-8 text-center bg-gradient-to-b from-[#1f2937] to-[#111928]">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-red-500/10 border border-red-500/20 text-4xl text-red-400 shadow-inner mb-5">
@@ -83,15 +83,23 @@ export function DocumentPreviewViewer({
               <i className="fa-solid fa-eye" />
               Buka Pratinjau ({previewPages} Hal)
             </a>
+            <a
+              href={previewUrl}
+              download
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-semibold text-gray-200 transition hover:bg-white/10"
+            >
+              <i className="fa-solid fa-download" />
+              Unduh Salinan Pratinjau ({previewPages} Hal)
+            </a>
           </div>
 
           <div className="mt-6 pt-6 border-t border-white/5">
             <button
               type="button"
-              onClick={() => setShowIframeOnMobile(true)}
+              onClick={() => setShowLiteModeOnMobile(false)}
               className="text-xs text-gray-400 hover:text-[#facc15] underline transition"
             >
-              Coba tampilkan penampil bawaan halaman (jika peramban mendukung)
+              Kembali ke penampil PDF halaman
             </button>
           </div>
         </div>
@@ -116,10 +124,10 @@ export function DocumentPreviewViewer({
             <div className="p-3 bg-[#111928] text-center border-t border-white/5">
               <button
                 type="button"
-                onClick={() => setShowIframeOnMobile(false)}
+                  onClick={() => setShowLiteModeOnMobile(true)}
                 className="text-xs text-gray-400 hover:text-[#facc15] transition"
               >
-                ← Kembali ke mode hemat ponsel
+                  Beralih ke mode hemat ponsel
               </button>
             </div>
           )}

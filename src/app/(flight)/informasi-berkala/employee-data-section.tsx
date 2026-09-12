@@ -27,48 +27,49 @@ const ageData = [
 ];
 
 const educationData = [
-  { name: "SMA/SMK", value: 45, fill: "#facc15" },
-  { name: "D II", value: 5, fill: "#60a5fa" },
-  { name: "D III", value: 12, fill: "#38bdf8" },
-  { name: "S1", value: 10, fill: "#4fb3a8" },
+  { name: "SMA/SMK", value: 42, fill: "#facc15" },
+  { name: "D II", value: 3, fill: "#60a5fa" },
+  { name: "D III", value: 18, fill: "#38bdf8" },
+  { name: "S1", value: 9, fill: "#4fb3a8" },
 ];
 
 const rankData = [
-  { name: "Gol. V", value: 1 },
-  { name: "Gol. IV", value: 2 },
-  { name: "Gol. III/d", value: 5 },
-  { name: "Gol. III/c", value: 8 },
-  { name: "Gol. III/b", value: 10 },
-  { name: "Gol. III/a", value: 6 },
-  { name: "Gol. II/d", value: 15 },
-  { name: "Gol. II/c", value: 22 },
-  { name: "Gol. II/b", value: 3 },
+  { name: "Gol. V", value: 28 },
+  { name: "Gol. VII", value: 1 },
+  { name: "Gol. IX", value: 4 },
+  { name: "Gol. III/d", value: 1 },
+  { name: "Gol. III/c", value: 1 },
+  { name: "Gol. III/b", value: 2 },
+  { name: "Gol. III/a", value: 1 },
+  { name: "Gol. II/d", value: 10 },
+  { name: "Gol. II/c", value: 16 },
+  { name: "Gol. II/b", value: 4 },
 ];
 
 const unitData = [
   { name: "AVSEC", pns: 8, pppk: 9 },
-  { name: "PKP-PK", pns: 6, pppk: 4 },
+  { name: "PKP-PK", pns: 4, pppk: 4 },
   { name: "A2B", pns: 1, pppk: 3 },
   { name: "Bangland", pns: 3, pppk: 8 },
   { name: "Elband", pns: 2, pppk: 3 },
   { name: "Listrik", pns: 6, pppk: 2 },
   { name: "Tata Usaha", pns: 9, pppk: 6 },
   { name: "Quality Control", pns: 2, pppk: 0 },
-  { name: "Landscape", pns: 0, pppk: 3 },
+  { name: "Sanitasi", pns: 0, pppk: 3 },
 ];
 
 const positionData = [
-  { name: "Operator Layanan Operasional", value: 5 },
-  { name: "Pengadministrasi Perkantoran", value: 22 },
-  { name: "Pengelola Layanan Operasional", value: 10 },
+  { name: "Operator Layanan Operasional", value: 30 },
+  { name: "Pengadministrasi Perkantoran", value: 3 },
+  { name: "Pengelola Layanan Operasional", value: 1 },
   { name: "Penata Layanan Operasional", value: 4 },
-  { name: "Personel Penerbangan", value: 12 },
-  { name: "Pengawas Operasional Penerbangan", value: 6 },
-  { name: "Pengawas Personel Penerbangan", value: 2 },
+  { name: "Personel Penerbangan", value: 2 },
+  { name: "Pengawas Operasional Penerbangan", value: 8 },
+  { name: "Pengawas Personel Penerbangan", value: 7 },
   { name: "Teknisi Penerbangan Terampil", value: 5 },
-  { name: "Bidang AVSEC", value: 2 },
-  { name: "Pengevaluasi Keselamatan", value: 1 },
-  { name: "Penelaah Teknis Kebijakan", value: 1 },
+  { name: "Pengevaluasi Keselamatan dan Keamanan Bandar Udara Bidang Avsec", value: 4 },
+  { name: "Pengolah Data dan Informasi", value: 2 }, 
+  { name: "Penelaah Teknis Kebijakan", value: 5 },
   { name: "Kepala Kantor", value: 1 },
 ];
 

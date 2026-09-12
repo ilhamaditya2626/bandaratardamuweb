@@ -238,7 +238,7 @@ export default function FlightsPage() {
                           {f.airline} <span className="text-gray-500">({f.flight_no})</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {f.origin ? `${f.origin} → SAU` : `SAU → ${f.destination}`}
+                          {`${f.origin || "SAU"} → ${f.destination || "SAU"}`}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {f.status_label || f.status}

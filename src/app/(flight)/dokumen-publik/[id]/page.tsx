@@ -37,7 +37,7 @@ export default function DocumentPreviewPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [showIframeOnMobile, setShowIframeOnMobile] = useState(false);
+  const [showIframeOnMobile, setShowIframeOnMobile] = useState(true);
   const [fileExists, setFileExists] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -331,7 +331,7 @@ export default function DocumentPreviewPage({
                   onClick={() => setShowIframeOnMobile(true)}
                   className="text-xs text-gray-400 hover:text-[#facc15] underline transition"
                 >
-                  Coba tampilkan penampil bawaan halaman (jika peramban mendukung)
+                  Kembali ke penampil PDF halaman
                 </button>
               </div>
             </div>
@@ -363,7 +363,7 @@ export default function DocumentPreviewPage({
                     onClick={() => setShowIframeOnMobile(false)}
                     className="text-xs text-gray-400 hover:text-[#facc15] transition"
                   >
-                    ← Kembali ke mode hemat ponsel
+                    Beralih ke mode hemat ponsel
                   </button>
                 </div>
               )}
