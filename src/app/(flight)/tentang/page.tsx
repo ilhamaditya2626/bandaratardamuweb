@@ -38,6 +38,30 @@ const infoCards = [
   },
 ];
 
+const missionItems = [
+  {
+    letter: "A",
+    icon: "fa-shield-halved",
+    title: "Keselamatan & Pelayanan",
+    badge: "Misi 01 • Standar & Sarpras",
+    text: "Memenuhi standar keamanan dan keselamatan penerbangan, memberikan pelayanan jasa yang optimal, serta menyediakan sarana dan prasarana transportasi udara yang memadai;",
+  },
+  {
+    letter: "B",
+    icon: "fa-chart-line",
+    title: "Iklim Usaha Kompetitif",
+    badge: "Misi 02 • Keberlanjutan",
+    text: "Mewujudkan iklim usaha di bidang transportasi udara yang kompetitif dan berkelanjutan;",
+  },
+  {
+    letter: "C",
+    icon: "fa-scale-balanced",
+    title: "Kelembagaan & SDM",
+    badge: "Misi 03 • Tata Kelola & Regulasi",
+    text: "Mewujudkan kelembagaan yang efektif dan efisien, didukung oleh sumber daya manusia yang profesional serta peraturan perundang-undangan yang komprehensif guna menjamin kepastian hukum.",
+  },
+];
+
 export default function TentangPage() {
   return (
     <div className="bg-[#111928] text-gray-200">
@@ -54,6 +78,99 @@ export default function TentangPage() {
       />
 
       <main className="py-20">
+        {/* Section Visi & Misi */}
+        <section className="mx-auto mb-32 max-w-7xl px-6">
+          <div className="mb-14 text-center">
+            <h2 className="mt-4 text-3xl font-bold text-white md:text-5xl" style={serifStyle}>
+              Visi &amp; <span className="italic text-[#facc15]">Misi</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-gray-400 md:text-base">
+              Pedoman strategis UPBU Kelas III Tardamu dalam menyelenggarakan transportasi udara yang aman, andal, dan berdaya saing bagi masyarakat Sabu Raijua.
+            </p>
+          </div>
+
+          {/* Visi Card */}
+          <div className="relative mb-8 overflow-hidden rounded-[36px] border border-white/10 bg-[#1f2937]/50 p-8 shadow-2xl backdrop-blur-md md:p-12">
+            <i className="fa-solid fa-quote-right pointer-events-none absolute bottom-6 right-8 text-7xl text-white/[0.03] md:text-9xl"></i>
+
+            <div className="relative z-10">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2.5 rounded-xl border border-[#facc15]/30 bg-[#facc15]/10 px-3.5 py-1.5">
+                  <i className="fa-solid fa-eye text-xs text-[#facc15]"></i>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#facc15]">
+                    Visi UPBU Kelas III Tardamu
+                  </span>
+                </div>
+                <span className="text-xs text-gray-500">Kementerian Perhubungan Republik Indonesia</span>
+              </div>
+
+              <blockquote className="my-4">
+                <p
+                  className="text-2xl font-medium leading-snug text-white md:text-3xl lg:text-4xl"
+                  style={serifStyle}
+                >
+                  “Terwujudnya Penyelenggaraan Transportasi Udara yang{" "}
+                  <span className="text-[#facc15] underline decoration-[#facc15]/40 underline-offset-8">
+                    Andal
+                  </span>
+                  ,{" "}
+                  <span className="text-[#facc15] underline decoration-[#facc15]/40 underline-offset-8">
+                    Berdaya Saing
+                  </span>
+                  , dan{" "}
+                  <span className="text-[#facc15] underline decoration-[#facc15]/40 underline-offset-8">
+                    Memberikan Nilai Tambah
+                  </span>
+                  .”
+                </p>
+              </blockquote>
+
+
+            </div>
+          </div>
+
+          {/* Misi Cards */}
+          <div className="grid gap-6 md:grid-cols-3">
+            {missionItems.map((item) => (
+              <div
+                key={item.letter}
+                className="group relative flex flex-col justify-between overflow-hidden rounded-[32px] border border-white/10 bg-[#1f2937]/40 p-8 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-[#facc15]/50 hover:bg-[#1f2937]/75 hover:shadow-2xl hover:shadow-[#facc15]/5"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-base font-black text-[#facc15] transition-all duration-300 group-hover:border-[#facc15] group-hover:bg-[#facc15] group-hover:text-[#111928] group-hover:shadow-lg group-hover:shadow-[#facc15]/20">
+                      {item.letter}
+                    </span>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#facc15]/10 text-[#facc15] transition-transform duration-300 group-hover:scale-110">
+                      <i className={`fa-solid ${item.icon} text-xl`}></i>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                      {item.badge}
+                    </span>
+                    <h3
+                      className="mt-1.5 text-xl font-bold text-white transition-colors group-hover:text-[#facc15]"
+                      style={serifStyle}
+                    >
+                      {item.title}
+                    </h3>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-relaxed text-gray-300" style={{ textAlign: "justify" }}>
+                    {item.text}
+                  </p>
+                </div>
+
+                <div className="mt-8 pt-4">
+                  <div className="h-0.5 w-12 rounded-full bg-[#facc15]/30 transition-all duration-500 group-hover:w-full group-hover:bg-[#facc15]"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="mx-auto mb-32 grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-2">
           <div className="relative">
             <div className="absolute -left-6 -top-6 h-24 w-24 rounded-full bg-[#facc15]/20 blur-2xl"></div>

@@ -192,12 +192,13 @@ export default function PassengerPage() {
   const stats = data?.data;
   const dailyStats = dailyData?.data;
   const dailyLogs: PassengerLog[] = useMemo(() => {
+    // Tampilkan SEMUA rute yang sudah memiliki data (airline, flight_type, city)
+    // termasuk rute dengan 0 penumpang — agar operator tahu data sudah tercatat.
     return (dailyStats?.logs || []).filter((row) => {
       return (
         row.airline &&
         row.flight_type &&
-        row.city &&
-        getPassengerCount(row) > 0
+        row.city
       );
     });
   }, [dailyStats]);
@@ -651,10 +652,15 @@ export default function PassengerPage() {
                         </td>
                       </tr>
                     ) : (
-                      dailyLogs.map((row) => (
+                      dailyLogs.map((row) => {
+                        const paxCount = getPassengerCount(row);
+                        const lf = getLoadFactor(row);
+                        const isZero = paxCount === 0;
+
+                        return (
                         <tr
                           key={row.id}
-                          className="border-b border-white/5 text-white transition hover:bg-white/[0.02]"
+                          className={`border-b border-white/5 transition hover:bg-white/[0.02] ${isZero ? "opacity-70" : "text-white"}`}
                         >
                           <td className="py-5 font-bold text-white">
                             {row.airline || "-"}
@@ -664,25 +670,30 @@ export default function PassengerPage() {
                             {row.city ? getRoute(row) : "-"}
                           </td>
 
-                          <td className="py-5 font-bold text-[#facc15]">
-                            {getPassengerCount(row).toLocaleString("id-ID")}
+                          <td className={`py-5 font-bold ${isZero ? "text-red-400" : "text-[#facc15]"}`}>
+                            {paxCount.toLocaleString("id-ID")}
                           </td>
 
                           <td className="min-w-[150px] py-5">
                             <div className="flex items-center gap-3">
                               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
-                                <div
-                                  className="h-full bg-emerald-400"
-                                  style={{ width: `${Math.min(getLoadFactor(row), 100)}%` }}
-                                />
+                                {isZero ? (
+                                  <div className="h-full w-full bg-red-500/20" />
+                                ) : (
+                                  <div
+                                    className="h-full bg-emerald-400"
+                                    style={{ width: `${Math.min(lf, 100)}%` }}
+                                  />
+                                )}
                               </div>
-                              <span className="text-xs font-bold text-emerald-400">
-                                {getLoadFactor(row).toFixed(1)}%
+                              <span className={`text-xs font-bold ${isZero ? "text-red-400" : "text-emerald-400"}`}>
+                                {lf.toFixed(1)}%
                               </span>
                             </div>
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
 
                     )}
                   </tbody>

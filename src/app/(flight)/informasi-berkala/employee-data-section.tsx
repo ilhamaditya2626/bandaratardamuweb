@@ -55,7 +55,7 @@ const unitData = [
   { name: "Listrik", pns: 6, pppk: 2 },
   { name: "Tata Usaha", pns: 9, pppk: 6 },
   { name: "Quality Control", pns: 2, pppk: 0 },
-  { name: "Sanitasi", pns: 0, pppk: 3 },
+  { name: "Landscape", pns: 0, pppk: 3 },
 ];
 
 const positionData = [
@@ -68,7 +68,7 @@ const positionData = [
   { name: "Pengawas Personel Penerbangan", value: 7 },
   { name: "Teknisi Penerbangan Terampil", value: 5 },
   { name: "Pengevaluasi Keselamatan dan Keamanan Bandar Udara Bidang Avsec", value: 4 },
-  { name: "Pengolah Data dan Informasi", value: 2 }, 
+  { name: "Pengolah Data dan Informasi", value: 2 },
   { name: "Penelaah Teknis Kebijakan", value: 5 },
   { name: "Kepala Kantor", value: 1 },
 ];

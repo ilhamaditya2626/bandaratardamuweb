@@ -7,7 +7,7 @@ const leaderProfile = {
   label: "Kepala Kantor UPBU Tardamu",
   image: "/assets/images/pegawai/pak david.webp",
   quote: "Visi kami adalah menjadikan Bandar Udara Tardamu sebagai gerbang konektivitas utama yang mengedepankan aspek Safety, Security, Services, and Compliance (3S + 1C) dalam setiap jengkal pelayanan. ",
-  bio: "Memimpin dengan dedikasi untuk memastikan seluruh unit kerja bersinergi dalam menghadirkan standar operasional penerbangan internasional bagi seluruh pengguna jasa.",
+  bio: "Memimpin dengan dedikasi untuk memastikan seluruh unit kerja bersinergi dalam menghadirkan standar operasional penerbangan nasional bagi seluruh pengguna jasa.",
 };
 const workUnits = [
   {
@@ -39,7 +39,7 @@ const workUnits = [
     label: "Rescue & Fire Fighting",
     icon: "/assets/images/LOGO PKP.webp",
     image:
-      "/assets/images/PKP1.webp",
+      "/assets/images/PKP-PK.webp",
     description:
       "Unit PKP-PK bertanggung jawab pada kesiapsiagaan pertolongan kecelakaan penerbangan dan pemadam kebakaran, dengan personel serta peralatan yang disiapkan untuk respons cepat.",
     link: "https://sites.google.com/view/aerofiresafetyhub/aero-tardamu",
@@ -90,13 +90,13 @@ const workUnits = [
     duties: ["Perawatan peralatan", "Sistem gedung", "Dukungan teknis"],
   },
   {
-    title: "Unit Sanitasi",
-    label: "Sanitation & Hygiene",
+    title: "Unit Landscape",
+    label: "Landscape",
     icon: "fa-spray-can-sparkles",
     image:
       "/assets/images/sanitasi.webp",
     description:
-      "Unit Sanitasi menjaga kebersihan terminal, toilet, area publik, dan lingkungan bandara melalui pengelolaan sanitasi rutin yang higienis dan konsisten.",
+      "Unit Landscape menjaga keindahan terminal, toilet, area publik, dan lingkungan bandara melalui pengelolaan sanitasi rutin yang higienis dan konsisten.",
     duties: ["Kebersihan terminal", "Sanitasi toilet", "Lingkungan sehat"],
   },
 ];

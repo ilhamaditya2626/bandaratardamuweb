@@ -102,11 +102,10 @@ function ImageCarousel({
                 setCurrent(i);
               }}
               aria-label={`Lihat foto ${i + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                i === current
-                  ? "h-2 w-5 bg-[#facc15]"
-                  : "h-2 w-2 bg-white/50 hover:bg-white/80"
-              }`}
+              className={`rounded-full transition-all duration-300 ${i === current
+                ? "h-2 w-5 bg-[#facc15]"
+                : "h-2 w-2 bg-white/50 hover:bg-white/80"
+                }`}
             />
           ))}
         </div>
@@ -208,7 +207,7 @@ export default function AkomodasiPenginapanPage() {
         ]}
         title={
           <>
-            Temukan Kenyamanan <br />
+            Temukan Penginapan <br />
             <span className="italic text-[#facc15]">di Sabu Raijua</span>
           </>
         }
@@ -263,7 +262,7 @@ export default function AkomodasiPenginapanPage() {
             <div className="grid grid-cols-2 gap-6">
               <div className="rounded-2xl border border-white/5 bg-white/5 p-6">
                 <h4 className="mb-1 text-2xl font-bold text-[#facc15]">
-                  {hotels.length > 0 ? `${hotels.length}+` : "15+"}
+                  {hotels.length > 0 ? `${hotels.length}+` : "Banyak"}
                 </h4>
                 <p className="text-xs uppercase tracking-widest text-gray-500">
                   Pilihan Akomodasi
