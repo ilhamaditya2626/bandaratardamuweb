@@ -48,8 +48,15 @@ export async function updateInformationRequest(id: number, data: Partial<typeof 
   await db.update(informationRequests).set({ ...data, updated_at: new Date() }).where(eq(informationRequests.id, id));
 }
 export async function deleteInformationRequest(id: number) { return db.delete(informationRequests).where(eq(informationRequests.id, id)); }
-export async function listDocuments(category?: string, latestOnly = false) {
-  const where = category ? and(eq(publicDocuments.category, category), eq(publicDocuments.is_published, true)) : eq(publicDocuments.is_published, true);
+export async function listDocuments(category?: string, subcategory?: string, latestOnly = false) {
+  const conditions = [eq(publicDocuments.is_published, true)];
+  if (category) {
+    conditions.push(eq(publicDocuments.category, category));
+  }
+  if (subcategory) {
+    conditions.push(eq(publicDocuments.subcategory, subcategory));
+  }
+  const where = and(...conditions);
   const query = db.select().from(publicDocuments).where(where).orderBy(desc(publicDocuments.document_date), desc(publicDocuments.created_at));
   return latestOnly ? query.limit(2) : query;
 }

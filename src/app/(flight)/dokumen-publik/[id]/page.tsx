@@ -13,10 +13,17 @@ const categoryLabels: Record<string, string> = {
   dik: "DIK",
 };
 
+const subcategoryLabels: Record<string, string> = {
+  ppid: "PPID",
+  bmn: "BMN",
+  surat: "Surat Keluar Masuk",
+};
+
 interface DocumentDetail {
   id: number;
   title: string;
   category: string;
+  subcategory?: string | null;
   description?: string | null;
   document_date?: string | null;
   total_pages?: number;
@@ -138,7 +145,11 @@ export default function DocumentPreviewPage({
     );
   }
 
-  const categoryName = categoryLabels[doc.category] || doc.category;
+  const baseCategoryName = categoryLabels[doc.category] || doc.category;
+  const categoryName =
+    doc.category === "annual_report" && doc.subcategory
+      ? `${baseCategoryName} — ${subcategoryLabels[doc.subcategory] || doc.subcategory.toUpperCase()}`
+      : baseCategoryName;
   const pages = doc.preview_pages || Math.max(1, Math.ceil((doc.total_pages || 1) * 0.2));
   const previewUrl = doc.preview_url || `/api/documents/${doc.id}/preview`;
   const showInlinePdf = !isMobile || showIframeOnMobile;

@@ -20,26 +20,74 @@ const profileHighlights = [
 ];
 
 const taskStatement =
-  "Menyelenggarakan pelayanan penerbangan dengan selamat, aman, nyaman dan sesuai aturan yang berlaku (3S+1C).";
+  "Melaksanakan pelayanan jasa kebandarudaraan dan jasa terkait Bandar Udara, kegiatan keamanan, keselamatan dan ketertiban penerbangan pada Bandar Udara yang belum diusahakan secara komersial.";
 
 const functionItems = [
   {
-    title: "Transportasi",
-    description:
-      "Bandar Udara Tardamu Sabu berfungsi sebagai titik utama transportasi udara di Kabupaten Sabu Raijua. Bandara ini memfasilitasi perjalanan penumpang dan pengiriman barang menuju wilayah kepulauan, serta memperkuat konektivitas regional dengan rute domestik di Nusa Tenggara Timur.",
-    icon: "fa-route",
+    number: "01",
+    icon: "fa-clipboard-list",
+    title: "Rencana & Program",
+    text: "Pelaksanaan penyusunan rencana dan program;",
   },
   {
-    title: "Pertahanan",
-    description:
-      "Bandar Udara Tardamu Sabu memiliki peran strategis dalam mendukung pertahanan dan keamanan wilayah kepulauan. Fasilitas bandara dapat menunjang kegiatan pengawasan, pengendalian wilayah, serta mobilisasi personel dan sumber daya ketika diperlukan respons cepat.",
+    number: "02",
+    icon: "fa-plane-departure",
+    title: "Pengoperasian Fasilitas",
+    text: "Pelaksanaan pengoperasian fasilitas keselamatan, sisi udara, sisi darat, dan alat-alat besar bandar udara serta fasilitas penunjang;",
+  },
+  {
+    number: "03",
+    icon: "fa-screwdriver-wrench",
+    title: "Perawatan & Perbaikan",
+    text: "Pelaksanaan perawatan dan perbaikan fasilitas keselamatan, sisi udara, sisi darat , dan alat-alat besar bandar udara serta fasilitas penunjang;",
+  },
+  {
+    number: "04",
+    icon: "fa-tower-observation",
+    title: "AMC & Slottime",
+    text: "Penyiapan pelaksanaan pelayanan pengaturan pergerakan pesawat udara (Apron Movement Control/AMC) serta penyusunan jadwal penerbangan (Slottime);",
+  },
+  {
+    number: "05",
     icon: "fa-shield-halved",
+    title: "Pengamanan & Angkutan",
+    text: "Pelaksanaan pengamanan pelayanan pengangkutan penumpang, awak pesawat udara, barang, jinjingan, pos dan kargo serta barang berbahaya dan senjata;",
   },
   {
-    title: "Tanggap Bencana",
-    description:
-      "Bandar Udara Tardamu Sabu berfungsi sebagai simpul tanggap bencana dalam situasi darurat. Fasilitas ini dapat digunakan untuk pengiriman bantuan kemanusiaan, evakuasi korban, dan pergerakan tim tanggap darurat di wilayah Sabu Raijua dan sekitarnya.",
-    icon: "fa-truck-medical",
+    number: "06",
+    icon: "fa-triangle-exclamation",
+    title: "Keamanan & Darurat",
+    text: "Pelaksanaan pengawasan, pengendalian keamanan dan ketertiban di lingkungan kerja serta pengoperasian, perawatan dan perbaikan fasilitas keamanan penerbangan dan pelayanan darurat bandar udara;",
+  },
+  {
+    number: "07",
+    icon: "fa-handshake-angle",
+    title: "Kerja Sama & Usaha",
+    text: "Pelaksanaan kerja sama dan pengembangan usaha jasa kebandarudaraan dan jasa terkait bandar udara;",
+  },
+  {
+    number: "08",
+    icon: "fa-building",
+    title: "Terminal & Sanitasi",
+    text: "Pelaksanaan pengoperasian dan pelayanan fasilitas terminal penumpang, kargo dan penunjang serta pengelolaan dan pengendalian hygiene dan sanitasi;",
+  },
+  {
+    number: "09",
+    icon: "fa-users",
+    title: "Koordinasi Instansi",
+    text: "Pelaksanaan koordinasi dengan instansi/lembaga terkait penyelenggaraan bandar udara;",
+  },
+  {
+    number: "10",
+    icon: "fa-scale-balanced",
+    title: "Tata Usaha & Hukum",
+    text: "urusan keuangan, kepegawaian, ketatausahaan, kerumahtanggaan, hukum dan hubungan masyarakat;",
+  },
+  {
+    number: "11",
+    icon: "fa-chart-line",
+    title: "Evaluasi & Pelaporan",
+    text: "Pelaksanaan evaluasi dan pelaporan.",
   },
 ];
 
@@ -182,7 +230,7 @@ const reportGroups = [
   {
     title: "Laporan Tahunan",
     icon: "fa-chart-line",
-    summary: "Pertanggungjawaban pelaksanaan kebijakan, capaian layanan, dan evaluasi kinerja kantor.",
+    summary: "Pertanggungjawaban pelaksanaan kebijakan, capaian layanan, dan evaluasi kinerja kantor. Terdiri dari laporan PPID, BMN, dan Surat Keluar Masuk.",
     files: [
       { label: "LAPORAN TAHUNAN 2024", slug: "laporan-tahunan-2024" },
       { label: "LAPORAN TAHUNAN 2025", slug: "laporan-tahunan-2025" },
@@ -572,38 +620,88 @@ export default async function InformasiBerkalaPage() {
               eyebrow="Tugas dan Fungsi"
               title={
                 <>
-                  Pelayanan penerbangan dengan prinsip{" "}
-                  <span className="italic text-[#facc15]">3S+1C</span>
+                  Tugas &amp; Fungsi{" "}
+                  <span className="italic text-[#facc15]">Kantor UPBU Tardamu</span>
                 </>
               }
-              description="Tugas dan fungsi Kantor UPBU Tardamu Sabu disajikan sebagai informasi berkala agar masyarakat memahami peran bandara dalam konektivitas, keamanan wilayah, dan kesiapsiagaan darurat."
+              description="Pedoman tugas pokok dan 11 butir fungsi pelaksanaan pelayanan jasa kebandarudaraan, keselamatan, keamanan, dan tata kelola operasional Bandar Udara Tardamu Sabu."
             />
 
-            <div className="mb-8 rounded-[30px] border border-[#facc15]/30 bg-[#111928]/80 p-8 shadow-[0_24px_90px_rgba(0,0,0,0.18)]">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15] text-2xl text-[#111928]">
-                <i className="fa-solid fa-plane-circle-check"></i>
+            {/* Card Tugas Pokok */}
+            <div className="relative mb-14 overflow-hidden rounded-[36px] border border-[#facc15]/30 bg-gradient-to-br from-[#1f2937]/90 via-[#111928]/95 to-[#1f2937]/70 p-8 shadow-2xl backdrop-blur-md md:p-12">
+              <i className="fa-solid fa-plane-circle-check pointer-events-none absolute -bottom-6 -right-6 text-8xl text-white/[0.03] md:text-9xl"></i>
+
+              <div className="relative z-10">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <div className="inline-flex items-center gap-2.5 rounded-xl border border-[#facc15]/30 bg-[#facc15]/10 px-3.5 py-1.5">
+                    <i className="fa-solid fa-bullseye text-xs text-[#facc15]"></i>
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#facc15]">
+                      Tugas Pokok
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">Kantor UPBU Kelas III Tardamu Sabu</span>
+                </div>
+
+                <blockquote className="my-2">
+                  <p
+                    className="max-w-5xl text-xl font-medium leading-relaxed text-white md:text-2xl lg:text-3xl"
+                    style={serifStyle}
+                  >
+                    “{taskStatement}”
+                  </p>
+                </blockquote>
               </div>
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#facc15]">
-                Tugas
-              </p>
-              <h3 className="max-w-4xl text-2xl leading-snug text-white md:text-4xl" style={serifStyle}>
-                {taskStatement}
-              </h3>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
+            {/* Sub-header 11 Butir Fungsi */}
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#facc15]">
+                  <i className="fa-solid fa-layer-group text-[11px]"></i>
+                  <span>Fungsi Organisasi</span>
+                </div>
+                <h3 className="mt-2 text-2xl font-bold text-white md:text-3xl" style={serifStyle}>
+                  11 Butir Pelaksanaan <span className="italic text-[#facc15]">Fungsi</span>
+                </h3>
+              </div>
+              <p className="max-w-md text-xs text-gray-400 md:text-sm">
+                Rangkaian fungsi strategis dan operasional dalam menjamin keteraturan, keselamatan, kelancaran, dan akuntabilitas bandar udara.
+              </p>
+            </div>
+
+            {/* Grid 11 Butir Fungsi */}
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {functionItems.map((item) => (
                 <article
-                  key={item.title}
-                  className="group rounded-[28px] border border-white/5 bg-[#111928]/70 p-8 transition hover:-translate-y-1 hover:border-[#facc15]/70"
+                  key={item.number}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[28px] border border-white/10 bg-[#1f2937]/40 p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#facc15]/50 hover:bg-[#1f2937]/75 hover:shadow-2xl hover:shadow-[#facc15]/5"
                 >
-                  <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15] transition group-hover:bg-[#facc15] group-hover:text-[#111928]">
-                    <i className={`fa-solid ${item.icon}`}></i>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#facc15]/30 bg-[#facc15]/10 font-mono text-xs font-bold text-[#facc15] transition-all duration-300 group-hover:border-[#facc15] group-hover:bg-[#facc15] group-hover:text-[#111928]">
+                        {item.number}
+                      </span>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-400 transition-all duration-300 group-hover:bg-[#facc15]/10 group-hover:text-[#facc15]">
+                        <i className={`fa-solid ${item.icon} text-base`}></i>
+                      </div>
+                    </div>
+
+                    <div className="mt-5">
+                      <h4
+                        className="text-lg font-bold text-white transition-colors group-hover:text-[#facc15]"
+                        style={serifStyle}
+                      >
+                        {item.title}
+                      </h4>
+                      <p className="mt-2.5 text-sm leading-relaxed text-gray-300" style={{ textAlign: "justify" }}>
+                        {item.text}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="mb-4 text-2xl text-white" style={serifStyle}>
-                    {item.title}
-                  </h3>
-                  <p className="text-sm leading-7 text-gray-400">{item.description}</p>
+
+                  <div className="mt-6 pt-3">
+                    <div className="h-0.5 w-8 rounded-full bg-[#facc15]/20 transition-all duration-500 group-hover:w-full group-hover:bg-[#facc15]"></div>
+                  </div>
                 </article>
               ))}
             </div>

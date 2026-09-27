@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     const content = formData.get("content")?.toString();
     const image = formData.get("image") as File | null;
     let image_url = formData.get("image_url")?.toString() || undefined;
+    const createdAtStr = formData.get("created_at")?.toString();
 
     if (!title || !content) {
       return NextResponse.json(
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
       image_url = await saveImageAsWebp(image, "news");
     }
 
-    const article = await createNews({ title, content, image_url });
+    const created_at = createdAtStr ? new Date(createdAtStr) : undefined;
+    const article = await createNews({ title, content, image_url, created_at });
     return NextResponse.json({ success: true, data: article }, { status: 201 });
   } catch (error) {
     console.error("POST /api/admin/news error:", error);
@@ -80,6 +82,7 @@ export async function PUT(request: NextRequest) {
     const content = formData.get("content")?.toString();
     const image = formData.get("image") as File | null;
     const image_url = formData.get("image_url")?.toString() || undefined;
+    const createdAtStr = formData.get("created_at")?.toString();
 
     if (!idStr) {
       return NextResponse.json(
@@ -93,10 +96,12 @@ export async function PUT(request: NextRequest) {
       title?: string;
       content?: string;
       image_url?: string;
+      created_at?: Date;
     } = {};
 
     if (title) updateData.title = title;
     if (content) updateData.content = content;
+    if (createdAtStr) updateData.created_at = new Date(createdAtStr);
 
     if (image && image.size > 0) {
       updateData.image_url = await saveImageAsWebp(image, "news");

@@ -12,6 +12,7 @@ async function allowed(r: NextRequest) {
 }
 
 const categories = ["annual_report", "work_budget", "financial_report", "lakip", "dip", "dik"];
+const annualSubcategories = ["ppid", "bmn", "surat"];
 
 export async function GET(r: NextRequest) {
   try {
@@ -49,11 +50,49 @@ export async function POST(r: NextRequest) {
     const title = String(f.get("title") || "").trim();
     const file = f.get("file");
 
-    if (!categories.includes(category) || !title || !(file instanceof File) || !file.size) {
-      return NextResponse.json({ success: false, error: "Kategori, judul, dan PDF wajib diisi." }, { status: 400 });
+    const isFileValid = file && typeof file === "object" && "size" in file && Number((file as any).size) > 0;
+
+    const debugInfo = {
+      keys: Array.from(f.keys()),
+      category,
+      title,
+      fileRaw: file ? {
+        type: typeof file,
+        constructor: file.constructor?.name,
+        name: (file as any)?.name,
+        size: (file as any)?.size,
+        mime: (file as any)?.type,
+      } : null,
+      isFileValid,
+    };
+
+    try {
+      const fsSync = require("fs");
+      fsSync.appendFileSync("upload_debug.log", new Date().toISOString() + " - " + JSON.stringify(debugInfo, null, 2) + "\n\n");
+    } catch (e) {
+      console.error("Failed to write debug log", e);
     }
-    if (file.type !== "application/pdf") {
+
+    if (!categories.includes(category)) {
+      return NextResponse.json({ success: false, error: `Kategori tidak valid (${category}).` }, { status: 400 });
+    }
+    if (!title) {
+      return NextResponse.json({ success: false, error: "Judul dokumen wajib diisi." }, { status: 400 });
+    }
+    if (!isFileValid) {
+      return NextResponse.json({ success: false, error: "Berkas PDF wajib dipilih dan tidak boleh kosong." }, { status: 400 });
+    }
+
+    const fileObj = file as File;
+    const isPdf = fileObj.type === "application/pdf" || fileObj.name?.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
       return NextResponse.json({ success: false, error: "Dokumen publik harus berupa PDF." }, { status: 400 });
+    }
+
+    let subcategory: string | null = null;
+    if (category === "annual_report") {
+      const sub = String(f.get("subcategory") || "").trim().toLowerCase();
+      subcategory = annualSubcategories.includes(sub) ? sub : "ppid";
     }
 
     const total_pages = await countPdfPages(file);
@@ -61,6 +100,7 @@ export async function POST(r: NextRequest) {
 
     await createDocument({
       category,
+      subcategory,
       title,
       description: String(f.get("description") || "") || null,
       document_date: String(f.get("document_date") || "") || null,
@@ -104,8 +144,14 @@ async function executeUpdateDocument(body: any) {
   if (!Number.isInteger(id) || !categories.includes(category) || !title) {
     return NextResponse.json({ success: false, error: "ID, kategori, dan judul wajib diisi." }, { status: 400 });
   }
+  let subcategory: string | null = null;
+  if (category === "annual_report") {
+    const sub = String(body.subcategory || "").trim().toLowerCase();
+    subcategory = annualSubcategories.includes(sub) ? sub : "ppid";
+  }
   await updateDocument(id, {
     category,
+    subcategory,
     title,
     description: typeof body.description === "string" ? body.description.trim() || null : null,
     document_date: typeof body.document_date === "string" ? body.document_date || null : null,

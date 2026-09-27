@@ -15,6 +15,13 @@ const categories = [
   { key: "dik", label: "DIK" },
 ];
 
+const annualSubcategories = [
+  { key: "", label: "Semua Laporan Tahunan" },
+  { key: "ppid", label: "PPID", accent: "#facc15" },
+  { key: "bmn", label: "BMN", accent: "#34d399" },
+  { key: "surat", label: "Surat Keluar Masuk", accent: "#38bdf8" },
+];
+
 const categoryLabels: Record<string, string> = {
   annual_report: "Laporan Tahunan",
   work_budget: "Rencana Kerja Anggaran",
@@ -24,9 +31,16 @@ const categoryLabels: Record<string, string> = {
   dik: "DIK",
 };
 
+const subcategoryLabels: Record<string, string> = {
+  ppid: "PPID",
+  bmn: "BMN",
+  surat: "Surat Keluar Masuk",
+};
+
 interface PublicDoc {
   id: number;
   category: string;
+  subcategory?: string | null;
   title: string;
   description?: string | null;
   document_date?: string | null;
@@ -38,19 +52,28 @@ interface PublicDoc {
 function DokumenPublikContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
+  const initialSubcategory = searchParams.get("subcategory") || "";
 
   const [activeCategory, setActiveCategory] = useState(initialCategory);
+  const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
   const [docs, setDocs] = useState<PublicDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const cat = searchParams.get("category") || "";
+    const sub = searchParams.get("subcategory") || "";
     setActiveCategory(cat);
+    setActiveSubcategory(sub);
   }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
-    const query = activeCategory ? `?category=${encodeURIComponent(activeCategory)}` : "";
+    const params = new URLSearchParams();
+    if (activeCategory) params.set("category", activeCategory);
+    if (activeCategory === "annual_report" && activeSubcategory) {
+      params.set("subcategory", activeSubcategory);
+    }
+    const query = params.toString() ? `?${params.toString()}` : "";
     fetch(`/api/documents${query}`)
       .then((res) => {
         if (!res.ok) throw new Error("Gagal memuat dokumen");
@@ -66,7 +89,14 @@ function DokumenPublikContent() {
       .finally(() => {
         setLoading(false);
       });
-  }, [activeCategory]);
+  }, [activeCategory, activeSubcategory]);
+
+  const handleSelectCategory = (catKey: string) => {
+    setActiveCategory(catKey);
+    if (catKey !== "annual_report") {
+      setActiveSubcategory("");
+    }
+  };
 
   return (
     <div className="bg-[#111928] text-gray-200">
@@ -87,20 +117,19 @@ function DokumenPublikContent() {
       />
 
       <main className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-        {/* Category Filters */}
-        <div className="mb-12 flex flex-wrap items-center gap-2 border-b border-white/10 pb-6">
+        {/* Main Category Filters */}
+        <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-white/10 pb-6">
           {categories.map((cat) => {
             const isActive = activeCategory === cat.key;
             return (
               <button
                 key={cat.key}
                 type="button"
-                onClick={() => setActiveCategory(cat.key)}
-                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] transition-all duration-300 ${
-                  isActive
-                    ? "bg-[#facc15] text-[#111928] shadow-[0_4px_20px_rgba(250,204,21,0.25)] scale-105"
-                    : "border border-white/10 bg-white/[0.03] text-gray-300 hover:border-[#facc15]/60 hover:text-white"
-                }`}
+                onClick={() => handleSelectCategory(cat.key)}
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] transition-all duration-300 ${isActive
+                  ? "bg-[#facc15] text-[#111928] shadow-[0_4px_20px_rgba(250,204,21,0.25)] scale-105"
+                  : "border border-white/10 bg-white/[0.03] text-gray-300 hover:border-[#facc15]/60 hover:text-white"
+                  }`}
               >
                 {cat.label}
               </button>
@@ -108,11 +137,48 @@ function DokumenPublikContent() {
           })}
         </div>
 
+        {/* Dynamic Subcategory Filters for Laporan Tahunan */}
+        {activeCategory === "annual_report" && (
+          <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-4 backdrop-blur-md">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <i className="fa-solid fa-layer-group text-[#facc15]" />
+              <span>Subkategori Laporan Tahunan:</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {annualSubcategories.map((sub) => {
+                const isSubActive = activeSubcategory === sub.key;
+                return (
+                  <button
+                    key={sub.key}
+                    type="button"
+                    onClick={() => setActiveSubcategory(sub.key)}
+                    className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                      isSubActive
+                        ? "bg-white/15 text-white shadow-md ring-1 ring-white/30"
+                        : "border border-white/5 bg-white/[0.03] text-gray-400 hover:text-white hover:bg-white/[0.08]"
+                    }`}
+                    style={isSubActive && sub.accent ? {
+                      borderColor: sub.accent,
+                      color: sub.accent,
+                    } : undefined}
+                  >
+                    <span>{sub.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Header summary */}
         <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-2xl text-white md:text-3xl" style={serifStyle}>
-              {activeCategory
+              {activeCategory === "annual_report"
+                ? activeSubcategory
+                  ? `Laporan Tahunan — ${subcategoryLabels[activeSubcategory] || activeSubcategory}`
+                  : "Laporan Tahunan (Semua Subkategori)"
+                : activeCategory
                 ? `Dokumen: ${categoryLabels[activeCategory] || activeCategory}`
                 : "Seluruh Dokumen Publik"}
             </h2>
@@ -150,9 +216,16 @@ function DokumenPublikContent() {
                     <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-xl text-red-400 transition-transform duration-300 group-hover:scale-110">
                       <i className="fa-solid fa-file-pdf" />
                     </span>
-                    <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#facc15]">
-                      {categoryLabels[doc.category] || doc.category}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#facc15]">
+                        {categoryLabels[doc.category] || doc.category}
+                      </span>
+                      {doc.category === "annual_report" && doc.subcategory && (
+                        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/15">
+                          {subcategoryLabels[doc.subcategory] || doc.subcategory.toUpperCase()}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <h3
@@ -170,7 +243,7 @@ function DokumenPublikContent() {
                 <div className="mt-8 border-t border-white/5 pt-5">
                   <div className="mb-4 flex items-center justify-between text-xs text-gray-400">
                     <span className="flex items-center gap-1.5">
-                      <i className="fa-regular fa-file-lines text-[#facc15]" />
+                      <i className="fa-regular fa-file text-[#facc15]" />
                       {doc.total_pages ? `${doc.total_pages} Halaman` : "PDF"}
                     </span>
                     {doc.document_date && (

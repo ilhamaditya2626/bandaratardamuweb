@@ -106,6 +106,7 @@
 .fa-plane-departure::before{content:"\f5b0"}
 .fa-plane-slash::before{content:"\e069"}
 .fa-plane-up::before{content:"\e22d"}
+.fa-quote-right::before{content:"\f10e"}
 .fa-radio::before{content:"\f8d7"}
 .fa-restroom::before{content:"\f7bd"}
 .fa-road::before{content:"\f018"}
@@ -132,7 +133,6 @@
 .fa-tower-broadcast::before{content:"\f519"}
 .fa-tower-observation::before{content:"\e586"}
 .fa-triangle-exclamation::before{content:"\f071"}
-.fa-truck-medical::before{content:"\f0f9"}
 .fa-tv::before{content:"\f26c"}
 .fa-umbrella-beach::before{content:"\f5ca"}
 .fa-user::before{content:"\f007"}

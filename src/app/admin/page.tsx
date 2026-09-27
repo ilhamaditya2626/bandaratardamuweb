@@ -204,8 +204,7 @@ export default async function AdminDashboard() {
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-amber-400 uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Portal Manajemen Operasional Terpadu</span>
+              <Sparkles className="h-3.5 w-3.5" /> 
             </div>
             <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl lg:text-4xl font-display">
               Ringkasan Operasional Bandara

@@ -9,7 +9,8 @@ import {
   CheckCircle, 
   AlertCircle, 
   ExternalLink, 
-  Loader2 
+  Loader2,
+  FolderTree
 } from "lucide-react";
 
 const labels: Record<string, string> = {
@@ -21,9 +22,22 @@ const labels: Record<string, string> = {
   dik: "DIK",
 };
 
+const annualSubcategories = [
+  { key: "ppid", label: "PPID", color: "bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/20" },
+  { key: "bmn", label: "BMN", color: "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/20" },
+  { key: "surat", label: "Surat Keluar Masuk", color: "bg-sky-50 text-sky-700 border-sky-200 ring-sky-500/20" },
+];
+
+const subcategoryMap: Record<string, { label: string; badge: string }> = {
+  ppid: { label: "PPID", badge: "bg-amber-100 text-amber-800 border-amber-200" },
+  bmn: { label: "BMN", badge: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  surat: { label: "Surat Keluar Masuk", badge: "bg-sky-100 text-sky-800 border-sky-200" },
+};
+
 interface PublicDoc {
   id: number;
   category: string;
+  subcategory?: string | null;
   title: string;
   description?: string | null;
   document_date?: string | null;
@@ -40,6 +54,10 @@ export default function DocumentsAdminPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [editingDocument, setEditingDocument] = useState<PublicDoc | null>(null);
+  const [editCategory, setEditCategory] = useState("annual_report");
+  const [editSubcategory, setEditSubcategory] = useState("ppid");
+  const [uploadCategory, setUploadCategory] = useState("annual_report");
+  const [uploadSubcategory, setUploadSubcategory] = useState("ppid");
   const [isSaving, setIsSaving] = useState(false);
 
   const loadDocuments = async () => {
@@ -64,16 +82,46 @@ export default function DocumentsAdminPage() {
     loadDocuments();
   }, []);
 
+  useEffect(() => {
+    if (editingDocument) {
+      setEditCategory(editingDocument.category || "annual_report");
+      setEditSubcategory(editingDocument.subcategory || "ppid");
+    }
+  }, [editingDocument]);
+
   async function upload(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setIsUploading(true);
     setNotice(null);
 
     const formEl = e.currentTarget;
+    const fileInput = formEl.querySelector<HTMLInputElement>('input[name="file"]');
+    const selectedFile = fileInput?.files?.[0];
+
+    if (!selectedFile) {
+      setNotice({ type: "error", message: "Silakan pilih berkas PDF terlebih dahulu." });
+      return;
+    }
+
+    if (selectedFile.size === 0) {
+      setNotice({
+        type: "error",
+        message: "Berkas PDF yang dipilih kosong (0 byte). Harap pilih file PDF yang memiliki isi/halaman.",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    const formData = new FormData(formEl);
+    formData.set("category", uploadCategory);
+    if (uploadCategory === "annual_report") {
+      formData.set("subcategory", uploadSubcategory);
+    }
+
     try {
       const response = await fetch("/api/admin/documents", {
         method: "POST",
-        body: new FormData(formEl),
+        body: formData,
       });
       const data = await response.json();
 
@@ -83,6 +131,8 @@ export default function DocumentsAdminPage() {
           message: `Dokumen berhasil dipublikasikan (${data.total_pages || "jumlah halaman terdeteksi"} halaman).`,
         });
         formEl.reset();
+        setUploadCategory("annual_report");
+        setUploadSubcategory("ppid");
         loadDocuments();
       } else {
         setNotice({ type: "error", message: data.error || "Unggahan dokumen gagal." });
@@ -129,13 +179,16 @@ export default function DocumentsAdminPage() {
     setIsSaving(true);
     const formData = new FormData(e.currentTarget);
     try {
+      const category = editCategory;
+      const subcategory = category === "annual_report" ? editSubcategory : null;
       const response = await fetch("/api/admin/documents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: editingDocument.id,
           title: formData.get("title"),
-          category: formData.get("category"),
+          category,
+          subcategory,
           document_date: formData.get("document_date"),
           description: formData.get("description"),
         }),
@@ -216,7 +269,7 @@ export default function DocumentsAdminPage() {
               <input
                 name="title"
                 required
-                placeholder="Contoh: Laporan Kinerja Instansi Pemerintah (LAKIP) 2025"
+                placeholder="Contoh: Laporan Tahunan PPID Tahun 2025"
                 className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
               />
             </div>
@@ -229,7 +282,9 @@ export default function DocumentsAdminPage() {
                 <select
                   name="category"
                   required
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                  value={uploadCategory}
+                  onChange={(e) => setUploadCategory(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white font-medium"
                 >
                   {Object.entries(labels).map(([key, label]) => (
                     <option value={key} key={key}>
@@ -250,6 +305,45 @@ export default function DocumentsAdminPage() {
                 />
               </div>
             </div>
+
+            {/* Subkategori Dinamis saat Kategori Laporan Tahunan dipilih */}
+            {uploadCategory === "annual_report" && (
+              <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 transition-all animate-fadeIn">
+                <div className="flex items-center gap-2 mb-2 text-amber-900">
+                  <FolderTree className="h-4 w-4 text-amber-600" />
+                  <label className="text-xs font-bold uppercase tracking-wider">
+                    Pilih Subkategori Laporan Tahunan <span className="text-red-500">*</span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {annualSubcategories.map((sub) => (
+                    <label
+                      key={sub.key}
+                      className={`
+                        flex flex-col items-center justify-center p-2.5 rounded-lg border cursor-pointer text-center transition-all
+                        ${uploadSubcategory === sub.key
+                          ? `${sub.color} border-current ring-2 shadow-xs font-bold`
+                          : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                        }
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="subcategory"
+                        value={sub.key}
+                        checked={uploadSubcategory === sub.key}
+                        onChange={() => setUploadSubcategory(sub.key)}
+                        className="sr-only"
+                      />
+                      <span className="text-xs">{sub.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] text-amber-700/90">
+                  Dokumen akan dikelompokkan ke dalam subkategori <strong>{annualSubcategories.find(s => s.key === uploadSubcategory)?.label}</strong>.
+                </p>
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
@@ -325,10 +419,15 @@ export default function DocumentsAdminPage() {
                 <div key={d.id} className="flex items-center justify-between gap-4 py-3.5 group">
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-gray-900 text-sm">{d.title}</div>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                       <span className="rounded bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
                         {labels[d.category] || d.category}
                       </span>
+                      {d.category === "annual_report" && d.subcategory && (
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${subcategoryMap[d.subcategory]?.badge || "bg-amber-100 text-amber-800 border-amber-200"}`}>
+                          {subcategoryMap[d.subcategory]?.label || d.subcategory.toUpperCase()}
+                        </span>
+                      )}
                       <span>{d.total_pages || "-"} halaman</span>
                       {d.document_date && <span>• {d.document_date}</span>}
                     </div>
@@ -367,19 +466,24 @@ export default function DocumentsAdminPage() {
 
       {editingDocument && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <form onSubmit={editDocument} className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+          <form onSubmit={editDocument} className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl animate-scaleUp">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
               <h3 className="text-lg font-bold text-gray-900">Edit Dokumen Publik</h3>
               <button type="button" onClick={() => setEditingDocument(null)} className="text-gray-400 hover:text-gray-700" title="Tutup">✕</button>
             </div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
               Judul Dokumen
-              <input name="title" required defaultValue={editingDocument.title} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+              <input name="title" required defaultValue={editingDocument.title} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500 font-medium" />
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
                 Kategori
-                <select name="category" defaultValue={editingDocument.category} className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:border-blue-500">
+                <select 
+                  name="category" 
+                  value={editCategory} 
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:border-blue-500 font-medium"
+                >
                   {Object.entries(labels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}
                 </select>
               </label>
@@ -388,6 +492,40 @@ export default function DocumentsAdminPage() {
                 <input name="document_date" type="date" defaultValue={editingDocument.document_date || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
               </label>
             </div>
+
+            {/* Subkategori Dinamis saat Edit Laporan Tahunan */}
+            {editCategory === "annual_report" && (
+              <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-3.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">
+                  Subkategori Laporan Tahunan
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {annualSubcategories.map((sub) => (
+                    <label
+                      key={sub.key}
+                      className={`
+                        flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer text-center text-xs transition-all
+                        ${editSubcategory === sub.key
+                          ? `${sub.color} border-current ring-2 font-bold`
+                          : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                        }
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="subcategory"
+                        value={sub.key}
+                        checked={editSubcategory === sub.key}
+                        onChange={() => setEditSubcategory(sub.key)}
+                        className="sr-only"
+                      />
+                      <span>{sub.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
               Keterangan Singkat
               <textarea name="description" rows={3} defaultValue={editingDocument.description || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />

@@ -42,23 +42,30 @@ const missionItems = [
   {
     letter: "A",
     icon: "fa-shield-halved",
-    title: "Keselamatan & Pelayanan",
-    badge: "Misi 01 • Standar & Sarpras",
-    text: "Memenuhi standar keamanan dan keselamatan penerbangan, memberikan pelayanan jasa yang optimal, serta menyediakan sarana dan prasarana transportasi udara yang memadai;",
+    title: "Keselamatan & Keamanan",
+    badge: "Misi 01 • Keselamatan",
+    text: "Mewujudkan keselamatan dan keamanan penerbangan di bandar udara;",
   },
   {
     letter: "B",
-    icon: "fa-chart-line",
-    title: "Iklim Usaha Kompetitif",
-    badge: "Misi 02 • Keberlanjutan",
-    text: "Mewujudkan iklim usaha di bidang transportasi udara yang kompetitif dan berkelanjutan;",
+    icon: "fa-plane-circle-check",
+    title: "Sarana & Prasarana",
+    badge: "Misi 02 • Keandalan Sarpras",
+    text: "Meningkatnya sarana dan prasarana bandar udara yang andal dan optimal;",
   },
   {
     letter: "C",
+    icon: "fa-user-tie",
+    title: "Pelayanan & SDM",
+    badge: "Misi 03 • Pelayanan Berkualitas",
+    text: "Mewujudkan pelayanan jasa kebandarudaraan yang berkualitas dengan didukung oleh SDM yang profesional;",
+  },
+  {
+    letter: "D",
     icon: "fa-scale-balanced",
-    title: "Kelembagaan & SDM",
-    badge: "Misi 03 • Tata Kelola & Regulasi",
-    text: "Mewujudkan kelembagaan yang efektif dan efisien, didukung oleh sumber daya manusia yang profesional serta peraturan perundang-undangan yang komprehensif guna menjamin kepastian hukum.",
+    title: "Kinerja Administrasi",
+    badge: "Misi 04 • Akuntabilitas & Keuangan",
+    text: "Meningkatkan kinerja administrasi dan keuangan yang terukur dan akuntabel.",
   },
 ];
 
@@ -90,7 +97,7 @@ export default function TentangPage() {
           </div>
 
           {/* Visi Card */}
-          <div className="relative mb-8 overflow-hidden rounded-[36px] border border-white/10 bg-[#1f2937]/50 p-8 shadow-2xl backdrop-blur-md md:p-12">
+          <div className="relative mb-10 overflow-hidden rounded-[36px] border border-white/10 bg-[#1f2937]/50 p-8 shadow-2xl backdrop-blur-md md:p-12">
             <i className="fa-solid fa-quote-right pointer-events-none absolute bottom-6 right-8 text-7xl text-white/[0.03] md:text-9xl"></i>
 
             <div className="relative z-10">
@@ -98,7 +105,7 @@ export default function TentangPage() {
                 <div className="inline-flex items-center gap-2.5 rounded-xl border border-[#facc15]/30 bg-[#facc15]/10 px-3.5 py-1.5">
                   <i className="fa-solid fa-eye text-xs text-[#facc15]"></i>
                   <span className="text-xs font-bold uppercase tracking-wider text-[#facc15]">
-                    Visi UPBU Kelas III Tardamu
+                    Visi Kantor UPBU Kelas III Tardamu Sabu
                   </span>
                 </div>
                 <span className="text-xs text-gray-500">Kementerian Perhubungan Republik Indonesia</span>
@@ -106,31 +113,29 @@ export default function TentangPage() {
 
               <blockquote className="my-4">
                 <p
-                  className="text-2xl font-medium leading-snug text-white md:text-3xl lg:text-4xl"
+                  className="text-xl font-medium leading-relaxed text-white md:text-2xl lg:text-3xl"
                   style={serifStyle}
                 >
-                  “Terwujudnya Penyelenggaraan Transportasi Udara yang{" "}
+                  “Terwujudnya penyelenggaraan jasa kebandarudaraan sesuai dengan standar keselamatan, keamanan dan pelayanan Bandar Udara dalam mewujudkan visi dan misi Direktorat Jenderal Perhubungan Udara yaitu{" "}
                   <span className="text-[#facc15] underline decoration-[#facc15]/40 underline-offset-8">
-                    Andal
-                  </span>
-                  ,{" "}
-                  <span className="text-[#facc15] underline decoration-[#facc15]/40 underline-offset-8">
-                    Berdaya Saing
-                  </span>
-                  , dan{" "}
-                  <span className="text-[#facc15] underline decoration-[#facc15]/40 underline-offset-8">
-                    Memberikan Nilai Tambah
-                  </span>
-                  .”
+                    Konektivitas Transportasi Udara yang Handal, Berdaya Saing, dan Memberikan Nilai Tambah
+                  </span>{" "}
+                  guna mendukung Visi dan Misi Presiden dan Wakil Presiden.”
                 </p>
               </blockquote>
-
-
             </div>
           </div>
 
+          {/* Pengantar Misi */}
+          <div className="mb-6 flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-[#facc15]"></span>
+            <p className="text-sm font-medium text-gray-300 md:text-base">
+              Untuk mewujudkan visi tersebut, dirumuskan misi Kantor UPBU Kelas III Tardamu Sabu yaitu:
+            </p>
+          </div>
+
           {/* Misi Cards */}
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {missionItems.map((item) => (
               <div
                 key={item.letter}

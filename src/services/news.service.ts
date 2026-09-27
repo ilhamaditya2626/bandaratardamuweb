@@ -68,13 +68,20 @@ export async function createNews(data: {
   content: string;
   image_url?: string;
   author?: string;
+  created_at?: Date;
 }) {
   const baseSlug = slugify(data.title, { lower: true, strict: true });
   const slug = `${baseSlug}-${Math.floor(Date.now() / 1000)}`;
 
+  const insertValues: Record<string, unknown> = { ...data, slug };
+  // Remove undefined created_at so it falls back to DB default
+  if (!data.created_at) {
+    delete insertValues.created_at;
+  }
+
   const [inserted] = await db
     .insert(news)
-    .values({ ...data, slug })
+    .values(insertValues as any)
     .$returningId();
 
   const [result] = await db
@@ -94,6 +101,7 @@ export async function updateNews(
     content: string;
     image_url: string;
     author: string;
+    created_at: Date;
   }>
 ) {
   const updateData: Record<string, unknown> = {

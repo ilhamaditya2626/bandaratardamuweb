@@ -663,7 +663,7 @@ const imagePanels = [
   {
     id: "prosedur",
     title: "Prosedur Permohonan Informasi",
-    src: "/assets/images/permohonan informasi.webp",
+    src: "/assets/images/prosedur permohonan.webp",
     alt: "Prosedur Permohonan",
   },
   {
@@ -1106,29 +1106,26 @@ export default function LayananInformasiPage() {
                   key={card.title}
                   type="button"
                   onClick={() => handleCardClick(card.type)}
-                  className={`group flex flex-col justify-between rounded-[32px] p-10 text-left transition-all duration-500 cursor-pointer ${
-                    isSelected
-                      ? "border-2 border-[#facc15] bg-[#1f2937] shadow-[0_0_40px_rgba(250,204,21,0.25)] scale-[1.02]"
-                      : "border border-white/5 bg-[rgba(31,41,55,0.6)] hover:border-[#facc15]/60 hover:bg-[#1f2937]"
-                  }`}
+                  className={`group flex flex-col justify-between rounded-[32px] p-10 text-left transition-all duration-500 cursor-pointer ${isSelected
+                    ? "border-2 border-[#facc15] bg-[#1f2937] shadow-[0_0_40px_rgba(250,204,21,0.25)] scale-[1.02]"
+                    : "border border-white/5 bg-[rgba(31,41,55,0.6)] hover:border-[#facc15]/60 hover:bg-[#1f2937]"
+                    }`}
                 >
                   <div>
                     <div className="mb-8 flex items-center justify-between">
                       <div
-                        className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl transition duration-300 ${
-                          isSelected
-                            ? "bg-[#facc15] text-[#111928] scale-110 shadow-lg"
-                            : "bg-[#facc15]/10 text-[#facc15] group-hover:scale-110"
-                        }`}
+                        className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl transition duration-300 ${isSelected
+                          ? "bg-[#facc15] text-[#111928] scale-110 shadow-lg"
+                          : "bg-[#facc15]/10 text-[#facc15] group-hover:scale-110"
+                          }`}
                       >
                         <i className={`fa-solid ${card.icon}`}></i>
                       </div>
                       <span
-                        className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition ${
-                          isSelected
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-white/5 text-gray-400 group-hover:text-[#facc15]"
-                        }`}
+                        className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition ${isSelected
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-white/5 text-gray-400 group-hover:text-[#facc15]"
+                          }`}
                       >
                         {isSelected ? "Sedang Dibuka" : card.badge}
                       </span>
@@ -1144,11 +1141,10 @@ export default function LayananInformasiPage() {
                       {isSelected ? "Formulir Aktif" : "Klik Untuk Membuka"}
                     </span>
                     <i
-                      className={`fa-solid ${
-                        isSelected
-                          ? "fa-chevron-down text-[#facc15]"
-                          : "fa-arrow-right text-gray-500 group-hover:translate-x-1 group-hover:text-[#facc15]"
-                      } transition-all`}
+                      className={`fa-solid ${isSelected
+                        ? "fa-chevron-down text-[#facc15]"
+                        : "fa-arrow-right text-gray-500 group-hover:translate-x-1 group-hover:text-[#facc15]"
+                        } transition-all`}
                     />
                   </div>
                 </button>
@@ -1201,7 +1197,7 @@ export default function LayananInformasiPage() {
           </div>
           <div className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#1f2937] shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
             <Image
-              src="/assets/images/maklumat pelayanan.webp"
+              src="/assets/images/estimasi.webp"
               alt="Estimasi Waktu Pelayanan"
               width={3200}
               height={4800}
@@ -1260,11 +1256,10 @@ export default function LayananInformasiPage() {
 
               {/* Status indicator */}
               <div
-                className={`mt-8 flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-5 py-3 transition-colors ${
-                  isServiceOpen
-                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                    : "border-rose-500/20 bg-rose-500/10 text-rose-400"
-                }`}
+                className={`mt-8 flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-5 py-3 transition-colors ${isServiceOpen
+                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                  : "border-rose-500/20 bg-rose-500/10 text-rose-400"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-3 w-3">
@@ -1281,8 +1276,8 @@ export default function LayananInformasiPage() {
                     {isServiceOpen === null
                       ? "Memeriksa Status..."
                       : isServiceOpen
-                      ? "Layanan Buka"
-                      : "Layanan Tutup"}
+                        ? "Layanan Buka"
+                        : "Layanan Tutup"}
                   </span>
                 </div>
                 <span className="text-xs font-medium text-gray-400">

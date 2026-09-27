@@ -151,6 +151,7 @@ export const informationRequests = mysqlTable("information_requests", {
 export const publicDocuments = mysqlTable("public_documents", {
   id: int("id").autoincrement().primaryKey(),
   category: varchar("category", { length: 40 }).notNull(), // annual_report | work_budget | financial_report | lakip | dip | dik
+  subcategory: varchar("subcategory", { length: 50 }), // ppid | bmn | surat (for annual_report)
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   document_date: date("document_date", { mode: "string" }),

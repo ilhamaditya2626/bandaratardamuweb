@@ -15,6 +15,7 @@ export default function NewsPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [articleDate, setArticleDate] = useState(() => new Date().toISOString().slice(0, 10));
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -52,6 +53,9 @@ export default function NewsPage() {
     setImageUrl(article.image_url || "");
     setImagePreview(article.image_url || "");
     setImageFile(null);
+    // Populate the date from the article's created_at
+    const existingDate = article.created_at ? new Date(article.created_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    setArticleDate(existingDate);
     setIsModalOpen(true);
   };
 
@@ -63,6 +67,7 @@ export default function NewsPage() {
     setImageUrl("");
     setImagePreview("");
     setImageFile(null);
+    setArticleDate(new Date().toISOString().slice(0, 10));
   };
 
   const openCreateModal = () => {
@@ -85,6 +90,7 @@ export default function NewsPage() {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
+    formData.append("created_at", articleDate);
 
     if (imageFile) {
       formData.append("image", imageFile);
@@ -203,6 +209,16 @@ export default function NewsPage() {
                       required
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Tanggal Berita</label>
+                    <input
+                      type="date"
+                      required
+                      value={articleDate}
+                      onChange={(e) => setArticleDate(e.target.value)}
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>

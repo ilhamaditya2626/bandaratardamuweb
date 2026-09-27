@@ -1,0 +1,21 @@
+2026-09-27T17:07:08.140Z - {
+  "keys": [
+    "title",
+    "category",
+    "document_date",
+    "subcategory",
+    "file",
+    "description"
+  ],
+  "category": "annual_report",
+  "title": "Surat Masuk",
+  "fileRaw": {
+    "type": "object",
+    "constructor": "File",
+    "name": "Surat Masuk 2025.pdf",
+    "size": 7874719,
+    "mime": "application/pdf"
+  },
+  "isFileValid": true
+}
+
