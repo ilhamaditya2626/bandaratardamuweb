@@ -7,32 +7,38 @@ import { PageHero, serifStyle } from "../_components/info-page-shell";
 
 const categories = [
   { key: "", label: "Semua Dokumen" },
-  { key: "annual_report", label: "Laporan Tahunan" },
+  { key: "annual_report", label: "Laporan Kinerja" },
   { key: "work_budget", label: "Rencana Kerja Anggaran" },
   { key: "financial_report", label: "Laporan Keuangan" },
   { key: "lakip", label: "LAKIP" },
+  { key: "bmn", label: "Laporan BMN" },
+  { key: "surat", label: "Surat Keluar Masuk" },
+  { key: "sop", label: "SOP" },
   { key: "dip", label: "DIP" },
   { key: "dik", label: "DIK" },
 ];
 
 const annualSubcategories = [
-  { key: "", label: "Semua Laporan Tahunan" },
+  { key: "", label: "Semua Laporan Kinerja" },
   { key: "ppid", label: "PPID", accent: "#facc15" },
-  { key: "bmn", label: "BMN", accent: "#34d399" },
-  { key: "surat", label: "Surat Keluar Masuk", accent: "#38bdf8" },
+  { key: "laporan_tahunan", label: "Laporan Tahunan", accent: "#a78bfa" },
 ];
 
 const categoryLabels: Record<string, string> = {
-  annual_report: "Laporan Tahunan",
+  annual_report: "Laporan Kinerja",
   work_budget: "Rencana Kerja Anggaran",
   financial_report: "Laporan Keuangan",
   lakip: "LAKIP",
+  bmn: "Laporan BMN",
+  surat: "Surat Keluar Masuk",
+  sop: "SOP",
   dip: "DIP",
   dik: "DIK",
 };
 
 const subcategoryLabels: Record<string, string> = {
   ppid: "PPID",
+  laporan_tahunan: "Laporan Tahunan",
   bmn: "BMN",
   surat: "Surat Keluar Masuk",
 };
@@ -46,7 +52,15 @@ interface PublicDoc {
   document_date?: string | null;
   file_url: string;
   total_pages?: number;
+  access_type?: "umum" | "rahasia";
   created_at?: string;
+}
+
+function getDocumentCategoryLabel(doc: PublicDoc) {
+  // Dokumen lama pernah disimpan sebagai subkategori laporan kinerja.
+  if (doc.category === "annual_report" && doc.subcategory === "surat") return "Surat Keluar Masuk";
+  if (doc.category === "annual_report" && doc.subcategory === "bmn") return "Laporan BMN";
+  return categoryLabels[doc.category] || doc.category;
 }
 
 function DokumenPublikContent() {
@@ -218,11 +232,16 @@ function DokumenPublikContent() {
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#facc15]">
-                        {categoryLabels[doc.category] || doc.category}
+                        {getDocumentCategoryLabel(doc)}
                       </span>
-                      {doc.category === "annual_report" && doc.subcategory && (
+                      {doc.category === "annual_report" && doc.subcategory && !["surat", "bmn"].includes(doc.subcategory) && (
                         <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/15">
                           {subcategoryLabels[doc.subcategory] || doc.subcategory.toUpperCase()}
+                        </span>
+                      )}
+                      {doc.access_type === "rahasia" && (
+                        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                          Rahasia · Pratinjau Terbatas
                         </span>
                       )}
                     </div>
@@ -258,7 +277,7 @@ function DokumenPublikContent() {
                     href={`/dokumen-publik/${doc.id}`}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.04] py-3 text-xs font-bold uppercase tracking-wider text-white transition-all group-hover:bg-[#facc15] group-hover:text-[#111928]"
                   >
-                    <span>Lihat Pratinjau</span>
+                    <span>{doc.access_type === "rahasia" ? "Lihat Pratinjau" : "Lihat Dokumen"}</span>
                     <i className="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>

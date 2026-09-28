@@ -5,10 +5,13 @@ import Link from "next/link";
 import { PageHero, serifStyle } from "../../_components/info-page-shell";
 
 const categoryLabels: Record<string, string> = {
-  annual_report: "Laporan Tahunan",
+  annual_report: "Laporan Kinerja",
   work_budget: "Rencana Kerja Anggaran",
   financial_report: "Laporan Keuangan",
   lakip: "LAKIP",
+  bmn: "Laporan BMN",
+  surat: "Surat Keluar Masuk",
+  sop: "SOP",
   dip: "DIP",
   dik: "DIK",
 };
@@ -17,6 +20,7 @@ const subcategoryLabels: Record<string, string> = {
   ppid: "PPID",
   bmn: "BMN",
   surat: "Surat Keluar Masuk",
+  laporan_tahunan: "Laporan Tahunan",
 };
 
 interface DocumentDetail {
@@ -31,6 +35,7 @@ interface DocumentDetail {
   file_url: string;
   preview_url?: string;
   file_name: string;
+  access_type?: "umum" | "rahasia";
   created_at: string;
 }
 
@@ -145,12 +150,17 @@ export default function DocumentPreviewPage({
     );
   }
 
-  const baseCategoryName = categoryLabels[doc.category] || doc.category;
+  const isSecret = doc.access_type === "rahasia";
+  const baseCategoryName = doc.category === "annual_report" && doc.subcategory === "surat"
+    ? "Surat Keluar Masuk"
+    : doc.category === "annual_report" && doc.subcategory === "bmn"
+      ? "Laporan BMN"
+      : categoryLabels[doc.category] || doc.category;
   const categoryName =
-    doc.category === "annual_report" && doc.subcategory
+    doc.category === "annual_report" && doc.subcategory && !["surat", "bmn"].includes(doc.subcategory)
       ? `${baseCategoryName} — ${subcategoryLabels[doc.subcategory] || doc.subcategory.toUpperCase()}`
       : baseCategoryName;
-  const pages = doc.preview_pages || Math.max(1, Math.ceil((doc.total_pages || 1) * 0.2));
+  const pages = doc.preview_pages || (isSecret ? Math.max(1, Math.ceil((doc.total_pages || 1) * 0.2)) : doc.total_pages || 1);
   const previewUrl = doc.preview_url || `/api/documents/${doc.id}/preview`;
   const showInlinePdf = !isMobile || showIframeOnMobile;
 
@@ -215,26 +225,28 @@ export default function DocumentPreviewPage({
                   </span>
                 </div>
                 <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-3 sm:p-4">
-                  <span className="text-xs text-gray-400 block mb-1">Pratinjau Ditampilkan</span>
+                  <span className="text-xs text-gray-400 block mb-1">{isSecret ? "Pratinjau Ditampilkan" : "Akses Ditampilkan"}</span>
                   <span className="text-base sm:text-lg font-bold text-[#facc15]">
-                    {pages} Halaman Pertama
+                    {isSecret ? `${pages} Halaman Pertama` : `${pages} Halaman Lengkap`}
                   </span>
                 </div>
               </div>
             </div>
           </article>
 
-          {/* Request Full Document Aside */}
+          {/* Information / request aside */}
           <aside className="flex flex-col justify-between rounded-[24px] md:rounded-[32px] border border-[#facc15]/25 bg-[#facc15]/[0.06] p-6 sm:p-8 shadow-xl">
             <div>
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15] text-xl text-[#111928] shadow-[0_4px_20px_rgba(250,204,21,0.3)]">
                 <i className="fa-solid fa-file-invoice" />
               </span>
               <h2 className="mt-6 text-xl sm:text-2xl text-white font-bold" style={serifStyle}>
-                Salinan Lengkap Dokumen
+                {isSecret ? "Salinan Lengkap Dokumen" : "Dokumen Akses Umum"}
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-gray-300">
-                Sesuai standar operasional pelayanan informasi, pratinjau digital menampilkan 20% halaman awal. Untuk memperoleh salinan lengkap atau dokumen fisik, silakan ajukan permohonan melalui formulir elektronik PPID.
+                {isSecret
+                  ? "Dokumen ini ditetapkan sebagai rahasia. Pratinjau digital hanya menampilkan 20% halaman awal. Untuk memperoleh salinan lengkap atau dokumen fisik, silakan ajukan permohonan melalui formulir elektronik PPID."
+                  : "Dokumen ini bersifat umum dan seluruh halaman PDF tersedia untuk dibaca. Anda tetap dapat mengajukan permohonan apabila memerlukan salinan resmi atau dokumen fisik."}
               </p>
             </div>
 
@@ -244,7 +256,7 @@ export default function DocumentPreviewPage({
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#facc15] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-[#111928] shadow-[0_4px_20px_rgba(250,204,21,0.25)] transition hover:scale-[1.02]"
               >
                 <i className="fa-solid fa-paper-plane" />
-                Ajukan Permohonan Dokumen
+                {isSecret ? "Ajukan Permohonan Dokumen" : "Ajukan Salinan Resmi"}
               </Link>
               <Link
                 href="/layanan-informasi#prosedur"
@@ -265,7 +277,7 @@ export default function DocumentPreviewPage({
                 <i className="fa-solid fa-eye" />
               </span>
               <span className="text-sm font-semibold text-white">
-                Pratinjau Dokumen ({pages} halaman)
+                {isSecret ? `Pratinjau Dokumen (${pages} halaman)` : `Dokumen Lengkap (${pages} halaman)`}
               </span>
             </div>
 
@@ -310,10 +322,12 @@ export default function DocumentPreviewPage({
               </div>
 
               <h3 className="text-lg font-bold text-white mb-2">
-                Pratinjau ({pages} Halaman): {doc.title}
+                {isSecret ? `Pratinjau (${pages} Halaman): ${doc.title}` : `Dokumen Lengkap (${pages} Halaman): ${doc.title}`}
               </h3>
               <p className="max-w-md mx-auto text-sm text-gray-400 mb-6 leading-relaxed">
-                Sesuai ketentuan, pratinjau menampilkan {pages} halaman awal (20% dari total {doc.total_pages || 0} halaman). Untuk kenyamanan di ponsel, Anda dapat membukanya langsung di aplikasi PDF atau tab baru peramban.
+                {isSecret
+                  ? `Dokumen rahasia ini menampilkan ${pages} halaman awal (20% dari total ${doc.total_pages || 0} halaman). Untuk kenyamanan di ponsel, Anda dapat membukanya langsung di aplikasi PDF atau tab baru peramban.`
+                  : `Dokumen umum ini menampilkan seluruh ${pages} halaman. Untuk kenyamanan di ponsel, Anda dapat membukanya langsung di aplikasi PDF atau tab baru peramban.`}
               </p>
 
               <div className="flex flex-col gap-3 justify-center max-w-sm mx-auto">
@@ -324,7 +338,7 @@ export default function DocumentPreviewPage({
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#facc15] px-6 py-3.5 text-sm font-bold text-[#111928] shadow-lg shadow-[#facc15]/10 transition hover:-translate-y-0.5 hover:bg-[#eab308]"
                 >
                   <i className="fa-solid fa-eye" />
-                  Buka Pratinjau PDF ({pages} Hal)
+                  {isSecret ? `Buka Pratinjau PDF (${pages} Hal)` : `Buka Dokumen PDF (${pages} Hal)`}
                 </a>
                 <a
                   href={previewUrl}
@@ -332,7 +346,7 @@ export default function DocumentPreviewPage({
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-gray-200 transition hover:bg-white/10"
                 >
                   <i className="fa-solid fa-download" />
-                  Unduh Salinan Pratinjau ({pages} Hal)
+                  {isSecret ? `Unduh Salinan Pratinjau (${pages} Hal)` : `Unduh Dokumen PDF (${pages} Hal)`}
                 </a>
               </div>
 
@@ -357,10 +371,10 @@ export default function DocumentPreviewPage({
                   src={
                     isMobile && typeof window !== "undefined" && !window.location.hostname.includes("localhost")
                       ? `https://docs.google.com/viewer?url=${encodeURIComponent(
-                          previewUrl.startsWith("http")
-                            ? previewUrl
-                            : `${window.location.origin}${previewUrl}`
-                        )}&embedded=true`
+                        previewUrl.startsWith("http")
+                          ? previewUrl
+                          : `${window.location.origin}${previewUrl}`
+                      )}&embedded=true`
                       : `${previewUrl}#page=1&toolbar=0`
                   }
                   className="h-[500px] sm:h-[680px] md:h-[760px] w-full rounded-lg sm:rounded-2xl border border-gray-200"

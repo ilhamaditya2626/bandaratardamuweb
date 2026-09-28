@@ -1,5 +1,5 @@
 /* Font Awesome 6 Free — SUBSET (dibuat otomatis oleh scripts/build-fa-subset.mjs)
-   Hanya berisi 140 ikon yang dipakai. Jangan diedit manual. */
+   Hanya berisi 153 ikon yang dipakai. Jangan diedit manual. */
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:swap;src:url(/fonts/fa/fa-solid-900.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-regular-400.woff2) format("woff2")}
 @font-face{font-family:"Font Awesome 6 Brands";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fa/fa-brands-400.woff2) format("woff2")}
@@ -16,11 +16,14 @@
 .fa-bars::before{content:"\f0c9"}
 .fa-bed::before{content:"\f236"}
 .fa-bolt::before{content:"\f0e7"}
+.fa-book-bookmark::before{content:"\e0bb"}
+.fa-box-open::before{content:"\f49e"}
 .fa-briefcase::before{content:"\f0b1"}
 .fa-building::before{content:"\f1ad"}
 .fa-building-columns::before{content:"\f19c"}
 .fa-building-user::before{content:"\e4da"}
 .fa-bullhorn::before{content:"\f0a1"}
+.fa-bullseye::before{content:"\f140"}
 .fa-bus::before{content:"\f207"}
 .fa-calendar::before{content:"\f133"}
 .fa-calendar-check::before{content:"\f274"}
@@ -37,10 +40,13 @@
 .fa-chevron-right::before{content:"\f054"}
 .fa-circle::before{content:"\f111"}
 .fa-circle-check::before{content:"\f058"}
+.fa-circle-dot::before{content:"\f192"}
 .fa-circle-exclamation::before{content:"\f06a"}
 .fa-circle-info::before{content:"\f05a"}
 .fa-circle-notch::before{content:"\f1ce"}
 .fa-circle-question::before{content:"\f059"}
+.fa-circle-xmark::before{content:"\f057"}
+.fa-clipboard-check::before{content:"\f46c"}
 .fa-clipboard-list::before{content:"\f46d"}
 .fa-clock::before{content:"\f017"}
 .fa-cloud::before{content:"\f0c2"}
@@ -55,10 +61,14 @@
 .fa-droplet::before{content:"\f043"}
 .fa-envelope::before{content:"\f0e0"}
 .fa-envelope-open-text::before{content:"\f658"}
+.fa-envelopes-bulk::before{content:"\f674"}
 .fa-eye::before{content:"\f06e"}
 .fa-facebook-f::before{content:"\f39e"}
 .fa-fan::before{content:"\f863"}
+.fa-file::before{content:"\f15b"}
 .fa-file-circle-exclamation::before{content:"\e4eb"}
+.fa-file-circle-plus::before{content:"\e494"}
+.fa-file-contract::before{content:"\f56c"}
 .fa-file-invoice::before{content:"\f570"}
 .fa-file-lines::before{content:"\f15c"}
 .fa-file-pdf::before{content:"\f1c1"}
@@ -75,14 +85,17 @@
 .fa-handshake-angle::before{content:"\f4c4"}
 .fa-headset::before{content:"\f590"}
 .fa-house::before{content:"\f015"}
+.fa-inbox::before{content:"\f01c"}
 .fa-info::before{content:"\f129"}
 .fa-info-circle::before{content:"\f05a"}
 .fa-instagram::before{content:"\f16d"}
 .fa-jug-detergent::before{content:"\e519"}
 .fa-kitchen-set::before{content:"\e51a"}
+.fa-layer-group::before{content:"\f5fd"}
 .fa-list::before{content:"\f03a"}
 .fa-location-arrow::before{content:"\f124"}
 .fa-location-dot::before{content:"\f3c5"}
+.fa-lock::before{content:"\f023"}
 .fa-magnifying-glass-plus::before{content:"\f00e"}
 .fa-map-location-dot::before{content:"\f5a0"}
 .fa-moon::before{content:"\f186"}

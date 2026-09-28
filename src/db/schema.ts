@@ -150,8 +150,8 @@ export const informationRequests = mysqlTable("information_requests", {
 // ─── DOKUMEN PUBLIK YANG DIKELOLA ADMIN ─────────────────────
 export const publicDocuments = mysqlTable("public_documents", {
   id: int("id").autoincrement().primaryKey(),
-  category: varchar("category", { length: 40 }).notNull(), // annual_report | work_budget | financial_report | lakip | dip | dik
-  subcategory: varchar("subcategory", { length: 50 }), // ppid | bmn | surat (for annual_report)
+  category: varchar("category", { length: 40 }).notNull(), // annual_report | work_budget | financial_report | lakip | bmn | surat | sop | dip | dik
+  subcategory: varchar("subcategory", { length: 50 }), // ppid | laporan_tahunan (for annual_report), legacy: bmn | surat
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   document_date: date("document_date", { mode: "string" }),
@@ -159,6 +159,7 @@ export const publicDocuments = mysqlTable("public_documents", {
   file_name: varchar("file_name", { length: 255 }).notNull(),
   total_pages: int("total_pages").default(0).notNull(),
   is_published: boolean("is_published").default(true).notNull(),
+  access_type: varchar("access_type", { length: 20 }).default("umum").notNull(), // umum | rahasia
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),
 });

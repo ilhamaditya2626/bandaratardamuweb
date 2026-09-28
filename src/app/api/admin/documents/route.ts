@@ -11,8 +11,8 @@ async function allowed(r: NextRequest) {
   }
 }
 
-const categories = ["annual_report", "work_budget", "financial_report", "lakip", "dip", "dik"];
-const annualSubcategories = ["ppid", "bmn", "surat"];
+const categories = ["annual_report", "work_budget", "financial_report", "lakip", "bmn", "surat", "sop", "dip", "dik"];
+const annualSubcategories = ["ppid", "laporan_tahunan", "bmn", "surat"];
 
 export async function GET(r: NextRequest) {
   try {
@@ -95,8 +95,11 @@ export async function POST(r: NextRequest) {
       subcategory = annualSubcategories.includes(sub) ? sub : "ppid";
     }
 
+    const rawAccess = String(f.get("access_type") || "").trim().toLowerCase();
+    const access_type = rawAccess === "rahasia" ? "rahasia" : "umum";
+
     const total_pages = await countPdfPages(file);
-    const file_url = await saveUploadedDocument(file, "documents");
+    const file_url = await saveUploadedDocument(file, "documents", access_type);
 
     await createDocument({
       category,
@@ -108,6 +111,7 @@ export async function POST(r: NextRequest) {
       file_name: file.name,
       total_pages,
       is_published: true,
+      access_type,
     });
 
     return NextResponse.json({ success: true, total_pages }, { status: 201 });
@@ -155,7 +159,8 @@ async function executeUpdateDocument(body: any) {
     title,
     description: typeof body.description === "string" ? body.description.trim() || null : null,
     document_date: typeof body.document_date === "string" ? body.document_date || null : null,
-  });
+    access_type: body.access_type === "rahasia" ? "rahasia" : "umum",
+    });
   return NextResponse.json({ success: true });
 }
 

@@ -21,7 +21,10 @@ export async function GET(
   }
 
   try {
-    const previewUrl = await ensureDocumentPreview(doc.file_url);
+    const isSecret = doc.access_type === "rahasia";
+    const previewUrl = isSecret
+      ? await ensureDocumentPreview(doc.file_url)
+      : doc.file_url;
     const diskPath = resolveDiskPathFromUrl(previewUrl);
 
     if (!diskPath) {
@@ -32,8 +35,11 @@ export async function GET(
     return new NextResponse(fileBuffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${encodeURIComponent(doc.file_name.replace(/\.pdf$/i, "") + "-preview.pdf")}"`,
-        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+        "Content-Disposition": `inline; filename="${encodeURIComponent(
+          doc.file_name.replace(/\.pdf$/i, "") + (isSecret ? "-preview.pdf" : ".pdf")
+        )}"`,
+        // Akses dokumen dapat berubah dari umum menjadi rahasia. Jangan gunakan PDF lama dari cache.
+        "Cache-Control": "private, no-store, max-age=0",
         "Accept-Ranges": "bytes",
       },
     });

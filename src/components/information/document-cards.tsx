@@ -13,8 +13,7 @@ type Doc = {
 
 const annualSubcategories = [
   { key: "ppid", label: "PPID", color: "from-amber-500/20 to-yellow-500/10", accent: "#facc15" },
-  { key: "bmn", label: "BMN", color: "from-emerald-500/20 to-teal-500/10", accent: "#34d399" },
-  { key: "surat", label: "Surat Keluar Masuk", color: "from-sky-500/20 to-blue-500/10", accent: "#38bdf8" },
+  { key: "laporan_tahunan", label: "Laporan Tahunan", color: "from-violet-500/20 to-purple-500/10", accent: "#a78bfa" },
 ];
 
 function DocLink({ d }: { d: Doc }) {

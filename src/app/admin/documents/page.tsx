@@ -14,25 +14,34 @@ import {
 } from "lucide-react";
 
 const labels: Record<string, string> = {
-  annual_report: "Laporan Tahunan",
+  annual_report: "Laporan Kinerja",
   work_budget: "Rencana Kerja Anggaran",
   financial_report: "Laporan Keuangan",
   lakip: "LAKIP",
+  bmn: "Laporan BMN",
+  surat: "Surat Keluar Masuk",
+  sop: "SOP",
   dip: "DIP",
   dik: "DIK",
 };
 
 const annualSubcategories = [
   { key: "ppid", label: "PPID", color: "bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/20" },
-  { key: "bmn", label: "BMN", color: "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/20" },
-  { key: "surat", label: "Surat Keluar Masuk", color: "bg-sky-50 text-sky-700 border-sky-200 ring-sky-500/20" },
+  { key: "laporan_tahunan", label: "Laporan Tahunan", color: "bg-violet-50 text-violet-700 border-violet-200 ring-violet-500/20" },
 ];
 
 const subcategoryMap: Record<string, { label: string; badge: string }> = {
   ppid: { label: "PPID", badge: "bg-amber-100 text-amber-800 border-amber-200" },
+  laporan_tahunan: { label: "Laporan Tahunan", badge: "bg-violet-100 text-violet-800 border-violet-200" },
   bmn: { label: "BMN", badge: "bg-emerald-100 text-emerald-800 border-emerald-200" },
   surat: { label: "Surat Keluar Masuk", badge: "bg-sky-100 text-sky-800 border-sky-200" },
 };
+
+function getAdminCategoryLabel(document: Pick<PublicDoc, "category" | "subcategory">) {
+  if (document.category === "annual_report" && document.subcategory === "surat") return "Surat Keluar Masuk";
+  if (document.category === "annual_report" && document.subcategory === "bmn") return "Laporan BMN";
+  return labels[document.category] || document.category;
+}
 
 interface PublicDoc {
   id: number;
@@ -45,6 +54,7 @@ interface PublicDoc {
   file_name: string;
   total_pages: number;
   is_published: boolean;
+  access_type?: "umum" | "rahasia";
   created_at: string;
 }
 
@@ -58,6 +68,8 @@ export default function DocumentsAdminPage() {
   const [editSubcategory, setEditSubcategory] = useState("ppid");
   const [uploadCategory, setUploadCategory] = useState("annual_report");
   const [uploadSubcategory, setUploadSubcategory] = useState("ppid");
+  const [uploadAccessType, setUploadAccessType] = useState<"umum" | "rahasia">("umum");
+  const [editAccessType, setEditAccessType] = useState<"umum" | "rahasia">("umum");
   const [isSaving, setIsSaving] = useState(false);
 
   const loadDocuments = async () => {
@@ -86,6 +98,7 @@ export default function DocumentsAdminPage() {
     if (editingDocument) {
       setEditCategory(editingDocument.category || "annual_report");
       setEditSubcategory(editingDocument.subcategory || "ppid");
+      setEditAccessType(editingDocument.access_type === "rahasia" ? "rahasia" : "umum");
     }
   }, [editingDocument]);
 
@@ -114,6 +127,7 @@ export default function DocumentsAdminPage() {
 
     const formData = new FormData(formEl);
     formData.set("category", uploadCategory);
+    formData.set("access_type", uploadAccessType);
     if (uploadCategory === "annual_report") {
       formData.set("subcategory", uploadSubcategory);
     }
@@ -133,6 +147,7 @@ export default function DocumentsAdminPage() {
         formEl.reset();
         setUploadCategory("annual_report");
         setUploadSubcategory("ppid");
+        setUploadAccessType("umum");
         loadDocuments();
       } else {
         setNotice({ type: "error", message: data.error || "Unggahan dokumen gagal." });
@@ -191,6 +206,7 @@ export default function DocumentsAdminPage() {
           subcategory,
           document_date: formData.get("document_date"),
           description: formData.get("description"),
+          access_type: editAccessType,
         }),
       });
       let data: any = null;
@@ -306,16 +322,16 @@ export default function DocumentsAdminPage() {
               </div>
             </div>
 
-            {/* Subkategori Dinamis saat Kategori Laporan Tahunan dipilih */}
+            {/* Subkategori Dinamis saat Kategori Laporan Kinerja dipilih */}
             {uploadCategory === "annual_report" && (
               <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 transition-all animate-fadeIn">
                 <div className="flex items-center gap-2 mb-2 text-amber-900">
                   <FolderTree className="h-4 w-4 text-amber-600" />
                   <label className="text-xs font-bold uppercase tracking-wider">
-                    Pilih Subkategori Laporan Tahunan <span className="text-red-500">*</span>
+                    Pilih Subkategori Laporan Kinerja <span className="text-red-500">*</span>
                   </label>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {annualSubcategories.map((sub) => (
                     <label
                       key={sub.key}
@@ -357,6 +373,24 @@ export default function DocumentsAdminPage() {
                 className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
             </div>
+
+            <fieldset>
+              <legend className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                Akses Dokumen <span className="text-red-500">*</span>
+              </legend>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className={`cursor-pointer rounded-xl border p-3 transition ${uploadAccessType === "umum" ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500" : "border-gray-200 hover:border-gray-300"}`}>
+                  <input className="sr-only" type="radio" name="access_type" value="umum" checked={uploadAccessType === "umum"} onChange={() => setUploadAccessType("umum")} />
+                  <span className="block text-sm font-semibold text-gray-900">Umum</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-gray-500">Seluruh halaman PDF dapat dibaca pada pratinjau.</span>
+                </label>
+                <label className={`cursor-pointer rounded-xl border p-3 transition ${uploadAccessType === "rahasia" ? "border-amber-500 bg-amber-50 ring-1 ring-amber-500" : "border-gray-200 hover:border-gray-300"}`}>
+                  <input className="sr-only" type="radio" name="access_type" value="rahasia" checked={uploadAccessType === "rahasia"} onChange={() => setUploadAccessType("rahasia")} />
+                  <span className="block text-sm font-semibold text-gray-900">Rahasia</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-gray-500">Pratinjau dibatasi pada 20% halaman awal.</span>
+                </label>
+              </div>
+            </fieldset>
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
@@ -421,14 +455,17 @@ export default function DocumentsAdminPage() {
                     <div className="font-semibold text-gray-900 text-sm">{d.title}</div>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                       <span className="rounded bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
-                        {labels[d.category] || d.category}
+                        {getAdminCategoryLabel(d)}
                       </span>
-                      {d.category === "annual_report" && d.subcategory && (
+                      {d.category === "annual_report" && d.subcategory && !["surat", "bmn"].includes(d.subcategory) && (
                         <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${subcategoryMap[d.subcategory]?.badge || "bg-amber-100 text-amber-800 border-amber-200"}`}>
                           {subcategoryMap[d.subcategory]?.label || d.subcategory.toUpperCase()}
                         </span>
                       )}
                       <span>{d.total_pages || "-"} halaman</span>
+                      <span className={`rounded-full px-2 py-0.5 font-medium ${d.access_type === "rahasia" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+                        {d.access_type === "rahasia" ? "Rahasia · 20% pratinjau" : "Umum · akses penuh"}
+                      </span>
                       {d.document_date && <span>• {d.document_date}</span>}
                     </div>
                   </div>
@@ -493,13 +530,13 @@ export default function DocumentsAdminPage() {
               </label>
             </div>
 
-            {/* Subkategori Dinamis saat Edit Laporan Tahunan */}
+            {/* Subkategori Dinamis saat Edit Laporan Kinerja */}
             {editCategory === "annual_report" && (
               <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-3.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">
-                  Subkategori Laporan Tahunan
+                  Subkategori Laporan Kinerja
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {annualSubcategories.map((sub) => (
                     <label
                       key={sub.key}
@@ -525,6 +562,18 @@ export default function DocumentsAdminPage() {
                 </div>
               </div>
             )}
+
+            <fieldset>
+              <legend className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">Akses Dokumen</legend>
+              <div className="grid grid-cols-2 gap-3">
+                {(["umum", "rahasia"] as const).map((accessType) => (
+                  <label key={accessType} className={`cursor-pointer rounded-lg border p-3 text-center text-xs transition ${editAccessType === accessType ? accessType === "umum" ? "border-blue-500 bg-blue-50 font-bold text-blue-800" : "border-amber-500 bg-amber-50 font-bold text-amber-800" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                    <input className="sr-only" type="radio" name="access_type" value={accessType} checked={editAccessType === accessType} onChange={() => setEditAccessType(accessType)} />
+                    {accessType === "umum" ? "Umum · seluruh halaman" : "Rahasia · 20% halaman"}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
               Keterangan Singkat

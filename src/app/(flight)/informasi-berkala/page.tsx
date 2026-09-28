@@ -200,7 +200,7 @@ const officials = [
   },
   {
     name: "Gusti Ngurah Budiarta, S.H.",
-    title: "Kepala Tata Usaha",
+    title: "Ketua Tim Tata Usaha",
     photo: "/assets/images/pegawai/pak gusti.webp",
     initials: "GNB",
     focus: "Tata usaha, kepegawaian, arsip, perencanaan, keuangan, dan dukungan administrasi kantor.",
@@ -213,7 +213,7 @@ const officials = [
   },
   {
     name: "Jefri Adji, S.I.P",
-    title: "Kepala TOKPD",
+    title: "Ketua Tim TOKPD",
     photo: "/assets/images/pegawai/pak jey1.webp",
     initials: "JA",
     focus: "Teknik, operasi, keamanan, pelayanan darurat, serta koordinasi kesiapan fasilitas operasional.",
@@ -221,16 +221,14 @@ const officials = [
       "Menjaga kesiapan teknis dan operasional fasilitas bandara, mulai dari koordinasi sisi udara, keamanan, pelayanan darurat, hingga pemeliharaan sarana pendukung operasi harian.",
     badge: "Operasi & Kesiapan Fasilitas",
     icon: "fa-tower-observation",
-    lhkpnUrl: "/assets/pdf/lhkpn/lhkpn-jefri-adji.pdf",
-    lhkpnDoc: "LHKPN 2025",
   },
 ];
 
 const reportGroups = [
   {
-    title: "Laporan Tahunan",
+    title: "Laporan Kinerja",
     icon: "fa-chart-line",
-    summary: "Pertanggungjawaban pelaksanaan kebijakan, capaian layanan, dan evaluasi kinerja kantor. Terdiri dari laporan PPID, BMN, dan Surat Keluar Masuk.",
+    summary: "Pertanggungjawaban pelaksanaan kebijakan, capaian layanan, dan evaluasi kinerja kantor. Terdiri dari laporan PPID dan Laporan Tahunan.",
     files: [
       { label: "LAPORAN TAHUNAN 2024", slug: "laporan-tahunan-2024" },
       { label: "LAPORAN TAHUNAN 2025", slug: "laporan-tahunan-2025" },
@@ -266,9 +264,15 @@ const reportGroups = [
       },
     ],
   },
+  {
+    title: "LAKIP",
+    icon: "fa-file-lines",
+    summary: "Laporan Akuntabilitas Kinerja Instansi Pemerintah (LAKIP) sebagai bentuk pertanggungjawaban kinerja organisasi.",
+    files: [],
+  },
 ];
 
-const reportCategories = ["annual_report", "work_budget", "financial_report"];
+const reportCategories = ["annual_report", "work_budget", "financial_report", "lakip"];
 
 const complaintChannels = [
   { label: "Email PPID", value: "bandaratardamu@gmail.com", icon: "fa-envelope" },
@@ -901,37 +905,39 @@ export default async function InformasiBerkalaPage() {
                         </div>
 
                         {/* LHKPN Transparency & PDF Link */}
-                        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#facc15]/20 bg-[#facc15]/10 text-base text-[#facc15]">
-                              <i className="fa-solid fa-file-shield"></i>
-                            </span>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#facc15]">
-                                  Kepatuhan LHKPN
+                        {official.lhkpnUrl && (
+                          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#facc15]/20 bg-[#facc15]/10 text-base text-[#facc15]">
+                                <i className="fa-solid fa-file-shield"></i>
+                              </span>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#facc15]">
+                                    Kepatuhan LHKPN
+                                  </p>
+                                  <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold text-emerald-400">
+                                    Terverifikasi KPK
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-400">
+                                  Laporan Harta Kekayaan Penyelenggara Negara ({official.lhkpnDoc})
                                 </p>
-                                <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold text-emerald-400">
-                                  Terverifikasi KPK
-                                </span>
                               </div>
-                              <p className="text-xs text-gray-400">
-                                Laporan Harta Kekayaan Penyelenggara Negara ({official.lhkpnDoc})
-                              </p>
                             </div>
-                          </div>
 
-                          <a
-                            href={official.lhkpnUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group/lhkpn inline-flex items-center gap-2.5 rounded-xl border border-[#facc15]/40 bg-[#facc15]/10 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-[#facc15] shadow-[0_4px_20px_rgba(250,204,21,0.12)] transition-all duration-300 hover:scale-[1.03] hover:border-[#facc15] hover:bg-[#facc15] hover:text-[#111928] hover:shadow-[0_8px_25px_rgba(250,204,21,0.3)]"
-                          >
-                            <i className="fa-solid fa-file-pdf text-sm transition-transform group-hover/lhkpn:scale-110"></i>
-                            <span>Lihat LHKPN</span>
-                            <i className="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-75 transition-transform group-hover/lhkpn:translate-x-0.5 group-hover/lhkpn:-translate-y-0.5 group-hover/lhkpn:opacity-100"></i>
-                          </a>
-                        </div>
+                            <a
+                              href={official.lhkpnUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group/lhkpn inline-flex items-center gap-2.5 rounded-xl border border-[#facc15]/40 bg-[#facc15]/10 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-[#facc15] shadow-[0_4px_20px_rgba(250,204,21,0.12)] transition-all duration-300 hover:scale-[1.03] hover:border-[#facc15] hover:bg-[#facc15] hover:text-[#111928] hover:shadow-[0_8px_25px_rgba(250,204,21,0.3)]"
+                            >
+                              <i className="fa-solid fa-file-pdf text-sm transition-transform group-hover/lhkpn:scale-110"></i>
+                              <span>Lihat LHKPN</span>
+                              <i className="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-75 transition-transform group-hover/lhkpn:translate-x-0.5 group-hover/lhkpn:-translate-y-0.5 group-hover/lhkpn:opacity-100"></i>
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </article>
@@ -954,17 +960,21 @@ export default async function InformasiBerkalaPage() {
               description="Ringkasan kategori laporan berkala. Dokumen publik yang sudah tersedia dapat diakses melalui halaman laporan dan layanan informasi."
             />
 
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2">
               {reportGroups.map((group, index) => (
-                <article key={group.title} className="rounded-[28px] border border-white/5 bg-[#111928]/70 p-8">
-                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15]">
-                    <i className={`fa-solid ${group.icon}`}></i>
+                <article key={group.title} className="flex flex-col justify-between rounded-[28px] border border-white/5 bg-[#111928]/70 p-8 shadow-xl transition hover:border-[#facc15]/30">
+                  <div>
+                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15]">
+                      <i className={`fa-solid ${group.icon}`}></i>
+                    </div>
+                    <h3 className="mb-4 text-2xl text-white" style={serifStyle}>
+                      {group.title}
+                    </h3>
+                    <p className="mb-7 text-sm leading-7 text-gray-400">{group.summary}</p>
                   </div>
-                  <h3 className="mb-4 text-2xl text-white" style={serifStyle}>
-                    {group.title}
-                  </h3>
-                  <p className="mb-7 text-sm leading-7 text-gray-400">{group.summary}</p>
-                  <DocumentCards category={reportCategories[index]} />
+                  <div className="pt-2">
+                    <DocumentCards category={reportCategories[index]} />
+                  </div>
                 </article>
               ))}
             </div>

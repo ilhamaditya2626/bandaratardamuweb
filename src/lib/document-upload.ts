@@ -24,7 +24,11 @@ export async function countPdfPages(file: File): Promise<number> {
   }
 }
 
-export async function saveUploadedDocument(file: File, folder: "documents" | "ppid") {
+export async function saveUploadedDocument(
+  file: File,
+  folder: "documents" | "ppid",
+  accessType: "umum" | "rahasia" = "umum"
+) {
   const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
   if (!allowed.includes(file.type)) throw new DocumentUploadError("File harus berupa PDF, JPG, PNG, atau WebP.");
   if (file.size > MAX_DOCUMENT_SIZE) throw new DocumentUploadError("Ukuran file maksimal 20 MB.");
@@ -39,8 +43,8 @@ export async function saveUploadedDocument(file: File, folder: "documents" | "pp
   const buffer = Buffer.from(await file.arrayBuffer());
   await fs.writeFile(path.join(dir, fileName), buffer);
 
-  // Jika berupa PDF dokumen publik, buat juga berkas pratinjau 20% secara otomatis
-  if (file.type === "application/pdf" && folder === "documents") {
+  // Hanya dokumen rahasia yang memerlukan berkas pratinjau terbatas (20%).
+  if (file.type === "application/pdf" && folder === "documents" && accessType === "rahasia") {
     try {
       const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const totalPages = pdfDoc.getPageCount();
