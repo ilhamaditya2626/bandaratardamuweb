@@ -70,9 +70,25 @@ jobs:
             rm -rf "$TARGET_BASE/standalone/public/uploads"
             ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
-            # Hentikan semua proses node lama yang sedang berjalan secara aman
-            pkill -9 -x node 2>/dev/null || true
-            sleep 2
+            echo "=== DIAGNOSTIK PROSES SEBELUM STOP ==="
+            whoami
+            ps -ef | grep -E "node|server\.js|pm2" | grep -v grep || true
+            ss -tulpn 2>/dev/null | grep 3000 || true
+            echo "======================================"
+
+            # Coba hentikan pm2 jika digunakan
+            if command -v pm2 >/dev/null 2>&1; then
+              pm2 stop all 2>/dev/null || true
+              pm2 delete all 2>/dev/null || true
+            fi
+
+            # Hentikan semua proses node
+            pkill -9 -f "node" 2>/dev/null || true
+            sleep 3
+
+            echo "=== DIAGNOSTIK PROSES SETELAH STOP ==="
+            ss -tulpn 2>/dev/null | grep 3000 || true
+            echo "======================================"
 
             # Bersihkan log server lama agar log yang tercetak selalu akurat
             rm -f "$TARGET_BASE/server.log"
