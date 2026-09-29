@@ -61,6 +61,10 @@ jobs:
             mv .next/standalone "$TARGET_BASE/standalone"
 
             mkdir -p "$TARGET_BASE/standalone/public"
+            # `public` ikut tersalin saat build. Hapus salinan uploads ini terlebih
+            # dahulu; tanpa langkah ini `ln` membuat tautan di dalam folder lama,
+            # sehingga URL /uploads membaca berkas build lama dan mengembalikan 404.
+            rm -rf "$TARGET_BASE/standalone/public/uploads"
             ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
             PID=$(ss -tulpn | awk '/:3000 / {print $NF}' | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -n 1)

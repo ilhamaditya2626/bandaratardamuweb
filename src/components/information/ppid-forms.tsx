@@ -80,9 +80,29 @@ export function PpidForms({ defaultKind, onClose }: PpidFormsProps = {}) {
         method: "POST",
         body: new FormData(form),
       });
-      const json = await res.json();
+
+      // Saat server/proxy sementara tidak tersedia, responsnya bisa berupa HTML
+      // (mis. 503), bukan JSON. Jangan biarkan `res.json()` menyamarkan pesan
+      // sebenarnya sebagai "Unexpected token <".
+      const responseText = await res.text();
+      let json: { message?: string; error?: string } | null = null;
+      try {
+        json = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        // Respons non-JSON ditangani melalui status HTTP di bawah.
+      }
       setSending(false);
-      setMessage(json.message || json.error || "Tanggapan diterima.");
+      if (!res.ok) {
+        setMessage(
+          json?.error ||
+            (res.status === 503
+              ? "Layanan sedang tidak tersedia. Silakan coba beberapa saat lagi."
+              : "Permohonan belum dapat dikirim. Silakan coba lagi.")
+        );
+        return;
+      }
+
+      setMessage(json?.message || "Permohonan berhasil dikirim ke PPID.");
       if (res.ok) form.reset();
     } catch (err) {
       console.error("Form submit error:", err);

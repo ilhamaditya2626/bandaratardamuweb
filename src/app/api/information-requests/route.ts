@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: "Permohonan berhasil dikirim ke PPID." }, { status: 201 });
   } catch (e) {
+    // Catat penyebab di log server tanpa memasukkan data pribadi pemohon ke log.
+    console.error("POST /api/information-requests error:", e);
     return NextResponse.json(
       { success: false, error: e instanceof DocumentUploadError ? e.message : "Permohonan gagal dikirim." },
       { status: 500 }
