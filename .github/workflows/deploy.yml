@@ -75,24 +75,24 @@ jobs:
 
             # Hentikan proses lama yang berjalan di port 3000
             PID=$(ss -tulpn 2>/dev/null | awk '/:3000 / {print $NF}' | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -n 1)
-            if [ -n "$PID" ]; then
+            if [ -n "$PID" ] && [ "$PID" != "$$" ]; then
               kill -9 "$PID" 2>/dev/null || true
+              sleep 2
             fi
             fuser -k 3000/tcp 2>/dev/null || true
-            pkill -9 -f "node.*server.js" 2>/dev/null || true
-            sleep 3
+            sleep 2
 
             cd "$TARGET_BASE/standalone"
             nohup env PORT=3000 HOSTNAME=0.0.0.0 UPLOAD_DIR="$PERSISTENT_UPLOADS" node server.js > ../server.log 2>&1 < /dev/null &
-            disown || true
+            disown -a 2>/dev/null || true
 
-            sleep 4
+            sleep 5
             echo "=== SERVER LOG (50 BARIS TERAKHIR) ==="
             tail -n 50 ../server.log || true
             echo "======================================"
 
             if ss -tulpn 2>/dev/null | grep -q ":3000 "; then
-              echo "Server berhasil aktif di port 3000."
+              echo "Server berhasil aktif dan mendengarkan pada port 3000."
             else
-              echo "PERINGATAN: Port 3000 belum terdeteksi mendengarkan."
+              echo "PERINGATAN: Port 3000 belum aktif. Periksa server.log di atas."
             fi
