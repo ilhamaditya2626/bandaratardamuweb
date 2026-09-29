@@ -5,13 +5,22 @@ import * as schema from "@/db/schema";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const authBaseURL =
-  (isProduction ? process.env.SITE_URL : null) ||
-  process.env.BETTER_AUTH_URL ||
-  process.env.SITE_URL ||
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://tardamuairport.id";
+// Helper: apakah URL mengarah ke localhost/127.0.0.1
+const isLocalURL = (url?: string) =>
+  !!url && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(url);
+
+// Di production, JANGAN gunakan localhost-based URL sebagai baseURL.
+// Prioritas: SITE_URL > BETTER_AUTH_URL (hanya jika bukan localhost) > fallback hardcoded.
+const authBaseURL = isProduction
+  ? process.env.SITE_URL ||
+    (!isLocalURL(process.env.BETTER_AUTH_URL)
+      ? process.env.BETTER_AUTH_URL
+      : undefined) ||
+    "https://tardamuairport.id"
+  : process.env.BETTER_AUTH_URL ||
+    process.env.SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
 
 const trustedOrigins = Array.from(
   new Set(
