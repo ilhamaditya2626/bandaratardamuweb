@@ -53,10 +53,9 @@ jobs:
             mkdir -p "$TARGET_BASE"
             mkdir -p "$PERSISTENT_UPLOADS"
 
-            # Selamatkan unggahan yang masih ada sebelum build runtime lama diganti (hanya jika bukan symlink)
-            if [ -d "$TARGET_BASE/standalone/public/uploads" ] && [ ! -L "$TARGET_BASE/standalone/public/uploads" ]; then
-              cp -a "$TARGET_BASE/standalone/public/uploads/." "$PERSISTENT_UPLOADS/" 2>/dev/null || true
-            fi
+            # Bersihkan recursive symlink loop 'uploads' di dalam PERSISTENT_UPLOADS (mencegah error ELOOP)
+            rm -rf "$PERSISTENT_UPLOADS/uploads" 2>/dev/null || true
+            find "$PERSISTENT_UPLOADS" -maxdepth 2 -type l -delete 2>/dev/null || true
 
             # Salin aset uploads baru dari repositori jika ada
             if [ -d public/uploads ]; then
@@ -67,9 +66,7 @@ jobs:
             mv .next/standalone "$TARGET_BASE/standalone"
 
             mkdir -p "$TARGET_BASE/standalone/public"
-            # `public` ikut tersalin saat build. Hapus salinan uploads ini terlebih
-            # dahulu; tanpa langkah ini `ln` membuat tautan di dalam folder lama,
-            # sehingga URL /uploads membaca berkas build lama dan mengembalikan 404.
+            # Hapus folder uploads salinan build Next.js dan buat symlink ke folder uploads permanen
             rm -rf "$TARGET_BASE/standalone/public/uploads"
             ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
