@@ -70,23 +70,25 @@ jobs:
             rm -rf "$TARGET_BASE/standalone/public/uploads"
             ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
-            # Hentikan proses lama yang berjalan di port 3000
-            PID=$(ss -tulpn 2>/dev/null | awk '/:3000 / {print $NF}' | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -n 1)
-            if [ -n "$PID" ] && [ "$PID" != "$$" ]; then
-              kill -9 "$PID" 2>/dev/null || true
-              sleep 2
-            fi
+            # Hentikan semua proses node server.js lama yang masih berjalan
+            for p in $(ps -eo pid,args 2>/dev/null | awk '/[n]ode.*server\.js/ {print $1}'); do
+              kill -9 "$p" 2>/dev/null || true
+            done
+            lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
             fuser -k 3000/tcp 2>/dev/null || true
-            sleep 2
+            sleep 3
+
+            # Bersihkan log server lama agar log yang tercetak selalu akurat
+            rm -f "$TARGET_BASE/server.log"
 
             cd "$TARGET_BASE/standalone"
             nohup env PORT=3000 HOSTNAME=0.0.0.0 UPLOAD_DIR="$PERSISTENT_UPLOADS" node server.js > ../server.log 2>&1 < /dev/null &
             disown -a 2>/dev/null || true
 
             sleep 5
-            echo "=== SERVER LOG (50 BARIS TERAKHIR) ==="
-            tail -n 50 ../server.log || true
-            echo "======================================"
+            echo "=== SERVER LOG (TERBARU) ==="
+            cat ../server.log || true
+            echo "============================"
 
             if ss -tulpn 2>/dev/null | grep -q ":3000 "; then
               echo "Server berhasil aktif dan mendengarkan pada port 3000."
