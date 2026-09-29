@@ -70,25 +70,19 @@ jobs:
             rm -rf "$TARGET_BASE/standalone/public/uploads"
             ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
-            echo "=== DIAGNOSTIK PROSES SEBELUM STOP ==="
-            whoami
-            ps -ef | grep -E "node|server\.js|pm2" | grep -v grep || true
-            ss -tulpn 2>/dev/null | grep 3000 || true
-            echo "======================================"
-
-            # Coba hentikan pm2 jika digunakan
-            if command -v pm2 >/dev/null 2>&1; then
-              pm2 stop all 2>/dev/null || true
-              pm2 delete all 2>/dev/null || true
-            fi
-
-            # Hentikan semua proses node
-            pkill -9 -f "node" 2>/dev/null || true
-            sleep 3
-
-            echo "=== DIAGNOSTIK PROSES SETELAH STOP ==="
-            ss -tulpn 2>/dev/null | grep 3000 || true
-            echo "======================================"
+            echo "=== MENGHENTIKAN SERVER LAMA DI PORT 3000 ==="
+            fuser -k 3000/tcp 2>/dev/null || true
+            for i in 1 2 3 4 5; do
+              TARGET_PID=$(ss -tulpn 2>/dev/null | sed -n 's/.*:3000 .*pid=\([0-9]*\).*/\1/p' | head -n 1)
+              if [ -z "$TARGET_PID" ]; then
+                echo "Port 3000 sudah bersih."
+                break
+              fi
+              echo "Menghentikan PID $TARGET_PID yang mendengarkan di port 3000..."
+              kill -9 "$TARGET_PID" 2>/dev/null || true
+              sleep 1
+            done
+            echo "============================================="
 
             # Bersihkan log server lama agar log yang tercetak selalu akurat
             rm -f "$TARGET_BASE/server.log"
@@ -106,4 +100,5 @@ jobs:
               echo "Server berhasil aktif dan mendengarkan pada port 3000."
             else
               echo "PERINGATAN: Port 3000 belum aktif. Periksa server.log di atas."
+              exit 1
             fi
