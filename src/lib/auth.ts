@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
+import * as schema from "@/db/schema";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -32,10 +33,19 @@ const trustedOrigins = Array.from(
 );
 
 export const auth = betterAuth({
+  secret:
+    process.env.BETTER_AUTH_SECRET ||
+    "my-super-secret-key-at-least-32-characters-long",
   baseURL: authBaseURL.replace(/\/$/, ""),
   trustedOrigins,
   database: drizzleAdapter(db, {
     provider: "mysql",
+    schema: {
+      user: schema.user,
+      session: schema.session,
+      account: schema.account,
+      verification: schema.verification,
+    },
   }),
   emailAndPassword: {
     enabled: true,
