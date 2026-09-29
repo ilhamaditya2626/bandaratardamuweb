@@ -8,7 +8,12 @@ const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
 const IMAGE_MAX_DIMENSION = 1600;
 const WEBP_QUALITY = 80;
 
-export class ImageUploadError extends Error {}
+export class ImageUploadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ImageUploadError";
+  }
+}
 
 function createSafeImageName(originalName: string, fallback: string) {
   const parsedName = path.parse(originalName || fallback).name;
@@ -30,15 +35,20 @@ export async function saveImageAsWebp(
   fallbackName = "image",
 ): Promise<string> {
   if (!image.type.startsWith("image/")) {
-    throw new ImageUploadError("File yang diupload harus berupa gambar");
+    throw new ImageUploadError("File yang diupload harus berupa gambar.");
   }
 
   if (image.size > MAX_IMAGE_SIZE) {
-    throw new ImageUploadError("Ukuran gambar maksimal 15 MB");
+    throw new ImageUploadError("Ukuran gambar maksimal 15 MB.");
   }
 
   const uploadDir = getUploadDirectory();
-  await fs.mkdir(uploadDir, { recursive: true });
+  try {
+    await fs.mkdir(uploadDir, { recursive: true });
+  } catch (dirErr) {
+    console.error("Gagal membuat/mengakses uploadDir:", uploadDir, dirErr);
+    throw new ImageUploadError("Gagal mengakses folder penyimpanan di server.");
+  }
 
   const inputBuffer = Buffer.from(await image.arrayBuffer());
   const fileName = createSafeImageName(image.name, fallbackName);
@@ -57,11 +67,21 @@ export async function saveImageAsWebp(
       .toBuffer();
 
     await fs.writeFile(filePath, webpBuffer);
-  } catch {
-    throw new ImageUploadError(
-      "Gagal memproses gambar. Gunakan file JPG, PNG, WebP, atau format gambar umum lainnya.",
-    );
+    return `/uploads/${fileName}`;
+  } catch (sharpError) {
+    console.warn("Sharp webp processing failed, falling back to original buffer:", sharpError);
+    // Fallback: simpan buffer gambar asli langsung jika kompresi sharp gagal
+    try {
+      const ext = path.extname(image.name).toLowerCase() || (image.type === "image/png" ? ".png" : ".jpg");
+      const fallbackFileName = fileName.replace(/\.webp$/, ext);
+      const fallbackFilePath = path.join(uploadDir, fallbackFileName);
+      await fs.writeFile(fallbackFilePath, inputBuffer);
+      return `/uploads/${fallbackFileName}`;
+    } catch (writeErr) {
+      console.error("Gagal menulis file gambar ke disk:", writeErr);
+      throw new ImageUploadError(
+        "Gagal menyimpan file gambar ke disk server. Periksa hak akses folder uploads."
+      );
+    }
   }
-
-  return `/uploads/${fileName}`;
 }

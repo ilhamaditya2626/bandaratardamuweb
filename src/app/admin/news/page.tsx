@@ -30,7 +30,10 @@ export default function NewsPage() {
       setIsModalOpen(false);
       resetForm();
     },
-    onError: () => alert("Gagal menambahkan berita."),
+    onError: (err: any) => {
+      console.error("Gagal menambahkan berita:", err);
+      alert(err?.message || "Gagal menambahkan berita.");
+    },
   });
 
   const updateMutation = useUpdateNews({
@@ -39,11 +42,17 @@ export default function NewsPage() {
       setIsModalOpen(false);
       resetForm();
     },
-    onError: () => alert("Gagal memperbarui berita."),
+    onError: (err: any) => {
+      console.error("Gagal memperbarui berita:", err);
+      alert(err?.message || "Gagal memperbarui berita.");
+    },
   });
 
   const deleteMutation = useDeleteNews({
-    onError: () => alert("Gagal menghapus berita."),
+    onError: (err: any) => {
+      console.error("Gagal menghapus berita:", err);
+      alert(err?.message || "Gagal menghapus berita.");
+    },
   });
 
   const openEditModal = (article: any) => {
@@ -75,21 +84,94 @@ export default function NewsPage() {
     setIsModalOpen(true);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Kompresi gambar sisi klien agar tidak gagal terkena batas upload Nginx / server
+  const compressImageIfNeeded = async (file: File): Promise<File> => {
+    if (!file.type.startsWith("image/") || file.size <= 1.5 * 1024 * 1024) {
+      return file;
+    }
+
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX_DIM = 1600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(file);
+
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob || blob.size >= file.size) return resolve(file);
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            0.85
+          );
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    if (!file.type.startsWith("image/")) {
+      alert("File yang dipilih harus berupa gambar.");
+      return;
+    }
+
+    try {
+      const processed = await compressImageIfNeeded(file);
+      setImageFile(processed);
+      setImagePreview(URL.createObjectURL(processed));
+    } catch {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!title.trim()) {
+      alert("Judul berita harus diisi");
+      return;
+    }
+    if (!content.trim()) {
+      alert("Konten berita harus diisi");
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
+    formData.append("title", title.trim());
+    formData.append("content", content.trim());
     formData.append("created_at", articleDate);
 
     if (imageFile) {

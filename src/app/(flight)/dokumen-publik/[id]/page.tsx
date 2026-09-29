@@ -245,7 +245,7 @@ export default function DocumentPreviewPage({
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-gray-300">
                 {isSecret
-                  ? "Dokumen ini ditetapkan sebagai rahasia. Pratinjau digital hanya menampilkan 20% halaman awal. Untuk memperoleh salinan lengkap atau dokumen fisik, silakan ajukan permohonan melalui formulir elektronik PPID."
+                  ? "Pratinjau digital tersedia sebagai informasi awal. Untuk memperoleh salinan dokumen secara lengkap, silakan mengajukan permohonan informasi melalui formulir elektronik PPID sesuai dengan prosedur layanan yang berlaku."
                   : "Dokumen ini bersifat umum dan seluruh halaman PDF tersedia untuk dibaca. Anda tetap dapat mengajukan permohonan apabila memerlukan salinan resmi atau dokumen fisik."}
               </p>
             </div>

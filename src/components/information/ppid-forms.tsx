@@ -525,12 +525,12 @@ export function RequestStatistics() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {data?.rows.map((r: any) => (
-                <tr key={r.id} className="text-gray-200 hover:bg-white/[0.02] transition">
+                <tr key={r.id} className="text-gray-200 hover:bg-white/[0.02] transition align-top">
                   <td className="p-3 whitespace-nowrap text-xs text-gray-400">
                     {r.submitted_on}
                   </td>
-                  <td className="p-3 font-medium">{r.name}</td>
-                  <td className="max-w-40 truncate p-3 text-gray-300">
+                  <td className="p-3 font-medium whitespace-nowrap sm:whitespace-normal">{r.name}</td>
+                  <td className="min-w-[180px] max-w-sm p-3 text-gray-300 break-words whitespace-normal leading-relaxed">
                     {r.detail || "-"}
                   </td>
                   <td className="p-3 whitespace-nowrap">

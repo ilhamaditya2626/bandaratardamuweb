@@ -70,13 +70,23 @@ export async function createNews(data: {
   author?: string;
   created_at?: Date;
 }) {
-  const baseSlug = slugify(data.title, { lower: true, strict: true });
+  const baseSlug = slugify(data.title, { lower: true, strict: true }) || "berita";
   const slug = `${baseSlug}-${Math.floor(Date.now() / 1000)}`;
 
-  const insertValues: Record<string, unknown> = { ...data, slug };
-  // Remove undefined created_at so it falls back to DB default
-  if (!data.created_at) {
-    delete insertValues.created_at;
+  const insertValues: Record<string, unknown> = {
+    title: data.title,
+    content: data.content,
+    slug,
+  };
+
+  if (data.image_url) {
+    insertValues.image_url = data.image_url;
+  }
+  if (data.author) {
+    insertValues.author = data.author;
+  }
+  if (data.created_at && !isNaN(data.created_at.getTime())) {
+    insertValues.created_at = data.created_at;
   }
 
   const [inserted] = await db
@@ -84,13 +94,19 @@ export async function createNews(data: {
     .values(insertValues as any)
     .$returningId();
 
-  const [result] = await db
-    .select()
-    .from(news)
-    .where(eq(news.id, inserted.id))
-    .limit(1);
+  const insertedId = inserted?.id ?? (inserted as any)?.insertId;
 
-  return result;
+  if (insertedId) {
+    const [result] = await db
+      .select()
+      .from(news)
+      .where(eq(news.id, insertedId))
+      .limit(1);
+
+    if (result) return result;
+  }
+
+  return { id: insertedId, ...insertValues };
 }
 
 // ─── Update news article ──────────────────────────────────────
@@ -105,13 +121,20 @@ export async function updateNews(
   }>
 ) {
   const updateData: Record<string, unknown> = {
-    ...data,
     updated_at: new Date(),
   };
 
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.content !== undefined) updateData.content = data.content;
+  if (data.image_url !== undefined) updateData.image_url = data.image_url;
+  if (data.author !== undefined) updateData.author = data.author;
+  if (data.created_at && !isNaN(data.created_at.getTime())) {
+    updateData.created_at = data.created_at;
+  }
+
   // Regenerate slug if title changes
   if (data.title) {
-    const baseSlug = slugify(data.title, { lower: true, strict: true });
+    const baseSlug = slugify(data.title, { lower: true, strict: true }) || "berita";
     updateData.slug = `${baseSlug}-${Math.floor(Date.now() / 1000)}`;
   }
 

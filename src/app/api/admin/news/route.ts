@@ -7,12 +7,17 @@ import { createNews, deleteNews, updateNews } from "@/services/news.service";
 export const runtime = "nodejs";
 
 async function verifyAdmin(request: NextRequest) {
-  return auth.api.getSession({
-    headers: request.headers,
-  });
+  try {
+    return await auth.api.getSession({
+      headers: request.headers,
+    });
+  } catch (error) {
+    console.error("verifyAdmin session error:", error);
+    return null;
+  }
 }
 
-function imageUploadErrorResponse(error: ImageUploadError) {
+function imageUploadErrorResponse(error: ImageUploadError | { message: string }) {
   return NextResponse.json(
     { success: false, error: error.message },
     { status: 400 }
@@ -24,22 +29,22 @@ export async function POST(request: NextRequest) {
   const session = await verifyAdmin(request);
   if (!session) {
     return NextResponse.json(
-      { success: false, error: "Unauthorized" },
+      { success: false, error: "Sesi login tidak sah atau telah berakhir. Silakan login kembali." },
       { status: 401 }
     );
   }
 
   try {
     const formData = await request.formData();
-    const title = formData.get("title")?.toString();
-    const content = formData.get("content")?.toString();
+    const title = formData.get("title")?.toString()?.trim();
+    const content = formData.get("content")?.toString()?.trim();
     const image = formData.get("image") as File | null;
     let image_url = formData.get("image_url")?.toString() || undefined;
     const createdAtStr = formData.get("created_at")?.toString();
 
     if (!title || !content) {
       return NextResponse.json(
-        { success: false, error: "Fields 'title' dan 'content' wajib diisi" },
+        { success: false, error: "Judul dan konten berita wajib diisi." },
         { status: 400 }
       );
     }
@@ -48,18 +53,25 @@ export async function POST(request: NextRequest) {
       image_url = await saveImageAsWebp(image, "news");
     }
 
-    const created_at = createdAtStr ? new Date(createdAtStr) : undefined;
+    let created_at: Date | undefined;
+    if (createdAtStr) {
+      const parsedDate = new Date(createdAtStr);
+      if (!isNaN(parsedDate.getTime())) {
+        created_at = parsedDate;
+      }
+    }
+
     const article = await createNews({ title, content, image_url, created_at });
     return NextResponse.json({ success: true, data: article }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("POST /api/admin/news error:", error);
 
-    if (error instanceof ImageUploadError) {
+    if (error instanceof ImageUploadError || error?.name === "ImageUploadError") {
       return imageUploadErrorResponse(error);
     }
 
     return NextResponse.json(
-      { success: false, error: "Gagal menambahkan berita" },
+      { success: false, error: error?.message || "Gagal menambahkan berita" },
       { status: 500 }
     );
   }
@@ -70,7 +82,7 @@ export async function PUT(request: NextRequest) {
   const session = await verifyAdmin(request);
   if (!session) {
     return NextResponse.json(
-      { success: false, error: "Unauthorized" },
+      { success: false, error: "Sesi login tidak sah atau telah berakhir. Silakan login kembali." },
       { status: 401 }
     );
   }
@@ -78,15 +90,15 @@ export async function PUT(request: NextRequest) {
   try {
     const formData = await request.formData();
     const idStr = formData.get("id")?.toString();
-    const title = formData.get("title")?.toString();
-    const content = formData.get("content")?.toString();
+    const title = formData.get("title")?.toString()?.trim();
+    const content = formData.get("content")?.toString()?.trim();
     const image = formData.get("image") as File | null;
     const image_url = formData.get("image_url")?.toString() || undefined;
     const createdAtStr = formData.get("created_at")?.toString();
 
     if (!idStr) {
       return NextResponse.json(
-        { success: false, error: "Field 'id' wajib diisi" },
+        { success: false, error: "ID berita wajib diisi." },
         { status: 400 }
       );
     }
@@ -101,7 +113,12 @@ export async function PUT(request: NextRequest) {
 
     if (title) updateData.title = title;
     if (content) updateData.content = content;
-    if (createdAtStr) updateData.created_at = new Date(createdAtStr);
+    if (createdAtStr) {
+      const parsedDate = new Date(createdAtStr);
+      if (!isNaN(parsedDate.getTime())) {
+        updateData.created_at = parsedDate;
+      }
+    }
 
     if (image && image.size > 0) {
       updateData.image_url = await saveImageAsWebp(image, "news");
@@ -119,15 +136,15 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: article });
-  } catch (error) {
+  } catch (error: any) {
     console.error("PUT /api/admin/news error:", error);
 
-    if (error instanceof ImageUploadError) {
+    if (error instanceof ImageUploadError || error?.name === "ImageUploadError") {
       return imageUploadErrorResponse(error);
     }
 
     return NextResponse.json(
-      { success: false, error: "Gagal memperbarui berita" },
+      { success: false, error: error?.message || "Gagal memperbarui berita" },
       { status: 500 }
     );
   }
@@ -138,7 +155,7 @@ export async function DELETE(request: NextRequest) {
   const session = await verifyAdmin(request);
   if (!session) {
     return NextResponse.json(
-      { success: false, error: "Unauthorized" },
+      { success: false, error: "Sesi login tidak sah atau telah berakhir. Silakan login kembali." },
       { status: 401 }
     );
   }
@@ -148,7 +165,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!body.id) {
       return NextResponse.json(
-        { success: false, error: "Field 'id' wajib diisi" },
+        { success: false, error: "ID berita wajib diisi." },
         { status: 400 }
       );
     }
@@ -163,10 +180,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: article });
-  } catch (error) {
+  } catch (error: any) {
     console.error("DELETE /api/admin/news error:", error);
     return NextResponse.json(
-      { success: false, error: "Gagal menghapus berita" },
+      { success: false, error: error?.message || "Gagal menghapus berita" },
       { status: 500 }
     );
   }
