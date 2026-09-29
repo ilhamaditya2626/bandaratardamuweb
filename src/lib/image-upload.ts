@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import sharp from "sharp";
 import { getUploadDirectory } from "@/lib/document-upload";
 
 // Batas & konfigurasi pemrosesan gambar (samakan dengan fitur Berita).
@@ -25,11 +24,11 @@ function createSafeImageName(originalName: string, fallback: string) {
 
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${
     safeBaseName || fallback
-  }.webp`;
+  }`;
 }
 
-// Simpan sebuah File gambar sebagai WebP di public/uploads dan
-// kembalikan path publiknya (mis. "/uploads/xxx.webp").
+// Simpan sebuah File gambar. Mencoba konversi WebP via sharp jika tersedia,
+// atau menyimpan file gambar asli jika sharp tidak tersedia di environment server.
 export async function saveImageAsWebp(
   image: File,
   fallbackName = "image",
@@ -51,37 +50,54 @@ export async function saveImageAsWebp(
   }
 
   const inputBuffer = Buffer.from(await image.arrayBuffer());
-  const fileName = createSafeImageName(image.name, fallbackName);
-  const filePath = path.join(uploadDir, fileName);
+  const baseName = createSafeImageName(image.name, fallbackName);
 
+  // Coba gunakan sharp secara dinamis jika runtime server mendukungnya
+  let sharp: any = null;
   try {
-    const webpBuffer = await sharp(inputBuffer)
-      .rotate()
-      .resize({
-        width: IMAGE_MAX_DIMENSION,
-        height: IMAGE_MAX_DIMENSION,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .webp({ quality: WEBP_QUALITY, effort: 5 })
-      .toBuffer();
+    const sharpModule = await import("sharp");
+    sharp = sharpModule.default || sharpModule;
+  } catch (loadErr) {
+    console.warn("Library sharp tidak dapat dimuat di runtime server ini, fallback ke gambar asli:", loadErr);
+  }
 
-    await fs.writeFile(filePath, webpBuffer);
-    return `/uploads/${fileName}`;
-  } catch (sharpError) {
-    console.warn("Sharp webp processing failed, falling back to original buffer:", sharpError);
-    // Fallback: simpan buffer gambar asli langsung jika kompresi sharp gagal
+  if (sharp) {
     try {
-      const ext = path.extname(image.name).toLowerCase() || (image.type === "image/png" ? ".png" : ".jpg");
-      const fallbackFileName = fileName.replace(/\.webp$/, ext);
-      const fallbackFilePath = path.join(uploadDir, fallbackFileName);
-      await fs.writeFile(fallbackFilePath, inputBuffer);
-      return `/uploads/${fallbackFileName}`;
-    } catch (writeErr) {
-      console.error("Gagal menulis file gambar ke disk:", writeErr);
-      throw new ImageUploadError(
-        "Gagal menyimpan file gambar ke disk server. Periksa hak akses folder uploads."
-      );
+      const webpFileName = `${baseName}.webp`;
+      const filePath = path.join(uploadDir, webpFileName);
+
+      const webpBuffer = await sharp(inputBuffer)
+        .rotate()
+        .resize({
+          width: IMAGE_MAX_DIMENSION,
+          height: IMAGE_MAX_DIMENSION,
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+        .webp({ quality: WEBP_QUALITY, effort: 5 })
+        .toBuffer();
+
+      await fs.writeFile(filePath, webpBuffer);
+      return `/uploads/${webpFileName}`;
+    } catch (sharpError) {
+      console.warn("Konversi sharp gagal, menyimpan file asli sebagai fallback:", sharpError);
     }
+  }
+
+  // Fallback: simpan gambar asli langsung jika sharp tidak ada atau gagal
+  try {
+    let ext = path.extname(image.name).toLowerCase();
+    if (!ext || ext === ".") {
+      ext = image.type === "image/png" ? ".png" : image.type === "image/webp" ? ".webp" : ".jpg";
+    }
+    const fallbackFileName = `${baseName}${ext}`;
+    const fallbackFilePath = path.join(uploadDir, fallbackFileName);
+    await fs.writeFile(fallbackFilePath, inputBuffer);
+    return `/uploads/${fallbackFileName}`;
+  } catch (writeErr) {
+    console.error("Gagal menulis file gambar ke disk:", writeErr);
+    throw new ImageUploadError(
+      "Gagal menyimpan file gambar ke disk server. Periksa hak akses folder uploads."
+    );
   }
 }
