@@ -88,13 +88,12 @@ jobs:
             rm -f "$TARGET_BASE/server.log"
 
             cd "$TARGET_BASE/standalone"
+            ENV_FLAG=""
             if [ -f .env ]; then
-              set -a
-              . ./.env
-              set +a
+              ENV_FLAG="--env-file=.env"
             fi
 
-            nohup env PORT=3000 HOSTNAME=0.0.0.0 UPLOAD_DIR="$PERSISTENT_UPLOADS" node server.js > ../server.log 2>&1 < /dev/null &
+            nohup env PORT=3000 HOSTNAME=0.0.0.0 UPLOAD_DIR="$PERSISTENT_UPLOADS" node $ENV_FLAG server.js > ../server.log 2>&1 < /dev/null &
             disown -a 2>/dev/null || true
 
             sleep 5
