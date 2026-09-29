@@ -70,13 +70,9 @@ jobs:
             rm -rf "$TARGET_BASE/standalone/public/uploads"
             ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
-            # Hentikan semua proses node server.js lama yang masih berjalan
-            for p in $(ps -eo pid,args 2>/dev/null | awk '/[n]ode.*server\.js/ {print $1}'); do
-              kill -9 "$p" 2>/dev/null || true
-            done
-            lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-            fuser -k 3000/tcp 2>/dev/null || true
-            sleep 3
+            # Hentikan semua proses node lama yang sedang berjalan secara aman
+            pkill -9 -x node 2>/dev/null || true
+            sleep 2
 
             # Bersihkan log server lama agar log yang tercetak selalu akurat
             rm -f "$TARGET_BASE/server.log"
