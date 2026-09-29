@@ -50,8 +50,8 @@ export const TicketPricesClientService = {
     ),
 
   deletePrice: (id: number) =>
-    ApiClient.delete<{ success: boolean; data: TicketPrice }>(
-      "/admin/ticket-prices",
+    ApiClient.post<{ success: boolean; data: TicketPrice }>(
+      "/admin/ticket-prices/delete",
       { id }
     ),
 };

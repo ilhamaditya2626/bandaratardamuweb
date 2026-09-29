@@ -44,5 +44,5 @@ export const NewsClientService = {
   },
 
   deleteNews: (id: number) =>
-    ApiClient.delete<{ success: boolean; data: NewsArticle }>("/admin/news", { id }),
+    ApiClient.post<{ success: boolean; data: NewsArticle }>("/admin/news/delete", { id }),
 };
