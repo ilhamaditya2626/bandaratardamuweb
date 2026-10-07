@@ -34,6 +34,7 @@ const desktopNavItems = [
     label: "Informasi",
     items: [
       { href: "/informasi", label: "Informasi" },
+      { href: "/dokumen-publik", label: "Dokumen Publik" },
       { href: "/informasi-berkala", label: "Informasi Berkala" },
       { href: "/informasi-serta-merta", label: "Informasi Serta Merta" },
       { href: "/informasi-setiap-saat", label: "Informasi Setiap Saat" },
@@ -270,6 +271,7 @@ export default function FlightLayout({
   const isInformationActive = informationRoutes.has(pathname) || isNewsDetail || isInformationList;
   const isInformationSidebar =
     pathname === "/informasi" ||
+    pathname === "/informasi-berkala" ||
     pathname === "/dokumen-publik" ||
     isInformationList ||
     isNewsDetail ||
