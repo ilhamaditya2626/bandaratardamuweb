@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 import { DynamicImage } from "@/components/dynamic-image";
 import { getAllNews } from "@/services/news.service";
+import { getAllPegawai } from "@/services/pegawai.service";
 import { EmployeeDataSection } from "./employee-data-section";
 
 const quickStats = [
@@ -290,6 +291,33 @@ export default async function InformasiBerkalaPage() {
   } catch (error) {
     console.error("Failed to load latest news for periodic information:", error);
   }
+
+  // Nama & jabatan pejabat sekarang berasal dari tabel `pegawai`
+  // di database (bukan hardcode lagi). Elemen visual (foto, ikon,
+  // fokus tanggung jawab, dokumen LHKPN) tetap dari data di atas,
+  // dipasangkan berdasarkan nama.
+  let pegawaiData: Awaited<ReturnType<typeof getAllPegawai>> = [];
+  try {
+    pegawaiData = await getAllPegawai();
+  } catch (error) {
+    console.error("Failed to load pegawai from database:", error);
+  }
+
+  const mergedOfficials =
+    pegawaiData.length > 0
+      ? pegawaiData
+          .map((p) => {
+            const visual = officials.find((o) => o.name === p.nama);
+            if (!visual) return null; // hanya tampilkan yang ada elemen visualnya
+            return {
+              ...visual,
+              name: p.nama,
+              title: p.jabatan ?? visual.title,
+            };
+          })
+          .filter((o): o is NonNullable<typeof o> => o !== null)
+      : officials; // fallback kalau database belum terisi
+
   return (
     <div className="bg-[#111928] text-gray-200">
       <style>{`
@@ -751,7 +779,7 @@ export default async function InformasiBerkalaPage() {
             />
 
             <div className="space-y-10">
-              {officials.map((official, index) => {
+              {mergedOfficials.map((official, index) => {
                 const photoOnRight = index % 2 === 0;
 
                 return (

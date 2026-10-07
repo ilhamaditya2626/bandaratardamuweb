@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
+import { getAllDivisi } from "@/services/divisi.service";
 
 const leaderProfile = {
   name: "David Benjamin Messakh, S.H.",
@@ -101,7 +102,34 @@ const workUnits = [
   },
 ];
 
-export default function UnitKerjaPage() {
+export default async function UnitKerjaPage() {
+  // Nama & deskripsi unit kerja sekarang berasal dari tabel `divisi`
+  // di database (bukan hardcode lagi). Elemen visual (ikon, foto,
+  // daftar tugas) tetap dari data di atas, dipasangkan berdasarkan nama.
+  let divisiData: Awaited<ReturnType<typeof getAllDivisi>> = [];
+  try {
+    divisiData = await getAllDivisi();
+  } catch (error) {
+    console.error("Failed to load divisi from database:", error);
+  }
+
+  const mergedWorkUnits =
+    divisiData.length > 0
+      ? divisiData.map((d) => {
+          const visual = workUnits.find((w) => w.title === d.nama);
+          return {
+            title: d.nama,
+            label: visual?.label ?? d.nama,
+            icon: visual?.icon ?? "fa-building",
+            image: visual?.image ?? "/assets/images/Terminal.webp",
+            description: d.deskripsi ?? visual?.description ?? "",
+            duties: visual?.duties ?? [],
+            licenseDoc: visual?.licenseDoc,
+            link: visual?.link,
+          };
+        })
+      : workUnits; // fallback kalau database belum terisi
+
   return (
     <div className="bg-[#111928] text-gray-200">
       <style>{`
@@ -475,7 +503,7 @@ export default function UnitKerjaPage() {
           </div>
         </div>
         {/* SECTION UNIT KERJA */}
-        {workUnits.map((unit, index) => {
+        {mergedWorkUnits.map((unit, index) => {
           const isReversed = index % 2 === 1;
           const sectionTone = "bg-[#172131]";
 

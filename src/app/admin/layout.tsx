@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Inter } from "next/font/google";
-import { Plane, Users, Newspaper, LayoutDashboard, LogOut, TrendingUp, MessageSquareText, Tags, BedDouble, Settings, Siren } from "lucide-react";
+import { Plane, Users, Newspaper, LayoutDashboard, LogOut, TrendingUp, MessageSquareText, Tags, BedDouble, Settings, Siren, MapPin, UserSquare2, ShieldCheck, Route } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,6 +39,10 @@ export default async function AdminLayout({
         { name: "Penginapan", href: "/admin/penginapan", icon: BedDouble },
         { name: "Kritik & Saran", href: "/admin/feedback", icon: MessageSquareText },
         { name: "Stats", href: "/admin/stats", icon: TrendingUp },
+        { name: "Destinasi", href: "/admin/destinasi", icon: MapPin },
+        { name: "Penumpang (Individu)", href: "/admin/penumpang-individu", icon: UserSquare2 },
+        { name: "Role", href: "/admin/role", icon: ShieldCheck },
+        { name: "Data Penerbangan Terpadu", href: "/admin/penerbangan-terpadu", icon: Route },
         { name: "Pengaturan", href: "/admin/settings", icon: Settings },
     ];
 
