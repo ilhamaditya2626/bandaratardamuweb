@@ -39,7 +39,12 @@ export async function POST(request: NextRequest) {
     if (!input.maskapai_id || !input.pilot_id || !input.destinasi_id) {
       return NextResponse.json({ success: false, error: "Maskapai, pilot, dan destinasi wajib dipilih" }, { status: 400 });
     }
-    const data = await createPenerbangan(input);
+    const data = await createPenerbangan({
+      ...input,
+      maskapai_id: input.maskapai_id,
+      pilot_id: input.pilot_id,
+      destinasi_id: input.destinasi_id,
+    });
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch {
     return NextResponse.json({ success: false, error: "Gagal menambah data" }, { status: 500 });
@@ -52,7 +57,13 @@ export async function PUT(request: NextRequest) {
     const form = await request.formData();
     const id = Number(form.get("id"));
     if (!id) return NextResponse.json({ success: false, error: "ID tidak valid" }, { status: 400 });
-    const data = await updatePenerbangan(id, readInput(form));
+    const input = readInput(form);
+    const data = await updatePenerbangan(id, {
+      ...input,
+      maskapai_id: input.maskapai_id ?? undefined,
+      pilot_id: input.pilot_id ?? undefined,
+      destinasi_id: input.destinasi_id ?? undefined,
+    });
     return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json({ success: false, error: "Gagal memperbarui data" }, { status: 500 });

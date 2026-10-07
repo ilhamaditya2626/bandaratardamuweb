@@ -41,9 +41,9 @@ export async function getPenerbanganOptions() {
 }
 
 export interface PenerbanganInput {
-  maskapai_id?: number | null;
-  pilot_id?: number | null;
-  destinasi_id?: number | null;
+  maskapai_id: number;
+  pilot_id: number;
+  destinasi_id: number;
   penumpang_id?: number | null;
   tanggal?: string | null;
   jam?: string | null;
