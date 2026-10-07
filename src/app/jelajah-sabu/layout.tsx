@@ -35,6 +35,7 @@ const desktopNavItems = [
     items: [
       { href: "/informasi", label: "Informasi" },
       { href: "/informasi-berkala", label: "Informasi Berkala" },
+      { href: "/dokumen-publik", label: "Dokumen Publik" },
       { href: "/informasi-serta-merta", label: "Informasi Serta Merta" },
       { href: "/informasi-setiap-saat", label: "Informasi Setiap Saat" },
       { href: "/informasi-dikecualikan", label: "Informasi yang Dikecualikan" },

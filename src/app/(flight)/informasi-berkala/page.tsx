@@ -910,15 +910,21 @@ export default async function InformasiBerkalaPage() {
               ))}
             </div>
 
-            <div className="mt-10 flex flex-wrap gap-4">
+                        <div className="mt-10 flex flex-wrap gap-4">
               <Link
-                href="/informasi-setiap-saat"
+                href="/dokumen-publik"
                 className="inline-flex items-center gap-3 rounded-full bg-[#facc15] px-6 py-3 text-sm font-bold text-[#111928] transition hover:-translate-y-1"
               >
-                Buka Informasi Setiap Saat <i className="fa-solid fa-arrow-right text-xs"></i>
+                Lihat Semua Dokumen Publik <i className="fa-solid fa-arrow-right text-xs"></i>
               </Link>
               <Link
-                href="/layanan-informasi#formulir"
+                href="/informasi-setiap-saat"
+                className="inline-flex items-center gap-3 rounded-full border border-white/10 px-6 py-3 text-sm font-bold text-white transition hover:border-[#facc15] hover:text-[#facc15]"
+              >
+                Buka Informasi Setiap Saat
+              </Link>
+              <Link
+                href="/permohonan-informasi"
                 className="inline-flex items-center gap-3 rounded-full border border-white/10 px-6 py-3 text-sm font-bold text-white transition hover:border-[#facc15] hover:text-[#facc15]"
               >
                 Ajukan Permohonan Dokumen

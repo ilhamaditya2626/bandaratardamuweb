@@ -5,7 +5,7 @@ import { buildPageMetadata } from "@/lib/seo";
 import { PageHero, serifStyle } from "../../../_components/info-page-shell";
 import { DocumentPreviewViewer } from "./_components/document-preview-viewer";
 
-const REQUEST_FORM_URL = "https://forms.gle/6N2LZZqUjs8HBjQW7";
+const REQUEST_FORM_URL = "/permohonan-informasi";
 
 const documents = {
   "laporan-tahunan-2024": { title: "Laporan Tahunan 2024", year: "2024", type: "Laporan Kinerja", description: "Ringkasan pelaksanaan kebijakan, capaian layanan, dan evaluasi kinerja Kantor UPBU Tardamu sepanjang tahun 2024.", points: ["Capaian kinerja dan layanan", "Program serta kegiatan strategis", "Evaluasi pelaksanaan dan tindak lanjut"], previewUrl: "/assets/pdf/previews/laporan-tahunan-2024-preview.pdf", previewPages: 15, totalPages: 72 },

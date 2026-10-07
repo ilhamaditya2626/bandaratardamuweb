@@ -101,7 +101,7 @@ export function PublicHeaderShell() {
 
             <div className="nav-dropdown__menu">
               <Link href="/informasi">Informasi</Link>
-              <Link href="/informasi-berkala">Informasi Berkala</Link>
+              <Link href="/dokumen-publik">Dokumen Publik</Link>
               <Link href="/informasi-serta-merta">Informasi Serta Merta</Link>
               <Link href="/informasi-setiap-saat">Informasi Setiap Saat</Link>
               <Link href="/informasi-dikecualikan">

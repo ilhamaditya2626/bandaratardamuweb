@@ -101,6 +101,7 @@ const exploreSidebarItems = [
 
 const informationSidebarItems = [
   { href: "/informasi-berkala", label: "Informasi Berkala", icon: "fa-calendar-check" },
+  { href: "/dokumen-publik", label: "Dokumen Publik", icon: "fa-file-pdf" },
   { href: "/informasi-serta-merta", label: "Informasi Serta Merta", icon: "fa-newspaper" },
   { href: "/informasi-setiap-saat", label: "Informasi Setiap Saat", icon: "fa-file-lines" },
   {
@@ -192,6 +193,7 @@ const exploreRoutes = new Set([
 const informationRoutes = new Set([
   "/informasi",
   "/informasi-berkala",
+  "/dokumen-publik",
   "/informasi-serta-merta",
   "/informasi-setiap-saat",
   "/informasi-dikecualikan",
@@ -268,7 +270,7 @@ export default function FlightLayout({
   const isInformationActive = informationRoutes.has(pathname) || isNewsDetail || isInformationList;
   const isInformationSidebar =
     pathname === "/informasi" ||
-    pathname === "/informasi-berkala" ||
+    pathname === "/dokumen-publik" ||
     isInformationList ||
     isNewsDetail ||
     pathname === "/informasi-setiap-saat" ||

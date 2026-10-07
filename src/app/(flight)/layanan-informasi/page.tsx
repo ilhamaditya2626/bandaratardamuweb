@@ -687,14 +687,16 @@ const imagePanels = [
 
 const formCards = [
   {
-    href: "https://forms.gle/6N2LZZqUjs8HBjQW7",
+    // href: "https://forms.gle/6N2LZZqUjs8HBjQW7",
+        href: "/permohonan-informasi",
     icon: "fa-file-invoice",
     title: "Permohonan Informasi",
     description:
       "Gunakan formulir ini untuk mengajukan permintaan informasi publik secara resmi.",
   },
   {
-    href: "https://forms.gle/YprafGdtnNjX2FpB9",
+    //href: "https://forms.gle/YprafGdtnNjX2FpB9",
+        href: "/permohonan-informasi?jenis=keberatan",
     icon: "fa-file-shield",
     title: "Pengajuan Keberatan",
     description:
@@ -1006,7 +1008,7 @@ export default function LayananInformasiPage() {
               Formulir Layanan Elektronik
             </h2>
             <p className="text-gray-500">
-              Silahkan pilih jenis formulir yang ingin Anda akses melalui Google Form
+              Silahkan pilih jenis formulir yang ingin Anda akses melalui formulir
             </p>
           </div>
 
