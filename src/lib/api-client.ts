@@ -26,8 +26,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
         errorMessage = errorData.error || errorData.message || errorMessage;
       } catch {
         // Non-JSON response (misal HTML dari web server LiteSpeed/Nginx atau Next.js)
-        if (response.status === 401 || response.status === 403) {
-          errorMessage = "Sesi login tidak sah atau akses ditolak. Silakan login kembali.";
+        if (response.status === 401) {
+          errorMessage = "Sesi login tidak sah atau telah berakhir. Silakan login kembali.";
+        } else if (response.status === 403) {
+          errorMessage = "Akses ditolak (403). Silakan periksa izin akses atau login kembali.";
+        } else if (response.status === 405) {
+          errorMessage = "Metode permintaan tidak diizinkan oleh server web (405).";
         } else if (response.status === 413) {
           errorMessage = "Ukuran file terlalu besar untuk server.";
         } else if (response.status === 500) {

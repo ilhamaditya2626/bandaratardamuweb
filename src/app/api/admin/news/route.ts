@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth";
 import { ImageUploadError, saveImageAsWebp } from "@/lib/image-upload";
@@ -24,7 +25,111 @@ function imageUploadErrorResponse(error: ImageUploadError | { message: string })
   );
 }
 
-// POST /api/admin/news - Create news
+function triggerRevalidation(slug?: string | null) {
+  try {
+    revalidatePath("/");
+    revalidatePath("/berita");
+    revalidatePath("/informasi-berkala");
+    if (slug) {
+      revalidatePath(`/berita/${slug}`);
+    }
+  } catch (err) {
+    console.error("revalidate error:", err);
+  }
+}
+
+async function handleCreate(formData: FormData) {
+  const title = formData.get("title")?.toString()?.trim();
+  const content = formData.get("content")?.toString()?.trim();
+  const image = formData.get("image") as File | null;
+  let image_url = formData.get("image_url")?.toString() || undefined;
+  const createdAtStr = formData.get("created_at")?.toString();
+
+  if (!title || !content) {
+    return NextResponse.json(
+      { success: false, error: "Judul dan konten berita wajib diisi." },
+      { status: 400 }
+    );
+  }
+
+  if (image && image.size > 0) {
+    image_url = await saveImageAsWebp(image, "news");
+  }
+
+  let created_at: Date | undefined;
+  if (createdAtStr) {
+    const parsedDate = new Date(createdAtStr);
+    if (!isNaN(parsedDate.getTime())) {
+      created_at = parsedDate;
+    }
+  }
+
+  const article = await createNews({ title, content, image_url, created_at });
+  triggerRevalidation((article as any)?.slug);
+  return NextResponse.json({ success: true, data: article }, { status: 201 });
+}
+
+async function handleUpdate(formData: FormData) {
+  const idStr = formData.get("id")?.toString();
+  const title = formData.get("title")?.toString()?.trim();
+  const content = formData.get("content")?.toString()?.trim();
+  const image = formData.get("image") as File | null;
+  const image_url = formData.get("image_url")?.toString() || undefined;
+  const createdAtStr = formData.get("created_at")?.toString();
+
+  if (!idStr) {
+    return NextResponse.json(
+      { success: false, error: "ID berita wajib diisi." },
+      { status: 400 }
+    );
+  }
+
+  const id = parseInt(idStr, 10);
+  if (isNaN(id)) {
+    return NextResponse.json(
+      { success: false, error: "ID berita tidak valid." },
+      { status: 400 }
+    );
+  }
+
+  const updateData: {
+    title?: string;
+    content?: string;
+    image_url?: string;
+    created_at?: Date;
+  } = {};
+
+  if (title) updateData.title = title;
+  if (content) updateData.content = content;
+  if (createdAtStr) {
+    const parsedDate = new Date(createdAtStr);
+    if (!isNaN(parsedDate.getTime())) {
+      updateData.created_at = parsedDate;
+    }
+  }
+
+  if (image && image.size > 0) {
+    updateData.image_url = await saveImageAsWebp(image, "news");
+  } else if (image_url !== undefined) {
+    updateData.image_url = image_url;
+  }
+
+  const article = await updateNews(id, updateData);
+
+  if (!article) {
+    return NextResponse.json(
+      { success: false, error: "Berita tidak ditemukan" },
+      { status: 404 }
+    );
+  }
+
+  triggerRevalidation(article.slug);
+  return NextResponse.json({ success: true, data: article });
+}
+
+// POST /api/admin/news
+// Mendukung Create, Update, dan Delete via POST karena web server produksi (LiteSpeed/cPanel)
+// memblokir HTTP method PUT dan DELETE secara default dengan 403 Forbidden.
 export async function POST(request: NextRequest) {
   const session = await verifyAdmin(request);
   if (!session) {
@@ -35,34 +140,66 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const formData = await request.formData();
-    const title = formData.get("title")?.toString()?.trim();
-    const content = formData.get("content")?.toString()?.trim();
-    const image = formData.get("image") as File | null;
-    let image_url = formData.get("image_url")?.toString() || undefined;
-    const createdAtStr = formData.get("created_at")?.toString();
+    const contentType = request.headers.get("content-type") || "";
 
-    if (!title || !content) {
-      return NextResponse.json(
-        { success: false, error: "Judul dan konten berita wajib diisi." },
-        { status: 400 }
-      );
-    }
+    // Tangani jika dikirim via JSON (misal payload delete atau JSON update)
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
 
-    if (image && image.size > 0) {
-      image_url = await saveImageAsWebp(image, "news");
-    }
+      if (body.action === "delete" || body._method === "DELETE") {
+        const id = Number(body.id);
+        if (!id || isNaN(id)) {
+          return NextResponse.json({ success: false, error: "ID berita wajib diisi" }, { status: 400 });
+        }
+        const article = await deleteNews(id);
+        if (!article) {
+          return NextResponse.json({ success: false, error: "Berita tidak ditemukan" }, { status: 404 });
+        }
+        triggerRevalidation(article.slug);
+        return NextResponse.json({ success: true, data: article });
+      }
 
-    let created_at: Date | undefined;
-    if (createdAtStr) {
-      const parsedDate = new Date(createdAtStr);
-      if (!isNaN(parsedDate.getTime())) {
-        created_at = parsedDate;
+      if (body.id || body.action === "update" || body._method === "PUT") {
+        const id = Number(body.id);
+        if (!id || isNaN(id)) {
+          return NextResponse.json({ success: false, error: "ID berita wajib diisi" }, { status: 400 });
+        }
+        const { id: _, ...data } = body;
+        const article = await updateNews(id, data);
+        if (!article) {
+          return NextResponse.json({ success: false, error: "Berita tidak ditemukan" }, { status: 404 });
+        }
+        triggerRevalidation(article.slug);
+        return NextResponse.json({ success: true, data: article });
       }
     }
 
-    const article = await createNews({ title, content, image_url, created_at });
-    return NextResponse.json({ success: true, data: article }, { status: 201 });
+    // Tangani FormData (Create atau Update dengan gambar)
+    const formData = await request.formData();
+    const idStr = formData.get("id")?.toString();
+    const action = formData.get("action")?.toString();
+
+    // Jika ada ID atau action update, jalankan Update
+    if (action === "update" || (idStr && idStr.trim() !== "")) {
+      return await handleUpdate(formData);
+    }
+
+    // Jika action delete via FormData
+    if (action === "delete") {
+      const id = parseInt(idStr || "", 10);
+      if (isNaN(id)) {
+        return NextResponse.json({ success: false, error: "ID berita tidak valid." }, { status: 400 });
+      }
+      const article = await deleteNews(id);
+      if (!article) {
+        return NextResponse.json({ success: false, error: "Berita tidak ditemukan" }, { status: 404 });
+      }
+      triggerRevalidation(article.slug);
+      return NextResponse.json({ success: true, data: article });
+    }
+
+    // Default: Create news
+    return await handleCreate(formData);
   } catch (error: any) {
     console.error("POST /api/admin/news error:", error);
 
@@ -71,13 +208,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: error?.message || "Gagal menambahkan berita" },
+      { success: false, error: error?.message || "Gagal memproses berita" },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/admin/news - Update news
+// PUT /api/admin/news - Tetap disediakan untuk backward compatibility jika dipanggil lewat PUT
 export async function PUT(request: NextRequest) {
   const session = await verifyAdmin(request);
   if (!session) {
@@ -89,53 +226,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const formData = await request.formData();
-    const idStr = formData.get("id")?.toString();
-    const title = formData.get("title")?.toString()?.trim();
-    const content = formData.get("content")?.toString()?.trim();
-    const image = formData.get("image") as File | null;
-    const image_url = formData.get("image_url")?.toString() || undefined;
-    const createdAtStr = formData.get("created_at")?.toString();
-
-    if (!idStr) {
-      return NextResponse.json(
-        { success: false, error: "ID berita wajib diisi." },
-        { status: 400 }
-      );
-    }
-
-    const id = parseInt(idStr, 10);
-    const updateData: {
-      title?: string;
-      content?: string;
-      image_url?: string;
-      created_at?: Date;
-    } = {};
-
-    if (title) updateData.title = title;
-    if (content) updateData.content = content;
-    if (createdAtStr) {
-      const parsedDate = new Date(createdAtStr);
-      if (!isNaN(parsedDate.getTime())) {
-        updateData.created_at = parsedDate;
-      }
-    }
-
-    if (image && image.size > 0) {
-      updateData.image_url = await saveImageAsWebp(image, "news");
-    } else if (image_url !== undefined) {
-      updateData.image_url = image_url;
-    }
-
-    const article = await updateNews(id, updateData);
-
-    if (!article) {
-      return NextResponse.json(
-        { success: false, error: "Berita tidak ditemukan" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: article });
+    return await handleUpdate(formData);
   } catch (error: any) {
     console.error("PUT /api/admin/news error:", error);
 
@@ -150,7 +241,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE /api/admin/news - Delete news
+// DELETE /api/admin/news - Tetap disediakan untuk backward compatibility jika dipanggil lewat DELETE
 export async function DELETE(request: NextRequest) {
   const session = await verifyAdmin(request);
   if (!session) {
@@ -179,6 +270,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    triggerRevalidation(article.slug);
     return NextResponse.json({ success: true, data: article });
   } catch (error: any) {
     console.error("DELETE /api/admin/news error:", error);

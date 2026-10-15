@@ -39,8 +39,9 @@ export const NewsClientService = {
     ApiClient.post<{ success: boolean; data: NewsArticle }>("/admin/news", payload),
 
   updateNews: (payload: UpdateNewsPayload) => {
-    payload.data.append("id", payload.id.toString());
-    return ApiClient.put<{ success: boolean; data: NewsArticle }>("/admin/news", payload.data);
+    payload.data.set("id", payload.id.toString());
+    payload.data.set("action", "update");
+    return ApiClient.post<{ success: boolean; data: NewsArticle }>("/admin/news", payload.data);
   },
 
   deleteNews: (id: number) =>

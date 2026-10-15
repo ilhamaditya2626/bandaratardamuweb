@@ -107,13 +107,45 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/admin/penginapan - Tambah penginapan.
+// POST /api/admin/penginapan - Tambah atau ubah penginapan (LiteSpeed compatibility).
 export async function POST(request: NextRequest) {
   try {
     const session = await verifyAdmin(request);
     if (!session) return unauthorized();
 
     const formData = await request.formData();
+    const idStr = formData.get("id")?.toString();
+
+    // Jika terdapat id, proses sebagai update
+    if (idStr && idStr.trim() !== "") {
+      const id = parseInt(idStr, 10);
+      const parsed = readBaseFields(formData);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { success: false, error: parsed.error.issues[0]?.message },
+          { status: 400 },
+        );
+      }
+
+      const photos = await collectPhotos(formData);
+      if (photos.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "Minimal harus ada 1 foto penginapan" },
+          { status: 400 },
+        );
+      }
+
+      const updated = await updatePenginapan(id, { ...parsed.data, photos });
+      if (!updated) {
+        return NextResponse.json(
+          { success: false, error: "Penginapan tidak ditemukan" },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json({ success: true, data: updated });
+    }
+
     const parsed = readBaseFields(formData);
     if (!parsed.success) {
       return NextResponse.json(
@@ -133,7 +165,7 @@ export async function POST(request: NextRequest) {
     const created = await createPenginapan({ ...parsed.data, photos });
     return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {
-    return handleError(error, "Gagal menambahkan penginapan");
+    return handleError(error, "Gagal memproses penginapan");
   }
 }
 

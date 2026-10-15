@@ -44,7 +44,7 @@ export const TicketPricesClientService = {
     ),
 
   updatePrice: (payload: UpdateTicketPricePayload) =>
-    ApiClient.put<{ success: boolean; data: TicketPrice }>(
+    ApiClient.post<{ success: boolean; data: TicketPrice }>(
       "/admin/ticket-prices",
       payload
     ),

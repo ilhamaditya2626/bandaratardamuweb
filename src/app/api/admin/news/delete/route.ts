@@ -45,6 +45,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    try {
+      const { revalidatePath } = await import("next/cache");
+      revalidatePath("/");
+      revalidatePath("/berita");
+      revalidatePath("/informasi-berkala");
+      if (article.slug) {
+        revalidatePath(`/berita/${article.slug}`);
+      }
+    } catch (e) {
+      console.error("Revalidation on delete failed:", e);
+    }
+
     return NextResponse.json({ success: true, data: article });
   } catch (error: any) {
     console.error("POST /api/admin/news/delete error:", error);

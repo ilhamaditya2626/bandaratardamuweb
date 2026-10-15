@@ -7,6 +7,10 @@ import { getAllNews } from "@/services/news.service";
 import { EmployeeDataSection } from "./employee-data-section";
 import { DocumentCards } from "@/components/information/document-cards";
 
+// Selalu ambil berita dan data dokumen terbaru secara real-time dari database
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const quickStats = [
   { label: "Alamat", value: "Jl. Trans Seba Bolou, Kel. Mebba, Kec. Sabu Barat/ Kab. Sabu Raijua / Propinsi Nusa Tenggara Timur", icon: "fa-location-dot" },
   { label: "Operasional", value: "07.00 - 15.00", icon: "fa-clock" },
