@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
       // 'unsafe-inline' masih diperlukan tanpa skema nonce.
       scriptSrc,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.elfsightcdn.com https://*.elfsight.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.elfsightcdn.com https://*.elfsight.com https://*.googleusercontent.com",
+      "img-src 'self' data: blob: https://images.unsplash.com https://tardamuairport.id https://*.tardamuairport.id https://*.elfsightcdn.com https://*.elfsight.com https://*.googleusercontent.com",
       "font-src 'self' data: https://fonts.gstatic.com https://*.elfsightcdn.com",
       "connect-src 'self' https://api.openweathermap.org https://core.service.elfsight.com https://*.elfsight.com https://*.elfsightcdn.com",
       "frame-src 'self' https://www.google.com https://maps.google.com https://*.elfsight.com https://docs.google.com",

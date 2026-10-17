@@ -14,8 +14,7 @@ export async function getAllNews(page: number = 1, limit: number = 10) {
       slug: news.slug,
       image_url: news.image_url,
       author: news.author,
-      // Return a preview snippet (first 200 chars of content)
-      content: sql<string>`SUBSTRING(${news.content}, 1, 200)`,
+      content: news.content,
       created_at: news.created_at,
     })
     .from(news)
