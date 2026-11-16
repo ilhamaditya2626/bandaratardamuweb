@@ -17,7 +17,8 @@ type Options = {
   allowCreate?: boolean; // default: true
 };
 
-async function getPegawaiId(userId: string) {
+// Mengambil id pegawai yang terhubung dengan akun admin yang sedang login.
+export async function getPegawaiId(userId: string) {
   const [row] = await db
     .select({ pegawai_id: user.pegawai_id })
     .from(user)

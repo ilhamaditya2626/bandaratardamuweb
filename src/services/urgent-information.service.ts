@@ -13,7 +13,7 @@ export async function getUrgentInformation(page = 1, limit = 10) {
   return { data, pagination: { page: safePage, limit: safeLimit, total, totalPages: Math.ceil(total / safeLimit) } };
 }
 
-export async function createUrgentInformation(data: { title: string; description: string; attachment_url?: string; published_at?: Date }) {
+export async function createUrgentInformation(data: { title: string; description: string; attachment_url?: string; published_at?: Date; pegawai_id?: number | null }) {
   const [inserted] = await db.insert(urgentInformation).values(data).$returningId();
   const [result] = await db.select().from(urgentInformation).where(eq(urgentInformation.id, inserted.id)).limit(1);
   return result;

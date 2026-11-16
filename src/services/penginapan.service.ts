@@ -40,6 +40,7 @@ export interface PenginapanInput {
   price: number;
   phone?: string | null;
   is_active?: boolean;
+  dikelola_oleh?: number | null; // pegawai pengelola data penginapan
 }
 
 export async function getPenginapan(includeInactive = false) {
@@ -69,6 +70,7 @@ export async function createPenginapan(data: PenginapanInput) {
       price: Number(data.price),
       phone: data.phone?.trim() || null,
       is_active: data.is_active ?? true,
+      dikelola_oleh: data.dikelola_oleh ?? null,
     })
     .$returningId();
 
@@ -94,6 +96,7 @@ export async function updatePenginapan(
     price?: number;
     phone?: string | null;
     is_active?: boolean;
+    dikelola_oleh?: number | null;
     updated_at: Date;
   } = {
     updated_at: new Date(),
@@ -110,6 +113,7 @@ export async function updatePenginapan(
   if (data.price !== undefined) payload.price = Number(data.price);
   if (data.phone !== undefined) payload.phone = data.phone?.trim() || null;
   if (data.is_active !== undefined) payload.is_active = data.is_active;
+  if (data.dikelola_oleh !== undefined) payload.dikelola_oleh = data.dikelola_oleh;
 
   await db.update(penginapan).set(payload).where(eq(penginapan.id, id));
 

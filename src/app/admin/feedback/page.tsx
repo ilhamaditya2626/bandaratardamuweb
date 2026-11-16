@@ -1,8 +1,8 @@
 "use client";
 
-import { Inbox, MessageSquareText, RefreshCw, Sparkles, Trash2, UserRound } from "lucide-react";
+import { CheckCircle2, Inbox, MessageSquareText, RefreshCw, Sparkles, Trash2, UserRound } from "lucide-react";
 import { useMemo } from "react";
-import { useDeleteFeedback, useGetFeedback } from "@/hooks/useFeedback";
+import { useDeleteFeedback, useGetFeedback, useMarkFeedbackHandled } from "@/hooks/useFeedback";
 
 const monthNames = [
   "Januari",
@@ -75,6 +75,9 @@ export default function FeedbackAdminPage() {
   const limit = 100;
   const { data: response, isLoading, isFetching, refetch } = useGetFeedback(page, limit);
   const deleteMutation = useDeleteFeedback();
+  const handleMutation = useMarkFeedbackHandled({
+    onError: (error) => window.alert(error.message || "Gagal menandai kritik dan saran"),
+  });
   const feedback = response?.data || [];
 
   const latestFeedback = feedback[0];
@@ -190,19 +193,41 @@ export default function FeedbackAdminPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
                         <h4 className="font-semibold text-slate-950">{item.name}</h4>
-                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                          {item.status === "new" ? "Baru" : item.status}
-                        </span>
+                        {item.status === "ditangani" ? (
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                            Ditangani
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                            Baru
+                          </span>
+                        )}
                       </div>
                       <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">
                         {item.message}
                       </p>
+                      {item.status === "ditangani" && (
+                        <p className="mt-2 text-xs font-medium text-slate-500">
+                          Ditangani oleh {item.ditangani_oleh_nama || "-"}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <time className="text-sm font-medium text-slate-400">
                       {formatFeedbackDate(item.created_at)}
                     </time>
+                    {item.status !== "ditangani" && (
+                      <button
+                        type="button"
+                        onClick={() => handleMutation.mutate(item.id)}
+                        disabled={handleMutation.isPending}
+                        className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Tandai Ditangani
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleDelete(item.id)}

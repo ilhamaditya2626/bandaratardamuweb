@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { ApiClient } from "@/lib/api-client";
+import { useRouteOptions, withCurrentName } from "@/hooks/useRouteOptions";
 
 type FlightType = "arrival" | "departure";
 
@@ -41,17 +42,6 @@ type RincianPayload = {
   cargo_kg: number;
   mail_kg: number;
 };
-
-const airlineOptions = [
-  "Susi Air",
-];
-
-const cityOptions = [
-  "Kupang",
-  "Ende",
-  "Rote",
-  "Waingapu",
-];
 
 function NumField({
   label,
@@ -97,6 +87,7 @@ function getRoute(row: PassengerLog) {
 
 export default function PassengersPage() {
   const queryClient = useQueryClient();
+  const { airlineNames, cityNames } = useRouteOptions();
 
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [showForm, setShowForm] = useState(false);
@@ -323,7 +314,7 @@ export default function PassengersPage() {
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
               >
                 <option value="">Pilih Maskapai</option>
-                {airlineOptions.map((item) => (
+                {withCurrentName(airlineNames, airline).map((item) => (
                   <option key={item} value={item}>
                     {item}
                   </option>
@@ -355,7 +346,7 @@ export default function PassengersPage() {
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
               >
                 <option value="">Pilih Kota</option>
-                {cityOptions.map((item) => (
+                {withCurrentName(cityNames, city).map((item) => (
                   <option key={item} value={item}>
                     {item}
                   </option>

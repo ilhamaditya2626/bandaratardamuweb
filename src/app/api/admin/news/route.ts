@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import { getPegawaiId } from "@/lib/admin-crud";
 import { ImageUploadError, saveImageAsWebp } from "@/lib/image-upload";
 import { createNews, deleteNews, updateNews } from "@/services/news.service";
 
@@ -47,7 +48,9 @@ export async function POST(request: NextRequest) {
       image_url = await saveImageAsWebp(image, "news");
     }
 
-    const article = await createNews({ title, content, image_url });
+    // Pegawai penanggung jawab dicatat dari akun admin yang menambahkan berita.
+    const pegawai_id = await getPegawaiId(session.user.id);
+    const article = await createNews({ title, content, image_url, pegawai_id });
     return NextResponse.json({ success: true, data: article }, { status: 201 });
   } catch (error) {
     console.error("POST /api/admin/news error:", error);

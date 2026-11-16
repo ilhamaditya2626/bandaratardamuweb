@@ -6,6 +6,7 @@ const rootDir = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: ["192.168.56.1"],
   turbopack: {
     root: rootDir,
   },

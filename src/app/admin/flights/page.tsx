@@ -3,17 +3,7 @@
 import { useState } from "react";
 import { Edit2, MessageSquare, Plus, Trash2, X } from "lucide-react";
 import { useGetFlights, useCreateFlight, useUpdateFlight, useDeleteFlight } from "@/hooks/useFlights";
-
-const airlineOptions = [
-  { value: "Susi Air", label: "Susi Air" },
-];
-
-const airportOptions = [
-  { value: "Kupang (KOE)", label: "Kupang (KOE)" },
-  { value: "Waingapu (WGP)", label: "Waingapu (WGP)" },
-  { value: "Ende (ENE)", label: "Ende (ENE)" },
-  { value: "Rote (RTI)", label: "Rote (RTI)" },
-];
+import { useRouteOptions, withCurrent } from "@/hooks/useRouteOptions";
 
 const flightTypeOptions = [
   { value: "reguler", label: "Reguler" },
@@ -25,6 +15,7 @@ const flightTypeOptions = [
 type FlightType = "reguler" | "extra_flight" | "charter_flight" | "perintis";
 
 export default function FlightsPage() {
+  const { airlineOptions, airportOptions } = useRouteOptions();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -299,7 +290,7 @@ export default function FlightsPage() {
                       className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="">Pilih Maskapai</option>
-                      {airlineOptions.map((item) => (
+                      {withCurrent(airlineOptions, airline).map((item) => (
                         <option key={item.value} value={item.value}>
                           {item.label}
                         </option>
@@ -354,7 +345,7 @@ export default function FlightsPage() {
                         className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
                         <option value="">Pilih Kota Asal</option>
-                        {airportOptions.map((item) => (
+                        {withCurrent(airportOptions, origin).map((item) => (
                           <option key={item.value} value={item.value}>
                             {item.label}
                           </option>
@@ -371,7 +362,7 @@ export default function FlightsPage() {
                         className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
                         <option value="">Pilih Kota Tujuan</option>
-                        {airportOptions.map((item) => (
+                        {withCurrent(airportOptions, dest).map((item) => (
                           <option key={item.value} value={item.value}>
                             {item.label}
                           </option>

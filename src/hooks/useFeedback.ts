@@ -25,3 +25,21 @@ export function useDeleteFeedback(options?: {
     },
   });
 }
+
+export function useMarkFeedbackHandled(options?: {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => FeedbackClientService.markHandled(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-feedback"] });
+      options?.onSuccess?.();
+    },
+    onError: (error: Error) => {
+      options?.onError?.(error);
+    },
+  });
+}

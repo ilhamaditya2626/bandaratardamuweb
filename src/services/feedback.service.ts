@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { feedbackSubmissions } from "@/db/schema";
+import { feedbackSubmissions, pegawai } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 
 export async function createFeedback(data: { name: string; message: string }) {
@@ -29,9 +29,11 @@ export async function getAllFeedback(page: number = 1, limit: number = 50) {
       name: feedbackSubmissions.name,
       message: feedbackSubmissions.message,
       status: feedbackSubmissions.status,
+      ditangani_oleh_nama: pegawai.nama,
       created_at: sql<string>`DATE_FORMAT(${feedbackSubmissions.created_at}, '%Y-%m-%dT%H:%i:%s.%f')`,
     })
     .from(feedbackSubmissions)
+    .leftJoin(pegawai, eq(feedbackSubmissions.ditangani_oleh, pegawai.id))
     .orderBy(desc(feedbackSubmissions.created_at))
     .limit(limit)
     .offset(offset);
@@ -51,6 +53,22 @@ export async function getAllFeedback(page: number = 1, limit: number = 50) {
       totalPages: Math.ceil(total / limit),
     },
   };
+}
+
+// Menandai kritik dan saran sudah ditangani, beserta pegawai yang menanganinya.
+export async function markFeedbackHandled(id: number, pegawaiId: number | null) {
+  await db
+    .update(feedbackSubmissions)
+    .set({ status: "ditangani", ditangani_oleh: pegawaiId })
+    .where(eq(feedbackSubmissions.id, id));
+
+  const [result] = await db
+    .select()
+    .from(feedbackSubmissions)
+    .where(eq(feedbackSubmissions.id, id))
+    .limit(1);
+
+  return result;
 }
 
 export async function deleteFeedback(id: number) {

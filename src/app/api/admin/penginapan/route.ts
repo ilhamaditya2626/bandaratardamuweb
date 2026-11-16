@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/lib/auth";
+import { getPegawaiId } from "@/lib/admin-crud";
 import { ImageUploadError, saveImageAsWebp } from "@/lib/image-upload";
 import {
   createPenginapan,
@@ -130,7 +131,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const created = await createPenginapan({ ...parsed.data, photos });
+    // Pegawai pengelola dicatat dari akun admin yang menyimpan data.
+    const dikelola_oleh = await getPegawaiId(session.user.id);
+    const created = await createPenginapan({ ...parsed.data, photos, dikelola_oleh });
     return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {
     return handleError(error, "Gagal menambahkan penginapan");
@@ -169,7 +172,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updated = await updatePenginapan(id, { ...parsed.data, photos });
+    const dikelola_oleh = await getPegawaiId(session.user.id);
+    const updated = await updatePenginapan(id, { ...parsed.data, photos, dikelola_oleh });
     if (!updated) {
       return NextResponse.json(
         { success: false, error: "Penginapan tidak ditemukan" },

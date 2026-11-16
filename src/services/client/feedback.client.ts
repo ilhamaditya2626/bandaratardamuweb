@@ -5,6 +5,7 @@ export interface FeedbackSubmission {
   name: string;
   message: string;
   status: string;
+  ditangani_oleh_nama: string | null;
   created_at: string;
 }
 
@@ -22,6 +23,9 @@ export const FeedbackClientService = {
       data: FeedbackSubmission[];
       pagination: FeedbackPagination;
     }>(`/admin/feedback?page=${page}&limit=${limit}`),
+
+  markHandled: (id: number) =>
+    ApiClient.put<{ success: boolean; data: FeedbackSubmission }>('/admin/feedback', { id }),
 
   deleteFeedback: (id: number) =>
     ApiClient.delete<{ success: boolean; data: { id: number } }>('/admin/feedback', { id }),

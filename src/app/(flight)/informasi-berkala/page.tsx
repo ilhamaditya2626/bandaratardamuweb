@@ -5,7 +5,11 @@ import { PageHero, serifStyle } from "../_components/info-page-shell";
 import { DynamicImage } from "@/components/dynamic-image";
 import { getAllNews } from "@/services/news.service";
 import { getAllPegawai } from "@/services/pegawai.service";
+import { getRekapKepegawaian } from "@/lib/rekap-kepegawaian";
 import { EmployeeDataSection } from "./employee-data-section";
+
+// Selalu ambil data terbaru (pegawai, rekap kepegawaian, berita) setiap halaman dibuka.
+export const dynamic = "force-dynamic";
 
 const quickStats = [
   { label: "Alamat", value: "Jl. Trans Seba Bolou, Kel. Mebba, Kec. Sabu Barat/ Kab. Sabu Raijua / Propinsi Nusa Tenggara Timur", icon: "fa-location-dot" },
@@ -302,6 +306,9 @@ export default async function InformasiBerkalaPage() {
   } catch (error) {
     console.error("Failed to load pegawai from database:", error);
   }
+
+  // Rekap status, usia, dan golongan dari menu Rekap Kepegawaian.
+  const rekapKepegawaian = await getRekapKepegawaian();
 
   const mergedOfficials =
     pegawaiData.length > 0
@@ -933,7 +940,7 @@ export default async function InformasiBerkalaPage() {
           </div>
         </section>
 
-        <EmployeeDataSection />
+                <EmployeeDataSection pegawai={pegawaiData} rekap={rekapKepegawaian} />
 
         <section id="berita" className="scroll-mt-28 border-b border-white/5 bg-[#111928] py-24">
           <div className="mx-auto max-w-7xl px-6">

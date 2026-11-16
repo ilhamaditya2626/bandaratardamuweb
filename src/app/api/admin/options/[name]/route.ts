@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { asc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { divisi, maskapai, pegawai, role } from "@/db/schema";
+import { destinasi, divisi, maskapai, pegawai, role } from "@/db/schema";
 
 const sources: Record<string, { table: any; label: string }> = {
   divisi: { table: divisi, label: "nama" },
   role: { table: role, label: "nama_role" },
   maskapai: { table: maskapai, label: "nama" },
+  destinasi: { table: destinasi, label: "nama_kota" },
   pegawai: { table: pegawai, label: "nama" },
 };
 
@@ -20,5 +21,5 @@ export async function GET(request: NextRequest, context: { params: Promise<{ nam
   const source = sources[name];
   if (!source) return NextResponse.json({ success: false, error: "Sumber tidak dikenal" }, { status: 404 });
   const rows = await db.select().from(source.table).orderBy(asc(source.table.id));
-  return NextResponse.json({ success: true, data: rows.map((r: any) => ({ value: r.id, label: String(r[source.label]) })) });
+  return NextResponse.json({ success: true, data: rows.map((r: any) => ({ value: r.id, label: String(r[source.label]), kode: r.kode_bandara ?? r.kode ?? null })) });
 }

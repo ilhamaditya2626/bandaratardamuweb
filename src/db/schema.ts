@@ -296,6 +296,7 @@ export const penerbangan = mysqlTable("penerbangan", {
   tanggal: date("tanggal", { mode: "string" }),
   jam: varchar("jam", { length: 5 }),
   seat: varchar("seat", { length: 10 }),
+  transit: varchar("transit", { length: 100 }),
   harga_tiket: int("harga_tiket"),
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),

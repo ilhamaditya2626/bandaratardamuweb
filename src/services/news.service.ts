@@ -68,6 +68,7 @@ export async function createNews(data: {
   content: string;
   image_url?: string;
   author?: string;
+  pegawai_id?: number | null;
 }) {
   const baseSlug = slugify(data.title, { lower: true, strict: true });
   const slug = `${baseSlug}-${Math.floor(Date.now() / 1000)}`;

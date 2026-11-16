@@ -200,6 +200,94 @@ function getTravelokaFlightUrl(item: TicketPriceCardItem, dateString: string) {
   return `https://www.traveloka.com/id-id/flight/fullsearch?${params.toString()}`;
 }
 
+function getSafeISODate(dateString: string) {
+  const date = new Date(`${dateString}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? formatDateISO(new Date()) : dateString;
+}
+
+function getRouteCodes(item: TicketPriceCardItem) {
+  const origin = getAirportCode(item.origin);
+  const destination = getAirportCode(item.destination);
+  return origin && destination ? { origin, destination } : null;
+}
+
+function getTripComFlightUrl(item: TicketPriceCardItem, dateString: string) {
+  const route = getRouteCodes(item);
+  if (!route) return "https://id.trip.com/flights/";
+
+  const params = new URLSearchParams({
+    dcity: route.origin.toLowerCase(),
+    acity: route.destination.toLowerCase(),
+    ddate: getSafeISODate(dateString),
+    triptype: "ow",
+    class: "y",
+    quantity: "1",
+  });
+
+  return `https://id.trip.com/flights/showfarefirst?${params.toString()}`;
+}
+
+function getSkyscannerFlightUrl(item: TicketPriceCardItem, dateString: string) {
+  const route = getRouteCodes(item);
+  if (!route) return "https://www.skyscanner.co.id/";
+
+  const [year, month, day] = getSafeISODate(dateString).split("-");
+  const skyscannerDate = `${year.slice(2)}${month}${day}`;
+
+  return `https://www.skyscanner.co.id/transport/flights/${route.origin.toLowerCase()}/${route.destination.toLowerCase()}/${skyscannerDate}/?adultsv2=1&cabinclass=economy&rtn=0`;
+}
+
+const nusaTripCitySlugs: Record<string, string> = {
+  KOE: "kupang_KOE",
+  SAU: "savu_SAU",
+};
+
+function getNusaTripFlightUrl(item: TicketPriceCardItem) {
+  const route = getRouteCodes(item);
+  const originSlug = route ? nusaTripCitySlugs[route.origin] : undefined;
+  const destinationSlug = route ? nusaTripCitySlugs[route.destination] : undefined;
+
+  if (!originSlug || !destinationSlug) return "https://www.nusatrip.com/";
+
+  return `https://www.nusatrip.com/en/flights/from/${originSlug}/to/${destinationSlug}`;
+}
+
+function getAirpazFlightUrl(item: TicketPriceCardItem, dateString: string) {
+  const route = getRouteCodes(item);
+  if (!route) return "https://www.airpaz.com/";
+
+  const params = new URLSearchParams({
+    depAirport: route.origin,
+    arrAirport: route.destination,
+    depDate: getSafeISODate(dateString),
+    adult: "1",
+    child: "0",
+    infant: "0",
+    cabin: "economy",
+  });
+
+  return `https://www.airpaz.com/en/flight/search?${params.toString()}`;
+}
+
+function getBookingComFlightUrl(item: TicketPriceCardItem, dateString: string) {
+  const route = getRouteCodes(item);
+  if (!route) return "https://flights.booking.com/";
+
+  const from = `${route.origin}.AIRPORT`;
+  const to = `${route.destination}.AIRPORT`;
+  const params = new URLSearchParams({
+    type: "ONEWAY",
+    adults: "1",
+    cabinClass: "ECONOMY",
+    from,
+    to,
+    depart: getSafeISODate(dateString),
+    sort: "BEST",
+  });
+
+  return `https://flights.booking.com/flights/${from}-${to}/?${params.toString()}`;
+}
+
 function TicketRouteCard({
   item,
   selectedDate,
@@ -207,14 +295,29 @@ function TicketRouteCard({
   item: TicketPriceCardItem;
   selectedDate: string;
 }) {
-  const travelokaUrl = getTravelokaFlightUrl(item, selectedDate);
+  const [showChannels, setShowChannels] = useState(false);
+  const bookingChannels = [
+    { label: "Traveloka", href: getTravelokaFlightUrl(item, selectedDate) },
+    { label: "Trip.com", href: getTripComFlightUrl(item, selectedDate) },
+    { label: "Skyscanner", href: getSkyscannerFlightUrl(item, selectedDate) },
+    { label: "NusaTrip", href: getNusaTripFlightUrl(item) },
+    { label: "Airpaz", href: getAirpazFlightUrl(item, selectedDate) },
+    { label: "Booking.com", href: getBookingComFlightUrl(item, selectedDate) },
+  ];
 
   return (
-    <a
-      href={travelokaUrl}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`Cari tiket ${item.origin} ke ${item.destination} di Traveloka`}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => setShowChannels((open) => !open)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setShowChannels((open) => !open);
+        }
+      }}
+      aria-expanded={showChannels}
+      aria-label={`Pilih tempat pemesanan tiket ${item.origin} ke ${item.destination}`}
       className="group relative block min-h-[230px] cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-[#151e2d] p-6 shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-[#facc15]/40 focus:outline-none focus:ring-2 focus:ring-[#facc15]/70 focus:ring-offset-2 focus:ring-offset-[#111928]"
     >
       <div className="pointer-events-none absolute right-0 top-0 h-28 w-14 rounded-bl-[56px] bg-white/[0.04] transition group-hover:bg-[#facc15]/10"></div>
@@ -261,14 +364,44 @@ function TicketRouteCard({
             {formatTicketPrice(item.price)}
           </p>
         </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-white transition group-hover:bg-[#facc15] group-hover:text-[#111928]">
-          <i className="fa-solid fa-arrow-right text-sm"></i>
+                <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 transition group-hover:text-[#facc15]">
+            {showChannels ? "Tutup" : "Bandingkan harga"}
+          </span>
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition group-hover:bg-[#facc15] group-hover:text-[#111928] ${
+              showChannels ? "bg-[#facc15] text-[#111928]" : "bg-white/5 text-white"
+            }`}
+          >
+            <i className={`fa-solid ${showChannels ? "fa-xmark" : "fa-arrow-right"} text-sm`}></i>
+          </div>
         </div>
       </div>
-    </a>
+
+      {showChannels && (
+        <div className="relative mt-5 border-t border-white/10 pt-4">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            Pesan tiket di:
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {bookingChannels.map((channel) => (
+              <a
+                key={channel.label}
+                href={channel.href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className="flex items-center justify-center rounded-xl border border-white/10 bg-white/5 py-2 text-xs font-bold text-white transition hover:border-[#facc15] hover:bg-[#facc15] hover:text-[#111928]"
+              >
+                {channel.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
-
 function FlightRow({
   flight,
   tab,

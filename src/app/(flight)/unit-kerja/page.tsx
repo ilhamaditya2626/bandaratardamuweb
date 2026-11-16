@@ -2,6 +2,9 @@ import Image from "next/image";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 import { getAllDivisi } from "@/services/divisi.service";
 
+// Selalu ambil data divisi terbaru setiap halaman dibuka.
+export const dynamic = "force-dynamic";
+
 const leaderProfile = {
   name: "David Benjamin Messakh, S.H.",
   position: "Kepala Kantor UPBU Kelas III Tardamu Sabu",
