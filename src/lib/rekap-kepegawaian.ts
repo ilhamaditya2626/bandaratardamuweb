@@ -41,7 +41,14 @@ export const DEFAULT_REKAP: RekapKepegawaian = {
   ],
 };
 
-const REKAP_FILE = path.join(process.cwd(), "storage", "rekap-kepegawaian.json");
+// Di server, folder aplikasi dihapus dan dibuat ulang setiap kali deploy.
+// Karena itu rekap disimpan di folder "storage" di samping folder uploads permanen
+// (UPLOAD_DIR diatur oleh skrip deploy), supaya tidak ikut terhapus.
+// Di laptop (tanpa UPLOAD_DIR), rekap tetap disimpan di folder storage proyek.
+const STORAGE_DIR = process.env.UPLOAD_DIR
+  ? path.join(path.dirname(process.env.UPLOAD_DIR), "storage")
+  : path.join(process.cwd(), "storage");
+const REKAP_FILE = path.join(STORAGE_DIR, "rekap-kepegawaian.json");
 const GROUPS = ["status", "usia", "golongan"] as const;
 
 // Memeriksa isi rekap: kelompok harus sama dengan kelompok bawaan,
