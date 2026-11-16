@@ -18,10 +18,32 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
 
   if (!response.ok) {
-    let errorMessage = 'An error occurred while fetching the data.';
+    let errorMessage = `Request gagal dengan status ${response.status}`;
     try {
-      const errorData = await response.json();
-      errorMessage = errorData.error || errorData.message || errorMessage;
+      const text = await response.text();
+      try {
+        const errorData = JSON.parse(text);
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch {
+        // Non-JSON response (misal HTML dari web server LiteSpeed/Nginx atau Next.js)
+        if (response.status === 401) {
+          errorMessage = "Sesi login tidak sah atau telah berakhir. Silakan login kembali.";
+        } else if (response.status === 403) {
+          errorMessage = "Akses ditolak (403). Silakan periksa izin akses atau login kembali.";
+        } else if (response.status === 405) {
+          errorMessage = "Metode permintaan tidak diizinkan oleh server web (405).";
+        } else if (response.status === 413) {
+          errorMessage = "Ukuran file terlalu besar untuk server.";
+        } else if (response.status === 500) {
+          errorMessage = "Terjadi kesalahan internal server (500). Silakan periksa log server.";
+        } else if (response.status === 502 || response.status === 504) {
+          errorMessage = "Server sedang tidak dapat dihubungi (Gateway/Timeout).";
+        } else if (text && text.length > 0 && text.length < 200 && !text.includes("<html")) {
+          errorMessage = text.trim();
+        } else {
+          errorMessage = response.statusText || errorMessage;
+        }
+      }
     } catch {
       errorMessage = response.statusText || errorMessage;
     }

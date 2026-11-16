@@ -164,7 +164,40 @@ export function EmployeeDataSection({ pegawai, rekap }: { pegawai: EmployeeRecor
           </ChartCard>
 
           <ChartCard title="Rekapitulasi SDM per Unit Kerja" className="xl:col-span-2">
-            <div className="h-[350px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={unitData} margin={{ top: 10, right: 5, left: -18, bottom: 0 }} barGap={4}><XAxis dataKey="name" tick={{ fill: "#cbd5e1", fontSize: 10 }} axisLine={false} tickLine={false} interval={0} /><YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} tickFormatter={(value) => `${value} Personel`} allowDecimals={false} axisLine={false} tickLine={false} /><Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value} personel`, "Jumlah"]} /><Bar dataKey="value" name="Pegawai" fill="#4f7fee" radius={[7, 7, 0, 0]} /></BarChart></ResponsiveContainer></div>
+            <div className="h-[380px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={unitData}
+                  margin={{ top: 10, right: 10, left: 15, bottom: 25 }}
+                  barGap={3}
+                >
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#cbd5e1", fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    interval={0}
+                    angle={-45}
+                    textAnchor="end"
+                    height={65}
+                    dy={4}
+                  />
+                  <YAxis
+                    width={78}
+                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                    tickFormatter={(value) => `${value} Personel`}
+                    allowDecimals={false}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value) => [`${value} personel`, "Jumlah"]}
+                  />
+                  <Bar dataKey="value" name="Pegawai" fill="#4f7fee" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </ChartCard>
 
           <ChartCard title="Komposisi Jabatan">

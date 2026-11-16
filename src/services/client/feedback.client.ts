@@ -25,8 +25,8 @@ export const FeedbackClientService = {
     }>(`/admin/feedback?page=${page}&limit=${limit}`),
 
   markHandled: (id: number) =>
-    ApiClient.put<{ success: boolean; data: FeedbackSubmission }>('/admin/feedback', { id }),
+    ApiClient.post<{ success: boolean; data: FeedbackSubmission }>('/admin/feedback', { id }),
 
   deleteFeedback: (id: number) =>
-    ApiClient.delete<{ success: boolean; data: { id: number } }>('/admin/feedback', { id }),
+    ApiClient.post<{ success: boolean; data: { id: number } }>("/admin/feedback/delete", { id }),
 };

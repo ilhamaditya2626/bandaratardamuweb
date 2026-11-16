@@ -54,8 +54,8 @@ export const FlightsClientService = {
     ApiClient.post<{ success: boolean; data: Flight }>("/admin/flights", payload),
 
   updateFlight: (payload: UpdateFlightPayload) =>
-    ApiClient.put<{ success: boolean; data: Flight }>("/admin/flights", payload),
+    ApiClient.post<{ success: boolean; data: Flight }>("/admin/flights", payload),
 
   deleteFlight: (id: number) =>
-    ApiClient.delete<{ success: boolean; data: Flight }>("/admin/flights", { id }),
+    ApiClient.post<{ success: boolean; data: Flight }>("/admin/flights", { action: "delete", id }),
 };

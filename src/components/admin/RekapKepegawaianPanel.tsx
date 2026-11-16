@@ -52,7 +52,7 @@ export default function RekapKepegawaianPanel() {
     setSuccess("");
     try {
       const response = await fetch("/api/admin/rekap-kepegawaian", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(rekap),
       });

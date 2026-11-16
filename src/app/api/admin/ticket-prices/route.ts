@@ -49,6 +49,28 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+
+    if (body.action === "delete") {
+      const id = Number(body.id);
+      if (!id || isNaN(id)) {
+        return NextResponse.json({ success: false, error: "Field 'id' wajib diisi" }, { status: 400 });
+      }
+      const deleted = await deleteTicketPrice(id);
+      if (!deleted) {
+        return NextResponse.json({ success: false, error: "Harga tiket tidak ditemukan" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: deleted });
+    }
+
+    if (body.id) {
+      const { id, ...data } = body;
+      const price = await updateTicketPrice(Number(id), data);
+      if (!price) {
+        return NextResponse.json({ success: false, error: "Harga tiket tidak ditemukan" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: price });
+    }
+
     const required = ["origin", "destination", "flight_type", "price"];
 
     for (const field of required) {

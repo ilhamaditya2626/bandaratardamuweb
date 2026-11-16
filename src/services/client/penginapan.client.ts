@@ -34,8 +34,8 @@ export const PenginapanClientService = {
     ApiClient.post<PenginapanItemResponse>("/admin/penginapan", payload),
 
   update: (payload: FormData) =>
-    ApiClient.put<PenginapanItemResponse>("/admin/penginapan", payload),
+    ApiClient.post<PenginapanItemResponse>("/admin/penginapan", payload),
 
   remove: (id: number) =>
-    ApiClient.delete<PenginapanItemResponse>("/admin/penginapan", { id }),
+    ApiClient.post<PenginapanItemResponse>("/admin/penginapan/delete", { id }),
 };

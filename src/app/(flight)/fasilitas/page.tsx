@@ -30,6 +30,13 @@ const facilityGroups = [
           "/assets/images/fasilitas/apron.webp",
         description: "Area parkir pesawat untuk proses boarding, handling, dan persiapan operasi.",
       },
+      {
+        name: "Gedung PKP-PK",
+        icon: "fa-fire-extinguisher",
+        image:
+          "/assets/images/fasilitas/PKP-PK.webp",
+        description: "Fasilitas siaga pertolongan kecelakaan penerbangan dan pemadam kebakaran.",
+      },
     ],
   },
   {
@@ -52,13 +59,6 @@ const facilityGroups = [
         image:
           "/assets/images/fasilitas/parking area.webp",
         description: "Area parkir kendaraan pengguna jasa dengan akses menuju terminal.",
-      },
-      {
-        name: "Gedung PKP-PK",
-        icon: "fa-fire-extinguisher",
-        image:
-          "/assets/images/fasilitas/PKP-PK.webp",
-        description: "Fasilitas siaga pertolongan kecelakaan penerbangan dan pemadam kebakaran.",
       },
       {
         name: "Gedung Power House",

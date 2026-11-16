@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { passengerStats } from "@/db/schema";
-import { eq, gte, lte, and } from "drizzle-orm";
+import { eq, gte, lte, and, sql } from "drizzle-orm";
 
 type FlightType = "arrival" | "departure";
 
@@ -164,13 +164,42 @@ function getDateRange(range: string, anchorDate?: string): { start: string; end:
 function getPassengerCount(row: typeof passengerStats.$inferSelect) {
   // Penumpang dihitung = dewasa + anak (bayi tidak dihitung). Bila rincian
   // belum diisi (data lama), jatuh ke passenger_count agar tetap tampil.
+  // Nilai 0 adalah SAH — artinya rute sudah di-update namun memang tidak
+  // ada penumpang pada hari itu.
   const rincian = Number(row.pax_adult ?? 0) + Number(row.pax_child ?? 0);
-  return rincian > 0 ? rincian : Number(row.passenger_count ?? 0);
+  return rincian > 0 ? rincian : Math.max(0, Number(row.passenger_count ?? 0));
 }
 
 function getLoadFactor(row: typeof passengerStats.$inferSelect) {
   const passengerCount = getPassengerCount(row);
   return calculateLoadFactor(passengerCount);
+}
+
+// ─── Get available months from database ───────────────────────
+export async function getAvailableStatsMonths(): Promise<
+  Array<{ yearMonth: string; label: string; count: number }>
+> {
+  const result = await db.execute(
+    sql`SELECT DISTINCT SUBSTRING(date, 1, 7) as ym, COUNT(*) as cnt FROM passenger_stats WHERE airline IS NOT NULL AND flight_type IS NOT NULL AND city IS NOT NULL GROUP BY ym ORDER BY ym DESC`
+  );
+
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const rows = (result[0] as unknown as Array<{ ym: string; cnt: number }>) || [];
+  return rows.map((r) => {
+    const ym = String(r.ym);
+    const [y, m] = ym.split("-");
+    const monthIndex = parseInt(m, 10) - 1;
+    const label = `${monthNames[monthIndex] || m} ${y}`;
+    return {
+      yearMonth: ym,
+      label,
+      count: Number(r.cnt),
+    };
+  });
 }
 
 // ─── Get aggregated stats for charts ──────────────────────────
@@ -183,17 +212,22 @@ export async function getStats(range: string, anchorDate?: string) {
     .where(and(gte(passengerStats.date, start), lte(passengerStats.date, end)))
     .orderBy(passengerStats.date);
 
+  // Semua baris yang memiliki airline, flight_type, dan city → tampil di log.
+  // Baris dengan 0 penumpang (rute tanpa penumpang yang sudah di-update via
+  // Telegram) tetap harus muncul agar operator tahu bahwa data sudah tercatat.
   const data = rawData.filter((row) => {
     return (
       row.airline &&
       row.flight_type &&
-      row.city &&
-      getPassengerCount(row) > 0
+      row.city
     );
   });
 
   let totalArrival = 0;
   let totalDeparture = 0;
+  let totalBaggage = 0;
+  let totalCargo = 0;
+  let totalMail = 0;
 
   data.forEach((row) => {
     const passengerCount = getPassengerCount(row);
@@ -205,6 +239,10 @@ export async function getStats(range: string, anchorDate?: string) {
     if (row.flight_type === "departure") {
       totalDeparture += passengerCount;
     }
+
+    totalBaggage += Number(row.baggage_kg ?? 0);
+    totalCargo += Number(row.cargo_kg ?? 0);
+    totalMail += Number(row.mail_kg ?? 0);
   });
 
   const totalPassengers = totalArrival + totalDeparture;
@@ -386,6 +424,25 @@ export async function getStats(range: string, anchorDate?: string) {
       ? Number(((totalPassengers / (totalFlights * DEFAULT_SEAT_CAPACITY)) * 100).toFixed(1))
       : 0;
 
+  // Breakdown rute
+  const routeMap = data.reduce((acc, row) => {
+    const city = row.city || "Tidak Diketahui";
+    const type = row.flight_type || "arrival";
+    const key = `${city}__${type}`;
+    if (!acc[key]) {
+      acc[key] = {
+        city,
+        flight_type: type,
+        flights: 0,
+        passengers: 0,
+      };
+    }
+    acc[key].flights += 1;
+    acc[key].passengers += getPassengerCount(row);
+    return acc;
+  }, {} as Record<string, { city: string; flight_type: string; flights: number; passengers: number }>);
+
+  const routeBreakdown = Object.values(routeMap).sort((a, b) => b.passengers - a.passengers);
 
   const logs = data.map((row) => ({
     id: row.id,
@@ -415,6 +472,10 @@ export async function getStats(range: string, anchorDate?: string) {
       arrivalPct,
       departurePct,
       avgLoadFactor,
+      totalFlights,
+      totalBaggage,
+      totalCargo,
+      totalMail,
     },
 
     trendChart: {
@@ -428,6 +489,8 @@ export async function getStats(range: string, anchorDate?: string) {
       arrival: totalArrival,
       departure: totalDeparture,
     },
+
+    routeBreakdown,
 
     logs,
 

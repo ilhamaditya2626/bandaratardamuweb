@@ -5,7 +5,8 @@ import { buildPageMetadata } from "@/lib/seo";
 import { getAllNews } from "@/services/news.service";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 type Props = { searchParams?: Promise<{ page?: string }> };
 function currentPage(value?: string) { return Math.max(Number.parseInt(value || "1", 10) || 1, 1); }
 const formatDate = (value: Date | string) => new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });

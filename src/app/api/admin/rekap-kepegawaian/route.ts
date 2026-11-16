@@ -41,3 +41,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Gagal menyimpan rekap kepegawaian" }, { status: 500 });
   }
 }
+
+// Server produksi memblokir metode PUT, jadi penyimpanan rekap dikirim lewat POST.
+export { PUT as POST };

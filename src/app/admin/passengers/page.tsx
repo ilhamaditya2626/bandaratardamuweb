@@ -144,7 +144,7 @@ export default function PassengersPage() {
 
   const deletePassengerMutation = useMutation({
     mutationFn: (id: string | number) =>
-      ApiClient.delete("/admin/passengers", { id }),
+      ApiClient.post("/admin/passengers", { action: "delete", id }),
   });
 
 

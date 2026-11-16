@@ -1,99 +1,92 @@
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { informationRequests } from "@/db/schema";
-import { FileUploadError, saveFile } from "@/lib/file-upload";
+import { createInformationRequest, requestStats } from "@/services/information.service";
+import { saveUploadedDocument, DocumentUploadError } from "@/lib/document-upload";
+import { notifyNewInformationRequest } from "@/lib/telegram";
 
-// Pembatas sederhana: maksimal 5 kiriman per IP per jam (tersimpan di memori server).
-const hits = new Map<string, number[]>();
-function isLimited(ip: string) {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < 60 * 60 * 1000);
-  if (recent.length >= 5) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return false;
-}
+const fields = ["email","name","phone","address","occupation","identity_type","identity_number","submitted_on"] as const;
 
-const fail = (error: string, status = 400) => NextResponse.json({ success: false, error }, { status });
-const text = (form: FormData, key: string, max: number) => String(form.get(key) ?? "").trim().slice(0, max);
-
-async function storeFile(form: FormData, key: string): Promise<string | null> {
-  const file = form.get(key);
-  if (!(file instanceof File) || file.size === 0) return null;
-  const saved = await saveFile(file, {
-    baseDir: path.join(process.cwd(), "storage", "private"),
-    allowedTypes: ["application/pdf", "image/jpeg", "image/png", "image/webp"],
-    maxMB: 2,
-  });
-  return `/api/admin/private-file/${saved.fileName}`;
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const year = searchParams.get("year") || undefined;
+  const month = searchParams.get("month") || undefined;
+  return NextResponse.json({ success: true, data: await requestStats(year, month) });
 }
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (isLimited(ip)) return fail("Terlalu banyak pengiriman. Coba lagi satu jam lagi.", 429);
-
   try {
     const form = await request.formData();
-
-    // Kolom jebakan untuk bot: manusia tidak melihatnya, jadi tidak pernah mengisinya.
-    if (text(form, "website", 100)) return NextResponse.json({ success: true });
-
-    // Di database: "information" = permohonan, "objection" = keberatan.
-    const isObjection = text(form, "request_type", 30) === "keberatan";
-    const request_type = isObjection ? "objection" : "information";
-
-    const name = text(form, "name", 150);
-    const email = text(form, "email", 255);
-    if (!name) return fail("Nama wajib diisi");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("Email tidak valid");
-
-    if (!isObjection) {
-      if (!text(form, "information_detail", 5000)) return fail("Rincian informasi yang dibutuhkan wajib diisi");
-      if (!text(form, "purpose", 2000)) return fail("Tujuan penggunaan informasi wajib diisi");
-      if (!text(form, "identity_number", 120)) return fail("Nomor identitas wajib diisi");
-      const identity = form.get("identity_file");
-      if (!(identity instanceof File) || identity.size === 0) return fail("Berkas identitas wajib diunggah");
-    } else {
-      if (!text(form, "objection_reason", 255)) return fail("Alasan keberatan wajib dipilih");
-      if (!text(form, "case_position", 5000)) return fail("Kasus posisi wajib diisi");
+    const request_type = String(form.get("request_type") || "");
+    if (!["information", "objection"].includes(request_type) || fields.some(k => !String(form.get(k) || "").trim())) {
+      return NextResponse.json({ success: false, error: "Mohon lengkapi seluruh kolom wajib." }, { status: 400 });
     }
 
-    const identity_file_url = await storeFile(form, "identity_file");
-    const supporting_file_url = await storeFile(form, "supporting_file");
+    const identity = form.get("identity_file");
+    if (!(identity instanceof File) || !identity.size) {
+      return NextResponse.json({ success: false, error: "Foto identitas wajib diunggah." }, { status: 400 });
+    }
 
-    // Tanggal masuk (format YYYY-MM-DD) menurut waktu Sabu (WITA).
-    const submitted_on = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Makassar" });
+    const identity_file_url = await saveUploadedDocument(identity, "ppid");
+    const support = form.get("supporting_file");
+    const supporting_file_url = support instanceof File && support.size ? await saveUploadedDocument(support, "ppid") : null;
 
-    await db.insert(informationRequests).values({
+    const name = String(form.get("name") || "").trim();
+    const email = String(form.get("email") || "").trim();
+    const phone = String(form.get("phone") || "").trim();
+    const address = String(form.get("address") || "").trim();
+    const occupation = String(form.get("occupation") || "").trim();
+    const identity_type = String(form.get("identity_type") || "").trim();
+    const identity_number = String(form.get("identity_number") || "").trim();
+    const institution = String(form.get("institution") || "").trim() || null;
+    const information_detail = String(form.get("information_detail") || "").trim() || null;
+    const purpose = String(form.get("purpose") || "").trim() || null;
+    const objection_reason = String(form.get("objection_reason") || "").trim() || null;
+    const objection_reason_other = String(form.get("objection_reason_other") || "").trim() || null;
+    const case_position = String(form.get("case_position") || "").trim() || null;
+    const submitted_on = String(form.get("submitted_on") || "").trim();
+
+    await createInformationRequest({
       request_type,
-      name,
       email,
-      // Kolom di bawah ini wajib terisi di database, jadi dikirim "" kalau pemohon tidak mengisi.
-      phone: text(form, "phone", 40),
-      address: text(form, "address", 1000),
-      occupation: text(form, "occupation", 150),
-      identity_type: text(form, "identity_type", 20),
-      identity_number: text(form, "identity_number", 120),
-      identity_file_url: identity_file_url ?? "",
-      // Kolom di bawah ini boleh kosong.
-      institution: text(form, "institution", 255) || null,
-      information_detail: text(form, "information_detail", 5000) || null,
-      purpose: text(form, "purpose", 2000) || null,
+      name,
+      phone,
+      address,
+      occupation,
+      identity_type,
+      identity_number,
+      identity_file_url,
+      institution,
+      information_detail,
+      purpose,
       supporting_file_url,
-      objection_reason: text(form, "objection_reason", 255) || null,
-      objection_reason_other: text(form, "objection_reason_other", 2000) || null,
-      case_position: text(form, "case_position", 5000) || null,
+      objection_reason,
+      objection_reason_other,
+      case_position,
       submitted_on,
     });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    if (error instanceof FileUploadError) return fail(error.message);
-    console.error("Failed to save information request:", error);
-    return fail("Gagal mengirim formulir. Silakan coba lagi.", 500);
+    // Kirim notifikasi Telegram ke grup admin secara asinkron tanpa memblokir respon
+    notifyNewInformationRequest({
+      request_type,
+      name,
+      phone,
+      email,
+      occupation,
+      institution,
+      information_detail,
+      purpose,
+      objection_reason,
+      objection_reason_other,
+      case_position,
+      submitted_on,
+    }).catch((err) => console.error("Gagal mengirim notifikasi Telegram:", err));
+
+    return NextResponse.json({ success: true, message: "Permohonan berhasil dikirim ke PPID." }, { status: 201 });
+  } catch (e) {
+    // Catat penyebab di log server tanpa memasukkan data pribadi pemohon ke log.
+    console.error("POST /api/information-requests error:", e);
+    return NextResponse.json(
+      { success: false, error: e instanceof DocumentUploadError ? e.message : "Permohonan gagal dikirim." },
+      { status: 500 }
+    );
   }
 }

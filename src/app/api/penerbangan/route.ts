@@ -61,9 +61,13 @@ function ambilKolom<T extends Record<string, unknown>>(
   const nama: string[] = [];
   const nilai: unknown[] = [];
   for (const k of kolom) {
-    if (obj[k] !== undefined) {
+    const value = obj[k];
+    // n8n kerap mengirim field formulir opsional sebagai string kosong.
+    // Jangan teruskan nilai itu ke MySQL, terutama untuk kolom angka yang
+    // pada mode strict akan menghasilkan error "Incorrect integer value".
+    if (value !== undefined && value !== null && !(typeof value === "string" && value.trim() === "")) {
       nama.push(k);
-      nilai.push(obj[k]);
+      nilai.push(value);
     }
   }
   return { nama, nilai };
@@ -270,16 +274,27 @@ export async function POST(request: Request) {
   const penumpang = body?.penumpang ?? {};
 
   const conn = await pool().getConnection();
+  let tahap: "penerbangan" | "penumpang" = "penerbangan";
   try {
     await conn.beginTransaction();
     const flightId = await upsertFlight(conn, penerbangan);
+    tahap = "penumpang";
     const paxId = await upsertPenumpang(conn, penumpang);
     await conn.commit();
     return Response.json({ ok: true, flightId, paxId });
-  } catch (err) {
+  } catch (err: any) {
     await conn.rollback();
     console.error("[api/penerbangan POST]", err);
-    return Response.json({ pesan: "Gagal menyimpan data." }, { status: 500 });
+    return Response.json(
+      {
+        pesan: "Gagal menyimpan data.",
+        tahap,
+        // Kode MySQL cukup aman untuk membantu n8n menandai sumber masalah
+        // tanpa membocorkan query atau konfigurasi database.
+        kode: typeof err?.code === "string" ? err.code : "DATABASE_ERROR",
+      },
+      { status: 500 }
+    );
   } finally {
     conn.release();
   }

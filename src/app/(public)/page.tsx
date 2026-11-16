@@ -470,7 +470,7 @@ export default async function HomePage() {
                 Bandara Tardamu Sabu Raijua.
               </p>
             </div>
-            <Link href="/informasi-serta-merta" className="latest-news__all-link">
+            <Link href="/berita" className="latest-news__all-link">
               Lihat Semua <i className="fa-solid fa-arrow-right"></i>
             </Link>
           </div>

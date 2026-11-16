@@ -14,8 +14,7 @@ export async function getAllNews(page: number = 1, limit: number = 10) {
       slug: news.slug,
       image_url: news.image_url,
       author: news.author,
-      // Return a preview snippet (first 200 chars of content)
-      content: sql<string>`SUBSTRING(${news.content}, 1, 200)`,
+      content: news.content,
       created_at: news.created_at,
     })
     .from(news)
@@ -69,22 +68,48 @@ export async function createNews(data: {
   image_url?: string;
   author?: string;
   pegawai_id?: number | null;
+  created_at?: Date;
 }) {
-  const baseSlug = slugify(data.title, { lower: true, strict: true });
+  const baseSlug = slugify(data.title, { lower: true, strict: true }) || "berita";
   const slug = `${baseSlug}-${Math.floor(Date.now() / 1000)}`;
+
+  const insertValues: Record<string, unknown> = {
+    title: data.title,
+    content: data.content,
+    slug,
+  };
+
+  if (data.image_url) {
+    insertValues.image_url = data.image_url;
+  }
+  if (data.author) {
+    insertValues.author = data.author;
+  }
+  if (data.pegawai_id) {
+    insertValues.pegawai_id = data.pegawai_id;
+  }
+  if (data.created_at && !isNaN(data.created_at.getTime())) {
+    insertValues.created_at = data.created_at;
+  }
 
   const [inserted] = await db
     .insert(news)
-    .values({ ...data, slug })
+    .values(insertValues as any)
     .$returningId();
 
-  const [result] = await db
-    .select()
-    .from(news)
-    .where(eq(news.id, inserted.id))
-    .limit(1);
+  const insertedId = inserted?.id ?? (inserted as any)?.insertId;
 
-  return result;
+  if (insertedId) {
+    const [result] = await db
+      .select()
+      .from(news)
+      .where(eq(news.id, insertedId))
+      .limit(1);
+
+    if (result) return result;
+  }
+
+  return { id: insertedId, ...insertValues };
 }
 
 // ─── Update news article ──────────────────────────────────────
@@ -95,16 +120,24 @@ export async function updateNews(
     content: string;
     image_url: string;
     author: string;
+    created_at: Date;
   }>
 ) {
   const updateData: Record<string, unknown> = {
-    ...data,
     updated_at: new Date(),
   };
 
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.content !== undefined) updateData.content = data.content;
+  if (data.image_url !== undefined) updateData.image_url = data.image_url;
+  if (data.author !== undefined) updateData.author = data.author;
+  if (data.created_at && !isNaN(data.created_at.getTime())) {
+    updateData.created_at = data.created_at;
+  }
+
   // Regenerate slug if title changes
   if (data.title) {
-    const baseSlug = slugify(data.title, { lower: true, strict: true });
+    const baseSlug = slugify(data.title, { lower: true, strict: true }) || "berita";
     updateData.slug = `${baseSlug}-${Math.floor(Date.now() / 1000)}`;
   }
 

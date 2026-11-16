@@ -1,0 +1,42 @@
+CREATE TABLE IF NOT EXISTS information_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  request_type VARCHAR(20) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  name VARCHAR(150) NOT NULL,
+  phone VARCHAR(40) NOT NULL,
+  address TEXT NOT NULL,
+  occupation VARCHAR(150) NOT NULL,
+  identity_type VARCHAR(20) NOT NULL,
+  identity_number VARCHAR(120) NOT NULL,
+  identity_file_url TEXT NOT NULL,
+  institution VARCHAR(255) NULL,
+  information_detail TEXT NULL,
+  purpose TEXT NULL,
+  supporting_file_url TEXT NULL,
+  objection_reason VARCHAR(255) NULL,
+  objection_reason_other TEXT NULL,
+  case_position TEXT NULL,
+  submitted_on DATE NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  admin_note TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_information_requests_status (status),
+  INDEX idx_information_requests_created_at (created_at)
+);
+
+CREATE TABLE IF NOT EXISTS public_documents (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  category VARCHAR(40) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  document_date DATE NULL,
+  file_url TEXT NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  total_pages INT NOT NULL DEFAULT 0,
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_public_documents_category_date (category, document_date),
+  INDEX idx_public_documents_published (is_published)
+);

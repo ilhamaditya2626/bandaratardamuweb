@@ -1,0 +1,592 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import { 
+  FileText, 
+  Upload, 
+  Trash2, 
+  Pencil,
+  CheckCircle, 
+  AlertCircle, 
+  ExternalLink, 
+  Loader2,
+  FolderTree
+} from "lucide-react";
+
+const labels: Record<string, string> = {
+  annual_report: "Laporan Kinerja",
+  work_budget: "Rencana Kerja Anggaran",
+  financial_report: "Laporan Keuangan",
+  lakip: "LAKIP",
+  bmn: "Laporan BMN",
+  surat: "Surat Keluar Masuk",
+  sop: "SOP",
+  dip: "DIP",
+  dik: "DIK",
+};
+
+const annualSubcategories = [
+  { key: "ppid", label: "PPID", color: "bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/20" },
+  { key: "laporan_tahunan", label: "Laporan Tahunan", color: "bg-violet-50 text-violet-700 border-violet-200 ring-violet-500/20" },
+];
+
+const subcategoryMap: Record<string, { label: string; badge: string }> = {
+  ppid: { label: "PPID", badge: "bg-amber-100 text-amber-800 border-amber-200" },
+  laporan_tahunan: { label: "Laporan Tahunan", badge: "bg-violet-100 text-violet-800 border-violet-200" },
+  bmn: { label: "BMN", badge: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  surat: { label: "Surat Keluar Masuk", badge: "bg-sky-100 text-sky-800 border-sky-200" },
+};
+
+function getAdminCategoryLabel(document: Pick<PublicDoc, "category" | "subcategory">) {
+  if (document.category === "annual_report" && document.subcategory === "surat") return "Surat Keluar Masuk";
+  if (document.category === "annual_report" && document.subcategory === "bmn") return "Laporan BMN";
+  return labels[document.category] || document.category;
+}
+
+interface PublicDoc {
+  id: number;
+  category: string;
+  subcategory?: string | null;
+  title: string;
+  description?: string | null;
+  document_date?: string | null;
+  file_url: string;
+  file_name: string;
+  total_pages: number;
+  is_published: boolean;
+  access_type?: "umum" | "rahasia";
+  created_at: string;
+}
+
+export default function DocumentsAdminPage() {
+  const [documents, setDocuments] = useState<PublicDoc[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [editingDocument, setEditingDocument] = useState<PublicDoc | null>(null);
+  const [editCategory, setEditCategory] = useState("annual_report");
+  const [editSubcategory, setEditSubcategory] = useState("ppid");
+  const [uploadCategory, setUploadCategory] = useState("annual_report");
+  const [uploadSubcategory, setUploadSubcategory] = useState("ppid");
+  const [uploadAccessType, setUploadAccessType] = useState<"umum" | "rahasia">("umum");
+  const [editAccessType, setEditAccessType] = useState<"umum" | "rahasia">("umum");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const loadDocuments = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/admin/documents");
+      if (response.ok) {
+        const json = await response.json();
+        setDocuments(Array.isArray(json.data) ? json.data : []);
+      } else {
+        console.error("Failed to load documents:", response.status);
+      }
+    } catch (err) {
+      console.error("Error loading documents:", err);
+      setNotice({ type: "error", message: "Gagal memuat dokumen dari server." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  useEffect(() => {
+    if (editingDocument) {
+      setEditCategory(editingDocument.category || "annual_report");
+      setEditSubcategory(editingDocument.subcategory || "ppid");
+      setEditAccessType(editingDocument.access_type === "rahasia" ? "rahasia" : "umum");
+    }
+  }, [editingDocument]);
+
+  async function upload(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setNotice(null);
+
+    const formEl = e.currentTarget;
+    const fileInput = formEl.querySelector<HTMLInputElement>('input[name="file"]');
+    const selectedFile = fileInput?.files?.[0];
+
+    if (!selectedFile) {
+      setNotice({ type: "error", message: "Silakan pilih berkas PDF terlebih dahulu." });
+      return;
+    }
+
+    if (selectedFile.size === 0) {
+      setNotice({
+        type: "error",
+        message: "Berkas PDF yang dipilih kosong (0 byte). Harap pilih file PDF yang memiliki isi/halaman.",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    const formData = new FormData(formEl);
+    formData.set("category", uploadCategory);
+    formData.set("access_type", uploadAccessType);
+    if (uploadCategory === "annual_report") {
+      formData.set("subcategory", uploadSubcategory);
+    }
+
+    try {
+      const response = await fetch("/api/admin/documents", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setNotice({
+          type: "success",
+          message: `Dokumen berhasil dipublikasikan (${data.total_pages || "jumlah halaman terdeteksi"} halaman).`,
+        });
+        formEl.reset();
+        setUploadCategory("annual_report");
+        setUploadSubcategory("ppid");
+        setUploadAccessType("umum");
+        loadDocuments();
+      } else {
+        setNotice({ type: "error", message: data.error || "Unggahan dokumen gagal." });
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      setNotice({ type: "error", message: "Terjadi kesalahan jaringan saat mengunggah." });
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function remove(id: number, title: string) {
+    if (!confirm(`Hapus dokumen "${title}"?`)) return;
+
+    try {
+      const response = await fetch("/api/admin/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", id }),
+      });
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Fallback
+      }
+
+      if (response.ok && data?.success) {
+        setNotice({ type: "success", message: "Dokumen berhasil dihapus." });
+        loadDocuments();
+      } else {
+        setNotice({ type: "error", message: data?.error || `Gagal menghapus dokumen (${response.status}).` });
+      }
+    } catch (err) {
+      console.error("Delete document error:", err);
+      setNotice({ type: "error", message: "Terjadi kesalahan saat menghapus dokumen." });
+    }
+  }
+
+  async function editDocument(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editingDocument) return;
+    setIsSaving(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      const category = editCategory;
+      const subcategory = category === "annual_report" ? editSubcategory : null;
+      const response = await fetch("/api/admin/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingDocument.id,
+          title: formData.get("title"),
+          category,
+          subcategory,
+          document_date: formData.get("document_date"),
+          description: formData.get("description"),
+          access_type: editAccessType,
+        }),
+      });
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Fallback
+      }
+      if (response.ok && data?.success) {
+        setNotice({ type: "success", message: "Dokumen berhasil diperbarui." });
+        setEditingDocument(null);
+        loadDocuments();
+      } else {
+        setNotice({ type: "error", message: data?.error || `Gagal memperbarui dokumen (${response.status}).` });
+      }
+    } catch (err) {
+      console.error("Edit document error:", err);
+      setNotice({ type: "error", message: "Terjadi kesalahan saat memperbarui dokumen." });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Dokumen Publik</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Unggah dan kelola arsip dokumen transparansi informasi publik Bandara Tardamu.
+        </p>
+      </div>
+
+      {notice && (
+        <div
+          className={`flex items-center justify-between rounded-xl p-4 text-sm ${
+            notice.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {notice.type === "success" ? (
+              <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+            )}
+            <span>{notice.message}</span>
+          </div>
+          <button
+            onClick={() => setNotice(null)}
+            className="text-gray-400 hover:text-gray-600 text-xs font-semibold"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Upload Form */}
+        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Upload className="h-5 w-5" />
+            </span>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Unggah Dokumen Baru</h3>
+              <p className="text-xs text-gray-500">Jumlah halaman PDF terdeteksi otomatis saat unggah</p>
+            </div>
+          </div>
+
+          <form onSubmit={upload} className="mt-5 space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                Judul Dokumen <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="title"
+                required
+                placeholder="Contoh: Laporan Tahunan PPID Tahun 2025"
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                  Kategori <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="category"
+                  required
+                  value={uploadCategory}
+                  onChange={(e) => setUploadCategory(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white font-medium"
+                >
+                  {Object.entries(labels).map(([key, label]) => (
+                    <option value={key} key={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                  Tanggal Dokumen
+                </label>
+                <input
+                  name="document_date"
+                  type="date"
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Subkategori Dinamis saat Kategori Laporan Kinerja dipilih */}
+            {uploadCategory === "annual_report" && (
+              <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 transition-all animate-fadeIn">
+                <div className="flex items-center gap-2 mb-2 text-amber-900">
+                  <FolderTree className="h-4 w-4 text-amber-600" />
+                  <label className="text-xs font-bold uppercase tracking-wider">
+                    Pilih Subkategori Laporan Kinerja <span className="text-red-500">*</span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {annualSubcategories.map((sub) => (
+                    <label
+                      key={sub.key}
+                      className={`
+                        flex flex-col items-center justify-center p-2.5 rounded-lg border cursor-pointer text-center transition-all
+                        ${uploadSubcategory === sub.key
+                          ? `${sub.color} border-current ring-2 shadow-xs font-bold`
+                          : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                        }
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="subcategory"
+                        value={sub.key}
+                        checked={uploadSubcategory === sub.key}
+                        onChange={() => setUploadSubcategory(sub.key)}
+                        className="sr-only"
+                      />
+                      <span className="text-xs">{sub.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] text-amber-700/90">
+                  Dokumen akan dikelompokkan ke dalam subkategori <strong>{annualSubcategories.find(s => s.key === uploadSubcategory)?.label}</strong>.
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                File PDF <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="file"
+                required
+                accept="application/pdf"
+                type="file"
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+            </div>
+
+            <fieldset>
+              <legend className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                Akses Dokumen <span className="text-red-500">*</span>
+              </legend>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className={`cursor-pointer rounded-xl border p-3 transition ${uploadAccessType === "umum" ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500" : "border-gray-200 hover:border-gray-300"}`}>
+                  <input className="sr-only" type="radio" name="access_type" value="umum" checked={uploadAccessType === "umum"} onChange={() => setUploadAccessType("umum")} />
+                  <span className="block text-sm font-semibold text-gray-900">Umum</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-gray-500">Seluruh halaman PDF dapat dibaca pada pratinjau.</span>
+                </label>
+                <label className={`cursor-pointer rounded-xl border p-3 transition ${uploadAccessType === "rahasia" ? "border-amber-500 bg-amber-50 ring-1 ring-amber-500" : "border-gray-200 hover:border-gray-300"}`}>
+                  <input className="sr-only" type="radio" name="access_type" value="rahasia" checked={uploadAccessType === "rahasia"} onChange={() => setUploadAccessType("rahasia")} />
+                  <span className="block text-sm font-semibold text-gray-900">Rahasia</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-gray-500">Pratinjau dibatasi pada 20% halaman awal.</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                Keterangan Singkat (Opsional)
+              </label>
+              <textarea
+                name="description"
+                rows={2}
+                placeholder="Keterangan isi ringkas dokumen..."
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isUploading}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Mengunggah...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Unggah & Publikasikan
+                </>
+              )}
+            </button>
+          </form>
+        </section>
+
+        {/* Existing Documents */}
+        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                <FileText className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Daftar Dokumen</h3>
+                <p className="text-xs text-gray-500">{documents.length} dokumen tersimpan</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex-1 overflow-y-auto max-h-[460px] divide-y divide-gray-100">
+            {isLoading ? (
+              <div className="py-12 text-center text-sm text-gray-400">
+                <Loader2 className="mx-auto h-6 w-6 animate-spin mb-2 text-gray-400" />
+                Memuat dokumen...
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="py-12 text-center text-sm text-gray-400">
+                Belum ada dokumen yang diunggah.
+              </div>
+            ) : (
+              documents.map((d) => (
+                <div key={d.id} className="flex items-center justify-between gap-4 py-3.5 group">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-gray-900 text-sm">{d.title}</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                      <span className="rounded bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
+                        {getAdminCategoryLabel(d)}
+                      </span>
+                      {d.category === "annual_report" && d.subcategory && !["surat", "bmn"].includes(d.subcategory) && (
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${subcategoryMap[d.subcategory]?.badge || "bg-amber-100 text-amber-800 border-amber-200"}`}>
+                          {subcategoryMap[d.subcategory]?.label || d.subcategory.toUpperCase()}
+                        </span>
+                      )}
+                      <span>{d.total_pages || "-"} halaman</span>
+                      <span className={`rounded-full px-2 py-0.5 font-medium ${d.access_type === "rahasia" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+                        {d.access_type === "rahasia" ? "Rahasia · 20% pratinjau" : "Umum · akses penuh"}
+                      </span>
+                      {d.document_date && <span>• {d.document_date}</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <a
+                      href={d.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
+                      title="Lihat file"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                    <button
+                      onClick={() => setEditingDocument(d)}
+                      className="rounded p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
+                      title="Edit dokumen"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => remove(d.id, d.title)}
+                      className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                      title="Hapus dokumen"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+
+      {editingDocument && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form onSubmit={editDocument} className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl animate-scaleUp">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+              <h3 className="text-lg font-bold text-gray-900">Edit Dokumen Publik</h3>
+              <button type="button" onClick={() => setEditingDocument(null)} className="text-gray-400 hover:text-gray-700" title="Tutup">✕</button>
+            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Judul Dokumen
+              <input name="title" required defaultValue={editingDocument.title} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500 font-medium" />
+            </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+                Kategori
+                <select 
+                  name="category" 
+                  value={editCategory} 
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm outline-none focus:border-blue-500 font-medium"
+                >
+                  {Object.entries(labels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}
+                </select>
+              </label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+                Tanggal Dokumen
+                <input name="document_date" type="date" defaultValue={editingDocument.document_date || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+              </label>
+            </div>
+
+            {/* Subkategori Dinamis saat Edit Laporan Kinerja */}
+            {editCategory === "annual_report" && (
+              <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-3.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">
+                  Subkategori Laporan Kinerja
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {annualSubcategories.map((sub) => (
+                    <label
+                      key={sub.key}
+                      className={`
+                        flex flex-col items-center justify-center p-2 rounded-lg border cursor-pointer text-center text-xs transition-all
+                        ${editSubcategory === sub.key
+                          ? `${sub.color} border-current ring-2 font-bold`
+                          : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                        }
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="subcategory"
+                        value={sub.key}
+                        checked={editSubcategory === sub.key}
+                        onChange={() => setEditSubcategory(sub.key)}
+                        className="sr-only"
+                      />
+                      <span>{sub.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <fieldset>
+              <legend className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">Akses Dokumen</legend>
+              <div className="grid grid-cols-2 gap-3">
+                {(["umum", "rahasia"] as const).map((accessType) => (
+                  <label key={accessType} className={`cursor-pointer rounded-lg border p-3 text-center text-xs transition ${editAccessType === accessType ? accessType === "umum" ? "border-blue-500 bg-blue-50 font-bold text-blue-800" : "border-amber-500 bg-amber-50 font-bold text-amber-800" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                    <input className="sr-only" type="radio" name="access_type" value={accessType} checked={editAccessType === accessType} onChange={() => setEditAccessType(accessType)} />
+                    {accessType === "umum" ? "Umum · seluruh halaman" : "Rahasia · 20% halaman"}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Keterangan Singkat
+              <textarea name="description" rows={3} defaultValue={editingDocument.description || ""} className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500" />
+            </label>
+            <p className="text-xs text-gray-500">File PDF tidak diubah. Untuk mengganti file, hapus dokumen ini lalu unggah versi baru.</p>
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+              <button type="button" onClick={() => setEditingDocument(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">Batal</button>
+              <button type="submit" disabled={isSaving} className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50">{isSaving ? "Menyimpan..." : "Simpan Perubahan"}</button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -117,3 +117,6 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+// Server produksi memblokir metode PUT, jadi tombol "Tandai Ditangani" dikirim lewat POST.
+export { PUT as POST };

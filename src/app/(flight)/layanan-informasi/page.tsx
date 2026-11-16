@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
+import { PpidForms, RequestStatistics } from "@/components/information/ppid-forms";
 
 type TabKey = "berkala" | "setiap-saat" | "serta-merta" | "dikecualikan";
 
@@ -662,7 +663,7 @@ const imagePanels = [
   {
     id: "prosedur",
     title: "Prosedur Permohonan Informasi",
-    src: "/assets/images/permohonan informasi.webp",
+    src: "/assets/images/prosedur permohonan.webp",
     alt: "Prosedur Permohonan",
   },
   {
@@ -687,29 +688,34 @@ const imagePanels = [
 
 const formCards = [
   {
-    // href: "https://forms.gle/6N2LZZqUjs8HBjQW7",
-        href: "/permohonan-informasi",
+    type: "information" as const,
     icon: "fa-file-invoice",
     title: "Permohonan Informasi",
+    badge: "Formulir Resmi",
     description:
       "Gunakan formulir ini untuk mengajukan permintaan informasi publik secara resmi.",
   },
   {
-    //href: "https://forms.gle/YprafGdtnNjX2FpB9",
-        href: "/permohonan-informasi?jenis=keberatan",
+    type: "objection" as const,
     icon: "fa-file-shield",
     title: "Pengajuan Keberatan",
+    badge: "Formulir Resmi",
     description:
       "Formulir resmi untuk menyampaikan keberatan atas tanggapan permintaan informasi.",
   },
   {
-    href: "https://drive.google.com/drive/u/0/my-drive",
+    type: "sop" as const,
+    href: "https://drive.google.com/drive/u/0/folders/1WoGJIgNIVy-GwD4kzPB7t68thXMzbPQL",
     icon: "fa-file-lines",
     title: "SOP",
+    badge: "Dokumen Panduan",
     description:
       "Panduan prosedur pelayanan informasi publik dan standar operasional yang berlaku di unit kerja.",
   },
 ];
+
+const publicInformationReportUrl =
+  process.env.NEXT_PUBLIC_PUBLIC_INFORMATION_REPORT_URL || "https://drive.google.com/drive/u/0/folders/1Uu4w7GlIonObrbOou7Q2Ll48jaF9yAqD";
 
 const complaintChannels = [
   {
@@ -741,6 +747,77 @@ const complaintChannels = [
 export default function LayananInformasiPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("berkala");
   const [isServiceOpen, setIsServiceOpen] = useState<boolean | null>(null);
+  const [activeFormType, setActiveFormType] = useState<"information" | "objection" | null>(null);
+  const [showComplaintImage, setShowComplaintImage] = useState(false);
+
+  // Auto open form when accessed with deep link / query param (e.g. from QR code scan or direct link)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleUrlNavigation = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const formParam = searchParams.get("form")?.toLowerCase();
+      const hash = window.location.hash.replace("#", "");
+
+      // Prioritaskan query parameter ?form=...
+      if (
+        formParam === "keberatan" ||
+        formParam === "pengajuan-keberatan" ||
+        formParam === "pernyataan-keberatan"
+      ) {
+        setActiveFormType("objection");
+      } else if (
+        formParam === "permohonan" ||
+        formParam === "informasi" ||
+        formParam === "permohonan-informasi"
+      ) {
+        setActiveFormType("information");
+      } else if (hash === "formulir-keberatan") {
+        setActiveFormType("objection");
+      } else if (hash === "form-ppid" || hash === "formulir-permohonan") {
+        setActiveFormType("information");
+      }
+
+      // Scroll ke elemen target
+      const targetId = hash || (formParam ? "form-ppid" : null);
+      if (targetId) {
+        setTimeout(() => {
+          const target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 300);
+      }
+    };
+
+    handleUrlNavigation();
+    window.addEventListener("popstate", handleUrlNavigation);
+    window.addEventListener("hashchange", handleUrlNavigation);
+
+    return () => {
+      window.removeEventListener("popstate", handleUrlNavigation);
+      window.removeEventListener("hashchange", handleUrlNavigation);
+    };
+  }, []);
+
+  const handleCardClick = (type: "information" | "objection") => {
+    if (activeFormType === type) {
+      const el = document.getElementById("form-ppid");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    setActiveFormType(type);
+    setTimeout(() => {
+      const el = document.getElementById("form-ppid");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+  };
+
+  const handleCloseForm = () => {
+    setActiveFormType(null);
+    const el = document.getElementById("formulir");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const rows = useMemo(
     () => (activeTab === "dikecualikan" ? [] : infoRows[activeTab]),
@@ -783,27 +860,6 @@ export default function LayananInformasiPage() {
     updateServiceStatus();
     const interval = setInterval(updateServiceStatus, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const scrollToHash = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (!hash) return;
-
-      const target = document.getElementById(hash);
-      if (!target) return;
-
-      requestAnimationFrame(() => {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    };
-
-    scrollToHash();
-    window.addEventListener("hashchange", scrollToHash);
-
-    return () => {
-      window.removeEventListener("hashchange", scrollToHash);
-    };
   }, []);
 
   return (
@@ -1007,30 +1063,129 @@ export default function LayananInformasiPage() {
             <h2 className="mb-4 text-3xl text-white md:text-4xl" style={serifStyle}>
               Formulir Layanan Elektronik
             </h2>
-            <p className="text-gray-500">
-              Silahkan pilih jenis formulir yang ingin Anda akses melalui formulir
+            <p className="text-gray-400">
+              Silakan pilih jenis formulir di bawah untuk menampilkan formulir permohonan atau pengajuan keberatan.
             </p>
           </div>
 
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {formCards.map((card) => (
-              <a
-                key={card.title}
-                href={card.href}
-                target={card.href.startsWith("http") ? "_blank" : undefined}
-                rel={card.href.startsWith("http") ? "noreferrer" : undefined}
-                className="group rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]"
-              >
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15] transition group-hover:scale-110">
-                    <i className={`fa-solid ${card.icon}`}></i>
+            {formCards.map((card) => {
+              if (card.type === "sop") {
+                return (
+                  <a
+                    key={card.title}
+                    href={card.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex flex-col justify-between rounded-[32px] border border-white/5 bg-[rgba(31,41,55,0.6)] p-10 transition-all duration-500 hover:border-[#facc15]"
+                  >
+                    <div>
+                      <div className="mb-8 flex items-center justify-between">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15] transition group-hover:scale-110">
+                          <i className={`fa-solid ${card.icon}`}></i>
+                        </div>
+                        <i className="fa-solid fa-arrow-up-right-from-square text-gray-600 group-hover:text-[#facc15]"></i>
+                      </div>
+                      <span className="inline-block mb-2 rounded bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        {card.badge}
+                      </span>
+                      <h3 className="mb-2 text-xl font-bold text-white">{card.title}</h3>
+                      <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
+                    </div>
+                    <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#facc15]">
+                      <span>Buka Dokumen SOP</span>
+                      <i className="fa-solid fa-arrow-up-right-from-square text-[10px]" />
+                    </div>
+                  </a>
+                );
+              }
+
+              const isSelected = activeFormType === card.type;
+              return (
+                <button
+                  key={card.title}
+                  type="button"
+                  onClick={() => handleCardClick(card.type)}
+                  className={`group flex flex-col justify-between rounded-[32px] p-10 text-left transition-all duration-500 cursor-pointer ${isSelected
+                    ? "border-2 border-[#facc15] bg-[#1f2937] shadow-[0_0_40px_rgba(250,204,21,0.25)] scale-[1.02]"
+                    : "border border-white/5 bg-[rgba(31,41,55,0.6)] hover:border-[#facc15]/60 hover:bg-[#1f2937]"
+                    }`}
+                >
+                  <div>
+                    <div className="mb-8 flex items-center justify-between">
+                      <div
+                        className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl transition duration-300 ${isSelected
+                          ? "bg-[#facc15] text-[#111928] scale-110 shadow-lg"
+                          : "bg-[#facc15]/10 text-[#facc15] group-hover:scale-110"
+                          }`}
+                      >
+                        <i className={`fa-solid ${card.icon}`}></i>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition ${isSelected
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-white/5 text-gray-400 group-hover:text-[#facc15]"
+                          }`}
+                      >
+                        {isSelected ? "Sedang Dibuka" : card.badge}
+                      </span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-bold text-white transition-colors group-hover:text-[#facc15]">
+                      {card.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
                   </div>
-                  <i className="fa-solid fa-arrow-up-right-from-square text-gray-600 group-hover:text-[#facc15]"></i>
+
+                  <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-4 text-xs font-bold uppercase tracking-wider">
+                    <span className={isSelected ? "text-[#facc15]" : "text-gray-400 group-hover:text-[#facc15]"}>
+                      {isSelected ? "Formulir Aktif" : "Klik Untuk Membuka"}
+                    </span>
+                    <i
+                      className={`fa-solid ${isSelected
+                        ? "fa-chevron-down text-[#facc15]"
+                        : "fa-arrow-right text-gray-500 group-hover:translate-x-1 group-hover:text-[#facc15]"
+                        } transition-all`}
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div id="form-ppid" className="mt-12 scroll-mt-28">
+            {activeFormType && (
+              <div className="animate-in fade-in duration-500">
+                <PpidForms
+                  key={activeFormType}
+                  defaultKind={activeFormType}
+                  onClose={handleCloseForm}
+                />
+              </div>
+            )}
+
+            <RequestStatistics />
+
+            <a
+              href={publicInformationReportUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group mx-auto mt-8 flex max-w-5xl items-center justify-between gap-6 rounded-[30px] border border-white/10 bg-[#1f2937]/70 p-6 transition-all duration-300 hover:border-[#facc15]/60 hover:bg-[#1f2937] md:p-8"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#facc15]/10 text-2xl text-[#facc15] transition group-hover:scale-105">
+                  <i className="fa-solid fa-file-lines" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">{card.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-400">{card.description}</p>
-              </a>
-            ))}
+                <div>
+                  <h3 className="text-lg font-bold text-white md:text-xl">
+                    Daftar Laporan Penyampaian Informasi Publik
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Lihat laporan penyampaian informasi publik melalui Google Drive.
+                  </p>
+                </div>
+              </div>
+              <i className="fa-solid fa-arrow-up-right-from-square shrink-0 text-[#facc15] transition group-hover:translate-x-1" />
+            </a>
           </div>
         </section>
 
@@ -1042,7 +1197,7 @@ export default function LayananInformasiPage() {
           </div>
           <div className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#1f2937] shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
             <Image
-              src="/assets/images/maklumat pelayanan.webp"
+              src="/assets/images/estimasi.webp"
               alt="Estimasi Waktu Pelayanan"
               width={3200}
               height={4800}
@@ -1101,11 +1256,10 @@ export default function LayananInformasiPage() {
 
               {/* Status indicator */}
               <div
-                className={`mt-8 flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-5 py-3 transition-colors ${
-                  isServiceOpen
-                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                    : "border-rose-500/20 bg-rose-500/10 text-rose-400"
-                }`}
+                className={`mt-8 flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-5 py-3 transition-colors ${isServiceOpen
+                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                  : "border-rose-500/20 bg-rose-500/10 text-rose-400"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-3 w-3">
@@ -1122,8 +1276,8 @@ export default function LayananInformasiPage() {
                     {isServiceOpen === null
                       ? "Memeriksa Status..."
                       : isServiceOpen
-                      ? "Layanan Buka"
-                      : "Layanan Tutup"}
+                        ? "Layanan Buka"
+                        : "Layanan Tutup"}
                   </span>
                 </div>
                 <span className="text-xs font-medium text-gray-400">
@@ -1197,6 +1351,69 @@ export default function LayananInformasiPage() {
                 Kementerian Perhubungan.
               </p>
             </div>
+
+            {/* Infografis Tata Cara Pengaduan */}
+            <div className="mb-16">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#facc15]/10 text-lg text-[#facc15]">
+                  <i className="fa-solid fa-route" />
+                </div>
+                <div>
+                  <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#facc15] border border-[#facc15]/20">
+                    Infografis Layanan
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowComplaintImage(true)}
+                className="group relative mx-auto block w-full max-w-2xl cursor-zoom-in overflow-hidden rounded-[2rem] border border-white/10 bg-[#1f2937] shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#facc15]/40 hover:shadow-[0_20px_60px_rgba(250,204,21,0.1)]"
+              >
+                <Image
+                  src="/assets/images/tata-cara-pengaduan.jpg"
+                  alt="Infografis Tata Cara Pengaduan Masyarakat"
+                  width={900}
+                  height={1200}
+                  sizes="(max-width: 768px) 100vw, 672px"
+                  className="h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/20">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#facc15] text-[#111928] opacity-0 shadow-lg transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 scale-75">
+                    <i className="fa-solid fa-magnifying-glass-plus text-lg" />
+                  </span>
+                </div>
+              </button>
+              <p className="mt-3 text-center text-xs text-gray-500">
+                <i className="fa-solid fa-hand-pointer mr-1" /> Klik gambar untuk memperbesar
+              </p>
+            </div>
+
+            {/* Modal Preview Gambar Tata Cara Pengaduan */}
+            {showComplaintImage && (
+              <div
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                onClick={() => setShowComplaintImage(false)}
+              >
+                <div className="relative max-h-[90vh] max-w-3xl w-full overflow-auto rounded-2xl" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => setShowComplaintImage(false)}
+                    className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
+                  >
+                    <i className="fa-solid fa-xmark text-lg" />
+                  </button>
+                  <Image
+                    src="/assets/images/tata-cara-pengaduan.jpg"
+                    alt="Infografis Tata Cara Pengaduan Masyarakat - Ukuran Penuh"
+                    width={900}
+                    height={1200}
+                    sizes="90vw"
+                    className="h-auto w-full rounded-2xl"
+                    priority
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
               {complaintChannels.map((item) => (

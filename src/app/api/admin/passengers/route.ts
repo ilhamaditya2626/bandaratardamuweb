@@ -61,6 +61,22 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+    if (body.action === "delete") {
+      const parsed = passengerDeleteSchema.safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: parsed.error.issues[0]?.message || "Invalid format",
+          },
+          { status: 400 }
+        );
+      }
+
+      const result = await deletePassengerLog(parsed.data.id);
+      return NextResponse.json({ success: true, data: result });
+    }
+
 
     const parsed = passengerSchema.safeParse(body);
     if (!parsed.success) {

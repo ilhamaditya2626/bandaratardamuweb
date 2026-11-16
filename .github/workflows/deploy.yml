@@ -36,15 +36,74 @@ jobs:
             mkdir -p .next/standalone/.next
             cp -r .next/static .next/standalone/.next/static
 
+            # Pastikan dependency sharp dan env tersalin ke standalone
+            if [ -d node_modules/sharp ]; then
+              cp -r node_modules/sharp .next/standalone/node_modules/ 2>/dev/null || true
+            fi
+            if [ -d node_modules/@img ]; then
+              cp -r node_modules/@img .next/standalone/node_modules/ 2>/dev/null || true
+            fi
+            if [ -f .env ]; then
+              cp .env .next/standalone/.env 2>/dev/null || true
+            fi
+
             TARGET_BASE="$(dirname "$PWD")/.next"
+            PERSISTENT_UPLOADS="$(dirname "$PWD")/uploads"
 
             mkdir -p "$TARGET_BASE"
+            mkdir -p "$PERSISTENT_UPLOADS"
+
+            # Bersihkan recursive symlink loop 'uploads' di dalam PERSISTENT_UPLOADS (mencegah error ELOOP)
+            rm -rf "$PERSISTENT_UPLOADS/uploads" 2>/dev/null || true
+            find "$PERSISTENT_UPLOADS" -maxdepth 2 -type l -delete 2>/dev/null || true
+
+            # Salin aset uploads baru dari repositori jika ada
+            if [ -d public/uploads ]; then
+              cp -rn public/uploads/. "$PERSISTENT_UPLOADS/" 2>/dev/null || true
+            fi
+
             rm -rf "$TARGET_BASE/standalone"
             mv .next/standalone "$TARGET_BASE/standalone"
 
-            PID=$(ss -tulpn | awk '/:3000 / {print $NF}' | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -n 1)
+            mkdir -p "$TARGET_BASE/standalone/public"
+            # Hapus folder uploads salinan build Next.js dan buat symlink ke folder uploads permanen
+            rm -rf "$TARGET_BASE/standalone/public/uploads"
+            ln -sfn "$PERSISTENT_UPLOADS" "$TARGET_BASE/standalone/public/uploads"
 
-            if [ -n "$PID" ]; then
-              kill "$PID"
-              sleep 5
+            echo "=== MENGHENTIKAN SERVER LAMA DI PORT 3000 ==="
+            fuser -k 3000/tcp 2>/dev/null || true
+            for i in 1 2 3 4 5; do
+              TARGET_PID=$(ss -tulpn 2>/dev/null | sed -n 's/.*:3000 .*pid=\([0-9]*\).*/\1/p' | head -n 1)
+              if [ -z "$TARGET_PID" ]; then
+                echo "Port 3000 sudah bersih."
+                break
+              fi
+              echo "Menghentikan PID $TARGET_PID yang mendengarkan di port 3000..."
+              kill -9 "$TARGET_PID" 2>/dev/null || true
+              sleep 1
+            done
+            echo "============================================="
+
+            # Bersihkan log server lama agar log yang tercetak selalu akurat
+            rm -f "$TARGET_BASE/server.log"
+
+            cd "$TARGET_BASE/standalone"
+            ENV_FLAG=""
+            if [ -f .env ]; then
+              ENV_FLAG="--env-file=.env"
+            fi
+
+            nohup env PORT=3000 HOSTNAME=0.0.0.0 UPLOAD_DIR="$PERSISTENT_UPLOADS" node $ENV_FLAG server.js > ../server.log 2>&1 < /dev/null &
+            disown -a 2>/dev/null || true
+
+            sleep 5
+            echo "=== SERVER LOG (TERBARU) ==="
+            cat ../server.log || true
+            echo "============================"
+
+            if ss -tulpn 2>/dev/null | grep -q ":3000 "; then
+              echo "Server berhasil aktif dan mendengarkan pada port 3000."
+            else
+              echo "PERINGATAN: Port 3000 belum aktif. Periksa server.log di atas."
+              exit 1
             fi

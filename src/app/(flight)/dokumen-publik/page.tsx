@@ -1,104 +1,348 @@
-import type { Metadata } from "next";
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { buildPageMetadata } from "@/lib/seo";
+import { useSearchParams } from "next/navigation";
 import { PageHero, serifStyle } from "../_components/info-page-shell";
-import { getPublishedDocuments } from "@/services/public-documents.service";
 
-export const dynamic = "force-dynamic";
+const categories = [
+  { key: "", label: "Semua Dokumen" },
+  { key: "annual_report", label: "Laporan Kinerja" },
+  { key: "work_budget", label: "Rencana Kerja Anggaran" },
+  { key: "financial_report", label: "Laporan Keuangan" },
+  { key: "lakip", label: "LAKIP" },
+  { key: "bmn", label: "Laporan BMN" },
+  { key: "surat", label: "Surat Keluar Masuk" },
+  { key: "sop", label: "SOP" },
+  { key: "dip", label: "DIP" },
+  { key: "dik", label: "DIK" },
+];
 
-export async function generateMetadata(): Promise<Metadata> {
-  return buildPageMetadata({
-    title: "Dokumen Publik",
-    description: "Daftar dokumen publik Bandar Udara Tardamu Sabu Raijua yang dapat dibuka dan diunduh.",
-    path: "/dokumen-publik",
-  });
-}
+const annualSubcategories = [
+  { key: "", label: "Semua Laporan Kinerja" },
+  { key: "ppid", label: "PPID", accent: "#facc15" },
+  { key: "laporan_tahunan", label: "Laporan Tahunan", accent: "#a78bfa" },
+];
 
 const categoryLabels: Record<string, string> = {
-  annual_report: "Laporan Tahunan",
+  annual_report: "Laporan Kinerja",
   work_budget: "Rencana Kerja Anggaran",
   financial_report: "Laporan Keuangan",
   lakip: "LAKIP",
-  dip: "Daftar Informasi Publik",
-  dik: "Daftar Informasi Dikecualikan",
+  bmn: "Laporan BMN",
+  surat: "Surat Keluar Masuk",
   sop: "SOP",
-  surat: "Surat",
-  bmn: "Barang Milik Negara (BMN)",
+  dip: "DIP",
+  dik: "DIK",
 };
 
-const dateFormatter = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" });
+const subcategoryLabels: Record<string, string> = {
+  ppid: "PPID",
+  laporan_tahunan: "Laporan Tahunan",
+  bmn: "BMN",
+  surat: "Surat Keluar Masuk",
+};
 
-export default async function DokumenPublikPage() {
-  let documents: Awaited<ReturnType<typeof getPublishedDocuments>> | null = null;
-  try {
-    documents = await getPublishedDocuments();
-  } catch (error) {
-    console.error("Failed to load public documents:", error);
-  }
+interface PublicDoc {
+  id: number;
+  category: string;
+  subcategory?: string | null;
+  title: string;
+  description?: string | null;
+  document_date?: string | null;
+  file_url: string;
+  total_pages?: number;
+  access_type?: "umum" | "rahasia";
+  created_at?: string;
+}
 
-  const groups = new Map<string, NonNullable<typeof documents>>();
-  for (const doc of documents ?? []) {
-    groups.set(doc.category, [...(groups.get(doc.category) ?? []), doc]);
-  }
-  const orderedKeys = [
-    ...Object.keys(categoryLabels).filter((key) => groups.has(key)),
-    ...[...groups.keys()].filter((key) => !(key in categoryLabels)),
-  ];
+function getDocumentCategoryLabel(doc: PublicDoc) {
+  // Dokumen lama pernah disimpan sebagai subkategori laporan kinerja.
+  if (doc.category === "annual_report" && doc.subcategory === "surat") return "Surat Keluar Masuk";
+  if (doc.category === "annual_report" && doc.subcategory === "bmn") return "Laporan BMN";
+  return categoryLabels[doc.category] || doc.category;
+}
+
+function DokumenPublikContent() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") || "";
+  const initialSubcategory = searchParams.get("subcategory") || "";
+
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
+  const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
+  const [docs, setDocs] = useState<PublicDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cat = searchParams.get("category") || "";
+    const sub = searchParams.get("subcategory") || "";
+    setActiveCategory(cat);
+    setActiveSubcategory(sub);
+  }, [searchParams]);
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (activeCategory) params.set("category", activeCategory);
+    if (activeCategory === "annual_report" && activeSubcategory) {
+      params.set("subcategory", activeSubcategory);
+    }
+    const query = params.toString() ? `?${params.toString()}` : "";
+    fetch(`/api/documents${query}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal memuat dokumen");
+        return res.json();
+      })
+      .then((data) => {
+        setDocs(Array.isArray(data.data) ? data.data : []);
+      })
+      .catch((err) => {
+        console.error("Fetch docs error:", err);
+        setDocs([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [activeCategory, activeSubcategory]);
+
+  const handleSelectCategory = (catKey: string) => {
+    setActiveCategory(catKey);
+    if (catKey !== "annual_report") {
+      setActiveSubcategory("");
+    }
+  };
 
   return (
     <div className="bg-[#111928] text-gray-200">
       <PageHero
-        backgroundImage="/assets/images/hero-bg.webp"
-        gradient="linear-gradient(to bottom, rgba(17, 25, 40, .82), rgba(17, 25, 40, 1))"
-        breadcrumbs={[{ href: "/", label: "Beranda" }, { href: "/informasi", label: "Informasi" }, { label: "Dokumen Publik" }]}
-        title={<>Dokumen <br /><span className="italic text-[#facc15]">Publik</span></>}
-        description="Laporan, rencana kerja, daftar informasi, dan dokumen lain yang dapat diakses masyarakat."
+        backgroundImage="/assets/images/Terminal.webp"
+        gradient="linear-gradient(to bottom, rgba(17, 25, 40, 0.75), rgba(17, 25, 40, 0.98))"
+        breadcrumbs={[
+          { href: "/", label: "Beranda" },
+          { href: "/informasi-berkala#laporan", label: "Informasi Publik" },
+          { label: "Arsip Dokumen Publik" },
+        ]}
+        title={
+          <>
+            Arsip Dokumen <span className="italic text-[#facc15]">Publik</span>
+          </>
+        }
+        description="Akses transparansi dokumen resmi, laporan berkala, keuangan, dan keterbukaan informasi publik Kantor UPBU Tardamu Sabu Raijua."
       />
-      <main className="mx-auto max-w-5xl px-6 py-20">
-        {!documents ? (
-          <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-8 text-center text-red-200">Gagal memuat dokumen publik.</div>
-        ) : documents.length === 0 ? (
-          <div className="rounded-3xl border border-white/5 bg-[#1f2937] p-10 text-center text-gray-400">Belum ada dokumen yang dipublikasikan.</div>
-        ) : (
-          <div className="space-y-12">
-            {orderedKeys.map((key) => (
-              <section key={key}>
-                <h2 className="mb-5 text-2xl text-white" style={serifStyle}>{categoryLabels[key] ?? key}</h2>
-                <div className="space-y-3">
-                  {(groups.get(key) ?? []).map((doc) => (
-                    <a
-                      key={doc.id}
-                      href={doc.file_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group flex items-start gap-4 rounded-2xl border border-white/5 bg-[#1f2937] p-5 transition hover:border-[#facc15]/70"
-                    >
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
-                        <i className="fa-solid fa-file-pdf" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-base font-semibold text-white">{doc.title}</span>
-                        {doc.description && <span className="mt-1 block text-sm leading-6 text-gray-400">{doc.description}</span>}
-                        <span className="mt-2 block text-xs text-gray-500">
-                          {doc.document_date ? dateFormatter.format(new Date(doc.document_date)) : null}
-                          {doc.document_date && doc.total_pages > 0 ? " • " : null}
-                          {doc.total_pages > 0 ? `${doc.total_pages} halaman` : null}
-                        </span>
-                      </span>
-                      <i className="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-[#facc15]" />
-                    </a>
-                  ))}
-                </div>
-              </section>
-            ))}
+
+      <main className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+        {/* Main Category Filters */}
+        <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-white/10 pb-6">
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat.key;
+            return (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => handleSelectCategory(cat.key)}
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] transition-all duration-300 ${isActive
+                  ? "bg-[#facc15] text-[#111928] shadow-[0_4px_20px_rgba(250,204,21,0.25)] scale-105"
+                  : "border border-white/10 bg-white/[0.03] text-gray-300 hover:border-[#facc15]/60 hover:text-white"
+                  }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Subcategory Filters for Laporan Tahunan */}
+        {activeCategory === "annual_report" && (
+          <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-4 backdrop-blur-md">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <i className="fa-solid fa-layer-group text-[#facc15]" />
+              <span>Subkategori Laporan Tahunan:</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {annualSubcategories.map((sub) => {
+                const isSubActive = activeSubcategory === sub.key;
+                return (
+                  <button
+                    key={sub.key}
+                    type="button"
+                    onClick={() => setActiveSubcategory(sub.key)}
+                    className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                      isSubActive
+                        ? "bg-white/15 text-white shadow-md ring-1 ring-white/30"
+                        : "border border-white/5 bg-white/[0.03] text-gray-400 hover:text-white hover:bg-white/[0.08]"
+                    }`}
+                    style={isSubActive && sub.accent ? {
+                      borderColor: sub.accent,
+                      color: sub.accent,
+                    } : undefined}
+                  >
+                    <span>{sub.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
-        <div className="mt-14">
-          <Link href="/permohonan-informasi" className="inline-flex items-center gap-2 rounded-full bg-[#facc15] px-6 py-3 text-sm font-bold text-[#111928]">
-            Dokumen tidak ditemukan? Ajukan permohonan informasi
+
+        {/* Header summary */}
+        <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="text-2xl text-white md:text-3xl" style={serifStyle}>
+              {activeCategory === "annual_report"
+                ? activeSubcategory
+                  ? `Laporan Tahunan — ${subcategoryLabels[activeSubcategory] || activeSubcategory}`
+                  : "Laporan Tahunan (Semua Subkategori)"
+                : activeCategory
+                ? `Dokumen: ${categoryLabels[activeCategory] || activeCategory}`
+                : "Seluruh Dokumen Publik"}
+            </h2>
+            <p className="mt-1 text-sm text-gray-400">
+              Menampilkan {docs.length} dokumen yang dipublikasikan secara resmi oleh PPID.
+            </p>
+          </div>
+          <Link
+            href="/layanan-informasi#formulir"
+            className="inline-flex items-center gap-2 self-start rounded-full border border-[#facc15]/40 bg-[#facc15]/10 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#facc15] transition hover:bg-[#facc15] hover:text-[#111928] sm:self-auto"
+          >
+            <i className="fa-solid fa-file-pen" /> Ajukan Dokumen Lainnya
+          </Link>
+        </div>
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center rounded-[32px] border border-white/5 bg-[#1f2937]/30 py-24 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#facc15]/10 text-3xl text-[#facc15]">
+              <i className="fa-solid fa-circle-notch fa-spin" />
+            </div>
+            <p className="mt-5 text-base font-semibold text-white">Memuat dokumen publik...</p>
+            <p className="mt-1 text-xs text-gray-400">Mengambil data arsip resmi dari server</p>
+          </div>
+        ) : docs.length > 0 ? (
+          /* Documents Grid */
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {docs.map((doc) => (
+              <article
+                key={doc.id}
+                className="group flex flex-col justify-between rounded-[28px] border border-white/5 bg-[#1f2937]/70 p-7 shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#facc15]/70 hover:bg-[#1f2937]"
+              >
+                <div>
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-xl text-red-400 transition-transform duration-300 group-hover:scale-110">
+                      <i className="fa-solid fa-file-pdf" />
+                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-[#facc15]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#facc15]">
+                        {getDocumentCategoryLabel(doc)}
+                      </span>
+                      {doc.category === "annual_report" && doc.subcategory && !["surat", "bmn"].includes(doc.subcategory) && (
+                        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/15">
+                          {subcategoryLabels[doc.subcategory] || doc.subcategory.toUpperCase()}
+                        </span>
+                      )}
+                      {doc.access_type === "rahasia" && (
+                        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                          Rahasia · Pratinjau Terbatas
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <h3
+                    className="text-xl font-bold leading-snug text-white transition-colors group-hover:text-[#facc15]"
+                    style={serifStyle}
+                  >
+                    {doc.title}
+                  </h3>
+
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-gray-400">
+                    {doc.description || "Dokumen keterbukaan informasi publik Kantor UPBU Tardamu Sabu Raijua."}
+                  </p>
+                </div>
+
+                <div className="mt-8 border-t border-white/5 pt-5">
+                  <div className="mb-4 flex items-center justify-between text-xs text-gray-400">
+                    <span className="flex items-center gap-1.5">
+                      <i className="fa-regular fa-file text-[#facc15]" />
+                      {doc.total_pages ? `${doc.total_pages} Halaman` : "PDF"}
+                    </span>
+                    {doc.document_date && (
+                      <span className="flex items-center gap-1.5">
+                        <i className="fa-regular fa-calendar" />
+                        {doc.document_date}
+                      </span>
+                    )}
+                  </div>
+
+                  <Link
+                    href={`/dokumen-publik/${doc.id}`}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.04] py-3 text-xs font-bold uppercase tracking-wider text-white transition-all group-hover:bg-[#facc15] group-hover:text-[#111928]"
+                  >
+                    <span>{doc.access_type === "rahasia" ? "Lihat Pratinjau" : "Lihat Dokumen"}</span>
+                    <i className="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="rounded-[36px] border border-white/5 bg-[#1f2937]/40 p-12 text-center md:p-20">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[#facc15]/10 text-4xl text-[#facc15] mb-6">
+              <i className="fa-solid fa-folder-open" />
+            </div>
+            <h3 className="text-2xl font-bold text-white md:text-3xl" style={serifStyle}>
+              Belum Ada Dokumen yang Dipublikasikan
+            </h3>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-gray-400">
+              {activeCategory
+                ? `Dokumen untuk kategori "${categoryLabels[activeCategory] || activeCategory}" belum diunggah atau sedang dalam proses digitalisasi oleh PPID.`
+                : "Arsip dokumen publik sedang dalam proses pembaruan oleh petugas PPID."}
+            </p>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              {activeCategory && (
+                <button
+                  type="button"
+                  onClick={() => setActiveCategory("")}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:border-[#facc15] hover:text-[#facc15]"
+                >
+                  <i className="fa-solid fa-list" /> Lihat Semua Kategori
+                </button>
+              )}
+              <Link
+                href="/layanan-informasi#formulir"
+                className="inline-flex items-center gap-2 rounded-full bg-[#facc15] px-6 py-3 text-xs font-bold uppercase tracking-wider text-[#111928] shadow-[0_4px_20px_rgba(250,204,21,0.25)] transition hover:scale-105"
+              >
+                <i className="fa-solid fa-paper-plane" /> Ajukan Permohonan Dokumen
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Back Link */}
+        <div className="mt-14 border-t border-white/5 pt-8">
+          <Link
+            href="/informasi-berkala#laporan"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 transition hover:text-[#facc15]"
+          >
+            <i className="fa-solid fa-arrow-left text-xs" /> Kembali ke Laporan Informasi Publik
           </Link>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function PublicDocumentsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#111928] flex items-center justify-center text-gray-400">
+          <i className="fa-solid fa-circle-notch fa-spin text-3xl text-[#facc15]" />
+        </div>
+      }
+    >
+      <DokumenPublikContent />
+    </Suspense>
   );
 }
