@@ -1,8 +1,18 @@
 import mysql from "mysql2/promise";
 
+// Alamat dan kata sandi basis data tidak ditulis di dalam kode; diambil dari file .env.
+// Contoh menjalankan: npx tsx --env-file=.env scripts/fix-flights-table.ts
+function requireDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error("DATABASE_URL belum diatur. Jalankan dengan: npx tsx --env-file=.env scripts/fix-flights-table.ts");
+  }
+  return url;
+}
+
 async function main() {
   const pool = mysql.createPool(
-    "mysql://tardamua1_airport:Tardamuairport@321@45.127.35.23:3306/tardamua1_airport"
+    requireDatabaseUrl()
   );
 
   try {

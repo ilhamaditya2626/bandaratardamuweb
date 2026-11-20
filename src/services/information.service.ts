@@ -1,9 +1,25 @@
 import { db } from "@/db";
 import { informationRequests, publicDocuments } from "@/db/schema";
 import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { decodeText } from "@/lib/sanitize";
 
 export type RequestInput = Omit<typeof informationRequests.$inferInsert, "id" | "created_at" | "updated_at" | "status">;
-export async function createInformationRequest(data: RequestInput) { const [row] = await db.insert(informationRequests).values(data).$returningId(); return row; }
+// Tanggal masuk (created_at) disamakan dengan tanggal pengajuan (submitted_on).
+// Jika tanggal pengajuan adalah hari ini, jam masuk yang sebenarnya tetap dipakai;
+// jika tanggal pengajuan sebelumnya (misalnya data tahun 2025), tanggal masuk mengikuti tanggal tersebut.
+function entryDateFor(submittedOn?: string | null): Date | undefined {
+  if (!submittedOn || !/^\d{4}-\d{2}-\d{2}$/.test(submittedOn)) return undefined;
+  const now = new Date();
+  const todayWita = new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  if (submittedOn === todayWita) return now;
+  const date = new Date(`${submittedOn}T08:00:00+08:00`);
+  return isNaN(date.getTime()) ? undefined : date;
+}
+export async function createInformationRequest(data: RequestInput) {
+  const created_at = entryDateFor(data.submitted_on);
+  const [row] = await db.insert(informationRequests).values(created_at ? { ...data, created_at } : data).$returningId();
+  return row;
+}
 export async function requestStats(year?: string, month?: string) {
   const conditions = [eq(informationRequests.request_type, "information")];
   if (year && !isNaN(Number(year))) {
@@ -14,10 +30,8 @@ export async function requestStats(year?: string, month?: string) {
   }
   const condition = and(...conditions);
   const rows = await db
+    // Halaman publik hanya menerima tanggal dan status; ID, nama pemohon, dan rincian tidak dikirim.
     .select({
-      id: informationRequests.id,
-      name: informationRequests.name,
-      detail: informationRequests.information_detail,
       submitted_on: informationRequests.submitted_on,
       status: informationRequests.status,
     })
@@ -42,12 +56,26 @@ export async function requestStats(year?: string, month?: string) {
     rejected: Number(counts?.rejected || 0),
   };
 }
-export async function listRequests() { return db.select().from(informationRequests).orderBy(desc(informationRequests.created_at)); }
-export async function updateRequestStatus(id: number, status: string, admin_note?: string, ditangani_oleh?: number | null) { await db.update(informationRequests).set({ status, admin_note, ditangani_oleh, updated_at: new Date() }).where(eq(informationRequests.id, id)); }
-export async function updateInformationRequest(id: number, data: Partial<typeof informationRequests.$inferInsert>) {
-  await db.update(informationRequests).set({ ...data, updated_at: new Date() }).where(eq(informationRequests.id, id));
+// Isian disimpan dalam bentuk yang sudah dinetralkan; untuk dashboard admin dikembalikan menjadi teks biasa.
+const REQUEST_TEXT_FIELDS = [
+  "name", "phone", "address", "occupation", "identity_type", "identity_number", "institution",
+  "information_detail", "purpose", "objection_reason", "objection_reason_other", "case_position", "admin_note",
+] as const;
+export async function listRequests() {
+  const rows = await db.select().from(informationRequests).orderBy(desc(informationRequests.created_at));
+  return rows.map((row) => {
+    const decoded: Record<string, unknown> = { ...row };
+    for (const field of REQUEST_TEXT_FIELDS) decoded[field] = decodeText(row[field]);
+    return decoded as typeof row;
+  });
 }
-export async function deleteInformationRequest(id: number) { return db.delete(informationRequests).where(eq(informationRequests.id, id)); }
+export async function updateRequestStatus(id: string, status: string, admin_note?: string, ditangani_oleh?: number | null) { await db.update(informationRequests).set({ status, admin_note, ditangani_oleh, updated_at: new Date() }).where(eq(informationRequests.id, id)); }
+export async function updateInformationRequest(id: string, data: Partial<typeof informationRequests.$inferInsert>) {
+  // Jika admin mengubah tanggal pengajuan, tanggal masuk ikut disesuaikan.
+  const created_at = typeof data.submitted_on === "string" ? entryDateFor(data.submitted_on) : undefined;
+  await db.update(informationRequests).set({ ...data, ...(created_at ? { created_at } : {}), updated_at: new Date() }).where(eq(informationRequests.id, id));
+}
+export async function deleteInformationRequest(id: string) { return db.delete(informationRequests).where(eq(informationRequests.id, id)); }
 export async function listDocuments(category?: string, subcategory?: string, latestOnly = false) {
   const conditions = [eq(publicDocuments.is_published, true)];
   if (category === "surat") {

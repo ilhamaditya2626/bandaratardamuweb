@@ -10,6 +10,7 @@ import {
   json,
   uniqueIndex,
 } from "drizzle-orm/mysql-core";
+import { randomUUID } from "crypto";
 
 
 // ─── 1. NEWS (Berita & Pengumuman) ───────────────────────────
@@ -322,7 +323,8 @@ export const publicDocuments = mysqlTable("public_documents", {
 
 // ─── PERMOHONAN / KEBERATAN INFORMASI ─────────────────────────
 export const informationRequests = mysqlTable("information_requests", {
-  id: int("id").autoincrement().primaryKey(),
+  // ID acak UUID v4 agar data pemohon tidak dapat ditebak dengan mencoba ID 1, ID 2, dan seterusnya.
+  id: varchar("id", { length: 36 }).primaryKey().$defaultFn(() => randomUUID()),
   request_type: varchar("request_type", { length: 20 }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),
   name: varchar("name", { length: 150 }).notNull(),

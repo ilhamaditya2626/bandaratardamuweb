@@ -1,14 +1,24 @@
 import mysql from "mysql2/promise";
 
+// Alamat dan kata sandi basis data tidak ditulis di dalam kode; diambil dari file .env.
+// Contoh menjalankan: npx tsx --env-file=.env scripts/create-missing-tables.ts
+function requireDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error("DATABASE_URL belum diatur. Jalankan dengan: npx tsx --env-file=.env scripts/create-missing-tables.ts");
+  }
+  return url;
+}
+
 async function run() {
-  const connectionString = process.env.DATABASE_URL || "mysql://tardamua1_airport:Tardamuairport@321@45.127.35.23:3306/tardamua1_airport";
+  const connectionString = requireDatabaseUrl();
   const pool = mysql.createPool(connectionString);
 
   try {
     console.log("Creating information_requests table if not exists...");
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS \`information_requests\` (
-        \`id\` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
+        \`id\` varchar(36) PRIMARY KEY NOT NULL,
         \`request_type\` varchar(20) NOT NULL,
         \`email\` varchar(255) NOT NULL,
         \`name\` varchar(150) NOT NULL,

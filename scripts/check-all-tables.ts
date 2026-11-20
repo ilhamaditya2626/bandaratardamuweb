@@ -2,8 +2,18 @@ import mysql from "mysql2/promise";
 import * as schema from "../src/db/schema";
 import { getTableColumns, getTableName } from "drizzle-orm";
 
+// Alamat dan kata sandi basis data tidak ditulis di dalam kode; diambil dari file .env.
+// Contoh menjalankan: npx tsx --env-file=.env scripts/check-all-tables.ts
+function requireDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error("DATABASE_URL belum diatur. Jalankan dengan: npx tsx --env-file=.env scripts/check-all-tables.ts");
+  }
+  return url;
+}
+
 async function main() {
-  const connectionString = process.env.DATABASE_URL || "mysql://tardamua1_airport:Tardamuairport@321@45.127.35.23:3306/tardamua1_airport";
+  const connectionString = requireDatabaseUrl();
   const pool = mysql.createPool(connectionString);
 
   try {

@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { feedbackSubmissions, pegawai } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
+import { decodeText } from "@/lib/sanitize";
 
 export async function createFeedback(data: { name: string; message: string }) {
   const [inserted] = await db
@@ -38,6 +39,9 @@ export async function getAllFeedback(page: number = 1, limit: number = 50) {
     .limit(limit)
     .offset(offset);
 
+  // Isian disimpan dalam bentuk yang sudah dinetralkan; untuk dashboard dikembalikan menjadi teks biasa.
+  const decodedData = data.map((row) => ({ ...row, name: decodeText(row.name), message: decodeText(row.message) }));
+
   const [countResult] = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(feedbackSubmissions);
@@ -45,7 +49,7 @@ export async function getAllFeedback(page: number = 1, limit: number = 50) {
   const total = Number(countResult.count);
 
   return {
-    data,
+    data: decodedData,
     pagination: {
       page,
       limit,

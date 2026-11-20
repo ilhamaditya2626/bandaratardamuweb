@@ -14,6 +14,8 @@ async function allowed(r: NextRequest) {
 
 const categories = ["annual_report", "work_budget", "financial_report", "lakip", "bmn", "surat", "sop", "dip", "dik"];
 const annualSubcategories = ["ppid", "laporan_tahunan", "bmn", "surat"];
+const ACCESS_TYPES = ["umum", "rahasia"] as const;
+type AccessType = (typeof ACCESS_TYPES)[number];
 
 export async function GET(r: NextRequest) {
   try {
@@ -97,8 +99,12 @@ export async function POST(r: NextRequest) {
       subcategory = annualSubcategories.includes(sub) ? sub : "ppid";
     }
 
+    // Jenis akses wajib dipilih dan hanya boleh "umum" atau "rahasia".
     const rawAccess = String(f.get("access_type") || "").trim().toLowerCase();
-    const access_type = rawAccess === "rahasia" ? "rahasia" : "umum";
+    if (!ACCESS_TYPES.includes(rawAccess as AccessType)) {
+      return NextResponse.json({ success: false, error: "Jenis akses dokumen harus \"umum\" atau \"rahasia\"." }, { status: 400 });
+    }
+    const access_type = rawAccess as AccessType;
 
     const total_pages = await countPdfPages(file);
     const file_url = await saveUploadedDocument(file, "documents", access_type);
@@ -152,6 +158,10 @@ async function executeUpdateDocument(body: any) {
   if (!Number.isInteger(id) || !categories.includes(category) || !title) {
     return NextResponse.json({ success: false, error: "ID, kategori, dan judul wajib diisi." }, { status: 400 });
   }
+  // Jenis akses hanya boleh "umum" atau "rahasia"; nilai lain ditolak.
+  if (!ACCESS_TYPES.includes(body.access_type)) {
+    return NextResponse.json({ success: false, error: "Jenis akses dokumen harus \"umum\" atau \"rahasia\"." }, { status: 400 });
+  }
   let subcategory: string | null = null;
   if (category === "annual_report") {
     const sub = String(body.subcategory || "").trim().toLowerCase();
@@ -163,7 +173,7 @@ async function executeUpdateDocument(body: any) {
     title,
     description: typeof body.description === "string" ? body.description.trim() || null : null,
     document_date: typeof body.document_date === "string" ? body.document_date || null : null,
-    access_type: body.access_type === "rahasia" ? "rahasia" : "umum",
+    access_type: body.access_type,
     });
   return NextResponse.json({ success: true });
 }

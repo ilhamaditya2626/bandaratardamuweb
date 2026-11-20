@@ -33,7 +33,7 @@ const months = [
 ];
 
 interface InformationRequest {
-  id: number;
+  id: string; // UUID v4
   request_type: "information" | "objection";
   name: string;
   email: string;
@@ -51,7 +51,7 @@ interface InformationRequest {
   objection_reason_other?: string | null;
   case_position?: string | null;
   submitted_on: string;
-  status: "pending" | "accepted" | "rejected";
+  status: "pending" | "processing" | "accepted" | "rejected";
   admin_note?: string | null;
   created_at: string;
 }
@@ -115,7 +115,7 @@ export default function InformationServicesAdmin() {
     loadData();
   }, []);
 
-  async function handleStatusUpdate(id: number, newStatus: "accepted" | "rejected") {
+  async function handleStatusUpdate(id: string, newStatus: "processing" | "accepted" | "rejected") {
     try {
       const res = await fetch("/api/admin/information-requests", {
         method: "POST",
@@ -131,7 +131,7 @@ export default function InformationServicesAdmin() {
       if (res.ok && data?.success) {
         setNotice({
           type: "success",
-          message: `Permohonan #${id} berhasil di-${newStatus === "accepted" ? "terima" : "tolak"}.`,
+          message: `Status permohonan #${id.slice(0, 8)} berhasil diubah menjadi ${newStatus === "processing" ? "Sedang Diproses" : newStatus === "accepted" ? "Diterima" : "Ditolak"}.`,
         });
         loadData();
       } else {
@@ -143,7 +143,7 @@ export default function InformationServicesAdmin() {
     }
   }
 
-  async function handleRemoveRequest(id: number, name: string) {
+  async function handleRemoveRequest(id: string, name: string) {
     if (!confirm(`Hapus permohonan dari "${name}"?`)) return;
     try {
       const res = await fetch("/api/admin/information-requests", {
@@ -385,13 +385,16 @@ export default function InformationServicesAdmin() {
                             ? "bg-emerald-100 text-emerald-800"
                             : r.status === "rejected"
                             ? "bg-red-100 text-red-800"
+                            : r.status === "processing"
+                            ? "bg-blue-100 text-blue-800"
                             : "bg-amber-100 text-amber-800"
                         }`}
                       >
                         {r.status === "accepted" && <CheckCircle className="h-3.5 w-3.5" />}
                         {r.status === "rejected" && <XCircle className="h-3.5 w-3.5" />}
                         {r.status === "pending" && <Clock className="h-3.5 w-3.5" />}
-                        {r.status === "accepted" ? "Diterima" : r.status === "rejected" ? "Ditolak" : "Menunggu"}
+                        {r.status === "processing" && <AlertCircle className="h-3.5 w-3.5" />}
+                        {r.status === "accepted" ? "Diterima" : r.status === "rejected" ? "Ditolak" : r.status === "processing" ? "Sedang Diproses" : "Menunggu"}
                       </span>
                     </td>
                     <td className="p-4 whitespace-nowrap text-right space-x-2">
@@ -411,6 +414,15 @@ export default function InformationServicesAdmin() {
                         <Trash2 className="h-3.5 w-3.5" />
                         Hapus
                       </button>
+                      {r.status === "pending" && (
+                        <button
+                          onClick={() => handleStatusUpdate(r.id, "processing")}
+                          className="inline-flex items-center gap-1 rounded bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                        >
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          Proses
+                        </button>
+                      )}
                       {r.status !== "accepted" && (
                         <button
                           onClick={() => handleStatusUpdate(r.id, "accepted")}
@@ -444,7 +456,7 @@ export default function InformationServicesAdmin() {
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
               <h3 className="text-lg font-bold text-gray-900">
-                Detail Permohonan #{selectedRequest.id}
+                Detail Permohonan #{selectedRequest.id.slice(0, 8)}
               </h3>
               <button
                 onClick={() => setSelectedRequest(null)}
@@ -563,6 +575,17 @@ export default function InformationServicesAdmin() {
               >
                 <Trash2 className="h-3.5 w-3.5" /> Hapus
               </button>
+              {selectedRequest.status === "pending" && (
+                <button
+                  onClick={() => {
+                    handleStatusUpdate(selectedRequest.id, "processing");
+                    setSelectedRequest(null);
+                  }}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                >
+                  Proses Permohonan
+                </button>
+              )}
               {selectedRequest.status !== "accepted" && (
                 <button
                   onClick={() => {
@@ -594,7 +617,7 @@ export default function InformationServicesAdmin() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
           <form onSubmit={handleEditRequest} className="max-h-[90vh] w-full max-w-2xl space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-bold text-gray-900">Edit Permohonan #{editingRequest.id}</h3>
+              <h3 className="text-lg font-bold text-gray-900">Edit Permohonan #{editingRequest.id.slice(0, 8)}</h3>
               <button type="button" onClick={() => setEditingRequest(null)} className="text-gray-400 hover:text-gray-700" title="Tutup">✕</button>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">

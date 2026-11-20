@@ -538,20 +538,15 @@ export function RequestStatistics() {
             <thead className="text-gray-400 border-b border-white/10">
               <tr>
                 <th className="p-3">Tanggal</th>
-                <th className="p-3">Pemohon</th>
-                <th className="p-3">Informasi</th>
                 <th className="p-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {data?.rows.map((r: any) => (
-                <tr key={r.id} className="text-gray-200 hover:bg-white/[0.02] transition align-top">
+              {/* Nama pemohon dan rincian permohonan tidak ditampilkan kepada publik. */}
+              {data?.rows.map((r: any, index: number) => (
+                <tr key={`${r.submitted_on}-${index}`} className="text-gray-200 hover:bg-white/[0.02] transition align-top">
                   <td className="p-3 whitespace-nowrap text-xs text-gray-400">
                     {r.submitted_on}
-                  </td>
-                  <td className="p-3 font-medium whitespace-nowrap sm:whitespace-normal">{r.name}</td>
-                  <td className="min-w-[180px] max-w-sm p-3 text-gray-300 break-words whitespace-normal leading-relaxed">
-                    {r.detail || "-"}
                   </td>
                   <td className="p-3 whitespace-nowrap">
                     <span
@@ -567,7 +562,9 @@ export function RequestStatistics() {
                         ? "Diterima"
                         : r.status === "rejected"
                         ? "Ditolak"
-                        : "Diproses"}
+                        : r.status === "processing"
+                        ? "Diproses"
+                        : "Menunggu"}
                     </span>
                   </td>
                 </tr>
@@ -575,7 +572,7 @@ export function RequestStatistics() {
               {!data?.rows.length && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={2}
                     className="p-8 text-center text-sm text-gray-500"
                   >
                     {isFiltered
