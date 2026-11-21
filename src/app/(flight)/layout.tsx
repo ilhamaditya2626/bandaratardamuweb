@@ -264,17 +264,15 @@ export default function FlightLayout({
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentHash, setCurrentHash] = useState("");
-  const isNewsDetail = pathname.startsWith("/berita/");
-  const isInformationList = pathname === "/informasi-serta-merta" || pathname === "/berita";
+  const isInformationList = pathname === "/informasi-serta-merta";
   const isAboutSidebar = aboutRoutes.has(pathname);
   const isExploreSidebar = exploreRoutes.has(pathname);
-  const isInformationActive = informationRoutes.has(pathname) || isNewsDetail || isInformationList;
+  const isInformationActive = informationRoutes.has(pathname) || isInformationList;
   const isInformationSidebar =
     pathname === "/informasi" ||
     pathname === "/informasi-berkala" ||
     pathname === "/dokumen-publik" ||
     isInformationList ||
-    isNewsDetail ||
     pathname === "/informasi-setiap-saat" ||
     pathname === "/informasi-dikecualikan";
   const isServiceSidebar = serviceRoutes.has(pathname);

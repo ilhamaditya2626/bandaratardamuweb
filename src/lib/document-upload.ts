@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { PDFDocument } from "pdf-lib";
 import { AllowedFileType, FILE_EXTENSIONS, FileSignatureError, findDangerousPdfContent, verifyUpload } from "./file-signature";
+import { isDriveConfigured, uploadToDrive } from "./google-drive";
 
 const MAX_DOCUMENT_SIZE = 20 * 1024 * 1024;
 export class DocumentUploadError extends Error {}
@@ -97,6 +98,20 @@ export async function saveUploadedDocument(
   const base = file.name.split(".")[0].replace(/[^a-zA-Z0-9-_]/g, "_").slice(0, 80) || "file";
   const fileId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const fileName = `${fileId}-${base}${ext}`;
+
+  // Berkas permohonan dan keberatan (KTP dan berkas pendukung) disimpan di Google Drive,
+  // bukan di server. Website hanya meneruskan berkas kepada admin yang sudah login.
+  if (folder === "ppid" && isDriveConfigured()) {
+    try {
+      const driveFileId = await uploadToDrive(buffer, fileName, detectedType, "ppid");
+      return `/api/admin/drive-file/${driveFileId}`;
+    } catch (error) {
+      // Termasuk gangguan koneksi ke Google; pemohon mendapat pesan yang jelas, bukan galat server.
+      console.error("Gagal menyimpan berkas ke Google Drive:", error);
+      throw new DocumentUploadError("Berkas gagal disimpan. Silakan coba beberapa saat lagi.");
+    }
+  }
+
   const dir = path.join(getUploadDirectory(), folder);
 
   await fs.mkdir(dir, { recursive: true });
