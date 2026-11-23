@@ -340,8 +340,8 @@ function BantuanContent() {
                 Suara Anda Membantu Kami Lebih Baik
               </h2>
               <p className="max-w-xl text-sm leading-7 text-gray-400 md:text-base">
-                Sampaikan pengalaman, kritik, atau saran untuk peningkatan layanan Bandara
-                Tardamu. Setiap aspirasi akan diterima oleh tim admin sebagai bahan evaluasi.
+                Sampaikan pengalaman, kritik, atau saran mengenai pelayanan dan fasilitas Bandara
+                Tardamu maupun maskapai yang beroperasi di Bandara Tardamu. Setiap aspirasi akan diterima oleh tim admin sebagai bahan evaluasi.
               </p>
             </div>
 
@@ -391,6 +391,10 @@ function BantuanContent() {
                       </label>
                       <span className="text-xs text-gray-500">{feedbackMessage.length}/2000</span>
                     </div>
+                    <p className="mb-3 text-xs leading-5 text-[#facc15]">
+                      Sebutkan apakah kritik dan saran Anda ditujukan untuk UPBU Tardamu atau maskapai.
+                      Jika untuk maskapai, tulis nama maskapainya.
+                    </p>
                     <textarea
                       id="feedback-message"
                       required
@@ -398,7 +402,7 @@ function BantuanContent() {
                       rows={7}
                       value={feedbackMessage}
                       onChange={(event) => setFeedbackMessage(event.target.value)}
-                      placeholder="Tulis kritik, saran, atau pengalaman layanan Anda..."
+                      placeholder="Contoh: Untuk maskapai Susi Air, petugas check-in sangat membantu..."
                       className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 text-white outline-none transition placeholder:text-gray-500 focus:border-[#facc15] focus:bg-white/[0.08]"
                     />
                   </div>
